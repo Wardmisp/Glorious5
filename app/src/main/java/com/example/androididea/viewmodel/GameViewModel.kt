@@ -1,0 +1,255 @@
+package com.example.androididea.viewmodel
+
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.State
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.androididea.data.models.BUDGET
+import com.example.androididea.data.models.NBA_PLAYERS
+import com.example.androididea.data.models.TOTAL
+import com.example.androididea.data.models.TeamEntry
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+
+class GameViewModel : ViewModel() {
+    private val _uiState = mutableStateOf<UiState>(UiState())
+    val uiState: State<UiState> = _uiState
+    private var timerJob: Job? = null
+
+    private fun updateGameState(update: (GameState) -> GameState) {
+        _uiState.value = _uiState.value.copy(
+            gameState = update(_uiState.value.gameState)
+        )
+    }
+
+    fun navigateToScreen(screen: Screen) {
+        val currentState = _uiState.value
+        _uiState.value = currentState.copy(currentScreen = screen)
+        
+        if (screen == Screen.VsComputer || screen == Screen.VsHuman) {
+            resetGameState()
+        }
+    }
+
+    private fun resetGameState() {
+        updateGameState { 
+            GameState(
+                budgets = Pair(BUDGET, BUDGET),
+                teams = Pair(emptyList(), emptyList()),
+                revealOrder = generateRevealOrder()
+            )
+        }
+        startTimer()
+    }
+
+    private fun generateRevealOrder(): List<Int> {
+        val baseWeights = listOf(
+            100, // 0: PTS
+            55,  // 1: REB
+            75,  // 2: AST
+            30,  // 3: STL
+            10,  // 4: BLK
+            5,   // 5: Season
+            20,  // 6: Position
+            150, // 7: Team
+            200, // 8: FirstName
+            250  // 9: LastName
+        )
+        return (0..9).map { index ->
+            index to (baseWeights[index] + ((-10..10).random()))
+        }.sortedBy { it.second }.map { it.first }
+    }
+
+    fun setBid(amount: Int, bidder: Int) {
+        updateGameState { currentState ->
+            currentState.copy(
+                bid = amount,
+                bidder = bidder,
+                bidCount = currentState.bidCount + 1
+            )
+        }
+        startTimer()
+    }
+
+    private fun startTimer() {
+        timerJob?.cancel()
+        timerJob = viewModelScope.launch {
+            for (i in 15 downTo 0) {
+                updateGameState { it.copy(timer = i) }
+                if (i == 0) {
+                    val currentState = _uiState.value.gameState
+                    if (currentState.bid > 0) {
+                        adjudicate(currentState.bid, currentState.bidder)
+                    } else {
+                        pass()
+                    }
+                }
+                delay(1000)
+            }
+        }
+    }
+
+    fun setP1Input(value: Int) {
+        updateGameState { it.copy(p1Input = value) }
+    }
+
+    fun setP2Input(value: Int) {
+        updateGameState { it.copy(p2Input = value) }
+    }
+
+    fun handleP1Bid(minBid: Int, budget: Int) {
+        val amount = maxOf(_uiState.value.gameState.p1Input, minBid)
+        if (amount <= budget) {
+            setBid(amount, 1)
+            setP1Input(amount + 1)
+        }
+    }
+
+    fun handleP2Bid(minBid: Int, budget: Int) {
+        val amount = maxOf(_uiState.value.gameState.p2Input, minBid)
+        if (amount <= budget) {
+            setBid(amount, 2)
+            setP2Input(amount + 1)
+        }
+    }
+
+    fun computerBid(minBid: Int) {
+        val currentState = _uiState.value.gameState
+        if (currentState.bidder == 2 || currentState.done) return
+
+        val player = NBA_PLAYERS[currentState.round]
+        
+        val baseValuation = (
+            player.pts * 0.8 + 
+            player.reb * 0.5 + 
+            player.ast * 0.6 + 
+            player.stl * 1.5 + 
+            player.blk * 1.5
+        )
+        
+        val seed = currentState.round + (currentState.budgets.second / 10)
+        val randomFactor = (0.8 + (Math.abs(seed.hashCode() % 40) / 100.0))
+        
+        val personalValuation = (baseValuation * randomFactor).toInt()
+        
+        val budgetLimit = if (personalValuation > 25) 
+            currentState.budgets.second 
+        else 
+            (currentState.budgets.second * 0.6).toInt()
+            
+        val maxBid = minOf(personalValuation, budgetLimit)
+        
+        if (currentState.bid >= maxBid) return
+
+        updateGameState { it.copy(thinking = true) }
+        viewModelScope.launch {
+            val baseDelay = if (currentState.bid == 0) 2400L else 1200L
+            val extraDelay = (1000..2600).random().toLong()
+            
+            delay(baseDelay + extraDelay)
+            
+            val updatedState = _uiState.value.gameState
+            if (!updatedState.done && updatedState.bidder != 2 && updatedState.bid < maxBid) {
+                val budgetRatio = updatedState.budgets.second.toFloat() / BUDGET
+                val interestRatio = personalValuation.toFloat() / 25f 
+                
+                val maxJump = when {
+                    interestRatio > 0.9f && budgetRatio > 0.7f -> 5
+                    interestRatio > 0.7f && budgetRatio > 0.4f -> 3
+                    interestRatio > 0.5f -> 2
+                    else -> 1
+                }
+                
+                val jump = (1..maxJump).random()
+                val nextBid = minOf(updatedState.bid + jump, maxBid)
+                
+                setBid(nextBid, 2)
+            }
+            updateGameState { it.copy(thinking = false) }
+        }
+    }
+
+    fun adjudicate(bid: Int, bidder: Int?) {
+        if (bid == 0 || bidder == null) return
+        
+        timerJob?.cancel()
+        
+        updateGameState { currentState ->
+            val player = NBA_PLAYERS[currentState.round]
+            
+            val newBudgets = if (bidder == 1) {
+                Pair(currentState.budgets.first - bid, currentState.budgets.second)
+            } else {
+                Pair(currentState.budgets.first, currentState.budgets.second - bid)
+            }
+
+            val newTeams = if (bidder == 1) {
+                Pair(
+                    currentState.teams.first + TeamEntry(player, bid),
+                    currentState.teams.second
+                )
+            } else {
+                Pair(
+                    currentState.teams.first,
+                    currentState.teams.second + TeamEntry(player, bid)
+                )
+            }
+
+            currentState.copy(
+                budgets = newBudgets,
+                teams = newTeams,
+                awardedTo = bidder,
+                done = true,
+                thinking = false
+            )
+        }
+    }
+
+    fun nextRound() {
+        timerJob?.cancel()
+        
+        val currentState = _uiState.value.gameState
+        val nextRoundIndex = currentState.round + 1
+
+        if (nextRoundIndex >= TOTAL) {
+            updateGameState { it.copy(gameOver = true) }
+        } else {
+            updateGameState { state ->
+                GameState(
+                    round = nextRoundIndex,
+                    bid = 0,
+                    bidder = null,
+                    p1Input = 1,
+                    p2Input = 1,
+                    budgets = state.budgets,
+                    teams = state.teams,
+                    bidCount = 0,
+                    revealOrder = generateRevealOrder(),
+                    timer = 15
+                )
+            }
+            startTimer()
+        }
+    }
+
+    fun toggleTeamsPanel() {
+        updateGameState { it.copy(showTeams = !it.showTeams) }
+    }
+
+    fun pass() {
+        val currentState = _uiState.value.gameState
+        if (currentState.bid > 0) {
+            // Si une enchère est en cours, le meneur actuel l'emporte immédiatement
+            adjudicate(currentState.bid, currentState.bidder)
+        } else {
+            // Si personne n'a misé, le joueur est invendu
+            timerJob?.cancel()
+            updateGameState { it.copy(done = true, awardedTo = null, thinking = false) }
+        }
+    }
+
+    fun goBack() {
+        navigateToScreen(Screen.Home)
+    }
+}
