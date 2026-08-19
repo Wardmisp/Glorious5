@@ -1,21 +1,33 @@
 package com.example.androididea.viewmodel
 
+import android.app.Application
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.androididea.data.models.BUDGET
 import com.example.androididea.data.models.NBA_PLAYERS
 import com.example.androididea.data.models.TOTAL
 import com.example.androididea.data.models.TeamEntry
+import com.example.androididea.data.repository.PlayerRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class GameViewModel : ViewModel() {
-    private val _uiState = mutableStateOf<UiState>(UiState())
+class GameViewModel(application: Application) : AndroidViewModel(application) {
+    private val playerRepository = PlayerRepository(application)
+    private val _uiState = mutableStateOf<UiState>(UiState(gameState = GameState(players = NBA_PLAYERS.take(TOTAL))))
     val uiState: State<UiState> = _uiState
     private var timerJob: Job? = null
+
+    init {
+        viewModelScope.launch {
+            val initialPlayers = playerRepository.getAuctionPlayers(TOTAL)
+            if (initialPlayers.isNotEmpty()) {
+                updateGameState { it.copy(players = initialPlayers) }
+            }
+        }
+    }
 
     private fun updateGameState(update: (GameState) -> GameState) {
         _uiState.value = _uiState.value.copy(
@@ -33,14 +45,19 @@ class GameViewModel : ViewModel() {
     }
 
     private fun resetGameState() {
-        updateGameState { 
-            GameState(
-                budgets = Pair(BUDGET, BUDGET),
-                teams = Pair(emptyList(), emptyList()),
-                revealOrder = generateRevealOrder()
-            )
+        timerJob?.cancel()
+        viewModelScope.launch {
+            val players = playerRepository.getAuctionPlayers(TOTAL)
+            updateGameState { 
+                GameState(
+                    budgets = Pair(BUDGET, BUDGET),
+                    teams = Pair(emptyList(), emptyList()),
+                    revealOrder = generateRevealOrder(),
+                    players = players
+                )
+            }
+            startTimer()
         }
-        startTimer()
     }
 
     private fun generateRevealOrder(): List<Int> {
@@ -118,7 +135,9 @@ class GameViewModel : ViewModel() {
         val currentState = _uiState.value.gameState
         if (currentState.bidder == 2 || currentState.done) return
 
-        val player = NBA_PLAYERS[currentState.round]
+        val player = currentState.players.getOrNull(currentState.round)
+            ?: NBA_PLAYERS.getOrNull(currentState.round)
+            ?: return
         
         val baseValuation = (
             player.pts * 0.8 + 
@@ -176,7 +195,9 @@ class GameViewModel : ViewModel() {
         timerJob?.cancel()
         
         updateGameState { currentState ->
-            val player = NBA_PLAYERS[currentState.round]
+            val player = currentState.players.getOrNull(currentState.round)
+                ?: NBA_PLAYERS.getOrNull(currentState.round)
+                ?: return@updateGameState currentState
             
             val newBudgets = if (bidder == 1) {
                 Pair(currentState.budgets.first - bid, currentState.budgets.second)
@@ -210,9 +231,10 @@ class GameViewModel : ViewModel() {
         timerJob?.cancel()
         
         val currentState = _uiState.value.gameState
+        val totalPlayers = if (currentState.players.isNotEmpty()) currentState.players.size else TOTAL
         val nextRoundIndex = currentState.round + 1
 
-        if (nextRoundIndex >= TOTAL) {
+        if (nextRoundIndex >= totalPlayers) {
             updateGameState { it.copy(gameOver = true) }
         } else {
             updateGameState { state ->
@@ -226,7 +248,8 @@ class GameViewModel : ViewModel() {
                     teams = state.teams,
                     bidCount = 0,
                     revealOrder = generateRevealOrder(),
-                    timer = 15
+                    timer = 15,
+                    players = state.players
                 )
             }
             startTimer()

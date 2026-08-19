@@ -54,7 +54,9 @@ fun GameScreen(
     modifier: Modifier = Modifier
 ) {
     val gameState = viewModel.uiState.value.gameState
-    val player = NBA_PLAYERS[gameState.round]
+    val totalPlayers = if (gameState.players.isNotEmpty()) gameState.players.size else TOTAL
+    val player = gameState.players.getOrNull(gameState.round)
+        ?: NBA_PLAYERS[gameState.round.coerceIn(0, NBA_PLAYERS.size - 1)]
     val p1Name = if (vsComputer) "Vous" else "Joueur 1"
     val p2Name = if (vsComputer) "Ordi" else "Joueur 2"
     val minBid = gameState.bid + 1
@@ -132,7 +134,7 @@ fun GameScreen(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                     Text(
-                        text = "Joueur ${gameState.round + 1} / $TOTAL",
+                        text = "Joueur ${gameState.round + 1} / $totalPlayers",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.ExtraBold,
                         fontFamily = FontFamily.SansSerif,
@@ -168,7 +170,7 @@ fun GameScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth((gameState.round.toFloat() / TOTAL))
+                        .fillMaxWidth((gameState.round.toFloat() / totalPlayers.toFloat()))
                         .height(2.dp)
                         .background(color = Color(0xFFF4722B))
                 )
@@ -310,7 +312,7 @@ fun GameScreen(
                                     .height(44.dp)
                             ) {
                                 Text(
-                                    text = if (gameState.round + 1 >= TOTAL) "VOIR LES RÉSULTATS →" else "JOUEUR SUIVANT →",
+                                    text = if (gameState.round + 1 >= totalPlayers) "VOIR LES RÉSULTATS →" else "JOUEUR SUIVANT →",
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontFamily = FontFamily.SansSerif,

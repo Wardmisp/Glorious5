@@ -25,7 +25,8 @@ data class GameState(
     val thinking: Boolean = false,
     val bidCount: Int = 0,
     val revealOrder: List<Int> = (0..9).toList(),
-    val timer: Int = 15
+    val timer: Int = 15,
+    val players: List<NBAPlayer> = emptyList()
 )
 
 data class UiState(
