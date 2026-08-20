@@ -39,6 +39,10 @@ class PlayerRepository(private val dao: PlayerSeasonDao) {
         val season = dao.getById(id)
         return season?.toNBAPlayer() ?: NBA_PLAYERS.find { it.id == id }
     }
+
+    suspend fun getAllSeasons(): List<NBAPlayer> {
+        return dao.getAllList().map { it.toNBAPlayer() }
+    }
 }
 
 fun formatPosition(pos: String?): String {
@@ -111,6 +115,16 @@ fun PlayerSeason.toNBAPlayer(): NBAPlayer {
         reb = reb ?: 0.0,
         ast = ast ?: 0.0,
         stl = stl ?: 0.0,
-        blk = blk ?: 0.0
+        blk = blk ?: 0.0,
+        fgPct = fgPct ?: 0.0,
+        fg3Pct = fg3Pct ?: 0.0,
+        ftPct = ftPct ?: 0.0,
+        per = per ?: 0.0,
+        winShares = winShares ?: 0.0,
+        games = games ?: 0
     )
+}
+
+suspend fun PlayerSeasonDao.getAllSeasonsList(): List<PlayerSeason> {
+    return getAllList()
 }

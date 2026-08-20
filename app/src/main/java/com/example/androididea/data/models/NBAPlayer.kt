@@ -12,5 +12,11 @@ data class NBAPlayer(
     val reb: Double,
     val ast: Double,
     val stl: Double,
-    val blk: Double
+    val blk: Double,
+    val fgPct: Double = 0.0,
+    val fg3Pct: Double = 0.0,
+    val ftPct: Double = 0.0,
+    val per: Double = 0.0,
+    val winShares: Double = 0.0,
+    val games: Int = 0
 )
