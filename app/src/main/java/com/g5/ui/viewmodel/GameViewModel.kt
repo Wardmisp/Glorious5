@@ -11,6 +11,7 @@ import com.g5.data.local.TOTAL
 import com.g5.domain.model.TeamEntry
 import com.g5.data.repository.PlayerRepository
 import com.g5.domain.usecase.CalculateWinProbabilityUseCase
+import com.g5.domain.usecase.GenerateMatchSimulationUseCase
 import com.g5.core.utils.SoundManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -281,8 +282,21 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 val randomValue = Math.random()
                 val winner = if (randomValue < p1WinProb) 1 else 2
                 
-                updateGameState { it.copy(gameOver = true, analytics = results, luckyWinner = winner) }
-                soundManager.playResultScreen()
+                // Génération de la simulation
+                val simUseCase = GenerateMatchSimulationUseCase()
+                val simulation = simUseCase.execute(
+                    teamA = currentState.teams.first.map { it.player },
+                    teamB = currentState.teams.second.map { it.player }
+                )
+
+                updateGameState { it.copy(
+                    analytics = results, 
+                    luckyWinner = winner,
+                    matchSimulation = simulation,
+                    currentSimulationQuarter = 0
+                ) }
+                
+                navigateToScreen(Screen.Simulation)
             }
         } else {
             updateGameState { state ->
@@ -302,6 +316,17 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             }
             startTimer()
             soundManager.playBeginAuction()
+        }
+    }
+
+    fun advanceSimulation() {
+        val currentState = _uiState.value.gameState
+        if (currentState.currentSimulationQuarter < 4) {
+            updateGameState { it.copy(currentSimulationQuarter = it.currentSimulationQuarter + 1) }
+        } else {
+            updateGameState { it.copy(gameOver = true) }
+            navigateToScreen(Screen.VsComputer) // On revient sur l'écran de jeu qui affichera GameOverScreen
+            soundManager.playResultScreen()
         }
     }
 
