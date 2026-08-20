@@ -22,10 +22,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.remember
 import com.example.androididea.ui.components.BasketballVisual
 import com.example.androididea.ui.components.CourtLines
 import com.example.androididea.ui.components.MenuButton
@@ -38,6 +40,15 @@ fun HomeScreen(
     onNavigate: (Screen) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    val versionName = remember {
+        try {
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName
+        } catch (_: Exception) {
+            "0.0.1"
+        }
+    }
+
     Column(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(0.dp)
@@ -107,9 +118,10 @@ fun HomeScreen(
             MenuButton(
                 icon = Icons.Default.Group,
                 label = "JOUER À DEUX",
-                sublabel = "Défi joueur vs joueur",
+                sublabel = "Bientôt disponible",
                 onClick = { onNavigate(Screen.VsHuman) },
-                variant = MenuButtonVariant.Secondary
+                variant = MenuButtonVariant.Secondary,
+                enabled = false
             )
 
             MenuButton(
@@ -122,7 +134,7 @@ fun HomeScreen(
         }
 
         Text(
-            text = "v1.0 · Saison 2025–26",
+            text = "v$versionName · Saison 2025–26",
             fontSize = 12.sp,
             fontFamily = FontFamily.SansSerif,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
