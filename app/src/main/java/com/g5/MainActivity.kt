@@ -68,7 +68,7 @@ fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) 
                 is Screen.Home -> {
                     HomeScreen(
                         onNavigate = { screen ->
-                            viewModel.navigateToScreen(screen)
+                            viewModel.navigateToScreen(screen, reset = true)
                         }
                     )
                 }
