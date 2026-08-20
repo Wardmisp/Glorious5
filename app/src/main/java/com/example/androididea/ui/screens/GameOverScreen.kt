@@ -15,7 +15,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,30 +27,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.androididea.data.models.TeamEntry
+import com.example.androididea.domain.model.TeamAnalytics
 import com.example.androididea.ui.components.StatusBar
 
 @Composable
 fun GameOverScreen(
     teams: Pair<List<TeamEntry>, List<TeamEntry>>,
     budgets: Pair<Int, Int>,
+    analytics: Pair<TeamAnalytics, TeamAnalytics>?,
+    luckyWinner: Int?,
     p1Name: String,
     p2Name: String,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val scoreTeam = { team: List<TeamEntry> ->
-        team.sumOf { entry ->
-            entry.player.pts + entry.player.reb * 0.7 + entry.player.ast * 0.8 + 
-            entry.player.stl * 1.5 + entry.player.blk * 1.5
-        }
-    }
-
-    val s1 = scoreTeam(teams.first)
-    val s2 = scoreTeam(teams.second)
-    val winner = when {
-        s1 > s2 -> p1Name
-        s2 > s1 -> p2Name
-        else -> null
+    val winnerName = when (luckyWinner) {
+        1 -> p1Name
+        2 -> p2Name
+        else -> "Personne"
     }
 
     Column(
@@ -91,7 +84,7 @@ fun GameOverScreen(
                 )
 
                 Text(
-                    text = winner?.let { "$it remporte la draft !" } ?: "Égalité parfaite !",
+                    text = "$winnerName remporte la draft !",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.SansSerif,
@@ -104,9 +97,8 @@ fun GameOverScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 repeat(2) { index ->
-                    val isWinner = if (s1 > s2) index == 0 else if (s2 > s1) index == 1 else false
+                    val isWinner = if (luckyWinner == 1) index == 0 else if (luckyWinner == 2) index == 1 else false
                     val name = if (index == 0) p1Name else p2Name
-                    val score = if (index == 0) s1 else s2
                     val team = if (index == 0) teams.first else teams.second
                     val budget = if (index == 0) budgets.first else budgets.second
 
@@ -131,11 +123,12 @@ fun GameOverScreen(
                         )
 
                         Text(
-                            text = String.format("%.0f pts", score),
-                            fontSize = 28.sp,
+                            text = if (isWinner) "GAGNANT" else "PERDANT",
+                            fontSize = 24.sp,
                             fontWeight = FontWeight.ExtraBold,
                             fontFamily = FontFamily.SansSerif,
-                            color = Color(0xFFF4722B)
+                            letterSpacing = 1.sp,
+                            color = if (isWinner) Color(0xFFF59E0B) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                         )
 
                         Column(

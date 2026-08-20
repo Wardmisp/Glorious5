@@ -12,9 +12,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,12 +29,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.androididea.ui.components.StatusBar
+import com.example.androididea.viewmodel.GameViewModel
 
 @Composable
 fun OptionsScreen(
+    viewModel: GameViewModel,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val uiState = viewModel.uiState.value
+    
     Column(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(0.dp)
@@ -74,35 +82,83 @@ fun OptionsScreen(
 
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            Box(
+            // Theme Toggle
+            androidx.compose.foundation.layout.Row(
                 modifier = Modifier
-                    .size(80.dp)
+                    .fillMaxWidth()
                     .background(
-                        color = Color(0xFFF4722B).copy(alpha = 0.1f),
-                        shape = RoundedCornerShape(24.dp)
-                    ),
-                contentAlignment = Alignment.Center
+                        color = MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(16.dp)
+                    )
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = null,
-                    tint = Color(0xFFF4722B),
-                    modifier = Modifier.size(36.dp)
+                androidx.compose.foundation.layout.Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(
+                                color = if (uiState.isDarkTheme) Color(0xFFBB86FC).copy(alpha = 0.1f) 
+                                        else Color(0xFFF4722B).copy(alpha = 0.1f),
+                                shape = RoundedCornerShape(10.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = if (uiState.isDarkTheme) Icons.Default.DarkMode else Icons.Default.LightMode,
+                            contentDescription = null,
+                            tint = if (uiState.isDarkTheme) Color(0xFFBB86FC) else Color(0xFFF4722B),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                    
+                    Column {
+                        Text(
+                            text = "Mode Sombre",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.SansSerif,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Text(
+                            text = if (uiState.isDarkTheme) "Activé" else "Désactivé",
+                            fontSize = 12.sp,
+                            fontFamily = FontFamily.SansSerif,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
+                }
+
+                Switch(
+                    checked = uiState.isDarkTheme,
+                    onCheckedChange = { viewModel.toggleTheme() },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = Color(0xFFF4722B),
+                        uncheckedThumbColor = Color.Gray,
+                        uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
                 )
             }
 
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
+            
             Text(
-                text = "Cet écran arrive bientôt.",
-                fontSize = 14.sp,
+                text = "D'autres réglages (volume, difficulté) arriveront bientôt dans cette section.",
+                fontSize = 12.sp,
+                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
                 fontFamily = FontFamily.SansSerif,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                modifier = Modifier.padding(top = 24.dp)
+                modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
             )
         }
     }

@@ -38,6 +38,7 @@ fun MenuButton(
     sublabel: String,
     onClick: () -> Unit,
     variant: MenuButtonVariant = MenuButtonVariant.Default,
+    enabled: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
@@ -48,6 +49,7 @@ fun MenuButton(
             .clickable(
                 interactionSource = interactionSource,
                 indication = null,
+                enabled = enabled,
                 onClick = onClick
             )
     ) {
@@ -55,23 +57,23 @@ fun MenuButton(
             when (variant) {
                 MenuButtonVariant.Primary -> {
                     Tuple6(
-                        Color(0xFFF4722B).copy(alpha = 0.9f),
-                        Color(0xFFF4722B).copy(alpha = 0.4f),
-                        Color.White.copy(alpha = 0.2f),
-                        Color.White,
-                        Color.White,
-                        Color.White.copy(alpha = 0.7f)
+                        Color(0xFFF4722B).copy(alpha = if (enabled) 0.9f else 0.3f),
+                        Color(0xFFF4722B).copy(alpha = if (enabled) 0.4f else 0.1f),
+                        Color.White.copy(alpha = if (enabled) 0.2f else 0.1f),
+                        Color.White.copy(alpha = if (enabled) 1f else 0.4f),
+                        Color.White.copy(alpha = if (enabled) 1f else 0.4f),
+                        Color.White.copy(alpha = if (enabled) 0.7f else 0.3f)
                     )
                 }
                 MenuButtonVariant.Secondary,
                 MenuButtonVariant.Default -> {
                     Tuple6(
-                        MaterialTheme.colorScheme.surface,
-                        MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                        Color(0xFFF4722B).copy(alpha = 0.15f),
-                        Color(0xFFF4722B),
-                        MaterialTheme.colorScheme.onSurface,
-                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        MaterialTheme.colorScheme.surface.copy(alpha = if (enabled) 1f else 0.4f),
+                        MaterialTheme.colorScheme.outline.copy(alpha = if (enabled) 0.3f else 0.1f),
+                        Color(0xFFF4722B).copy(alpha = if (enabled) 0.15f else 0.05f),
+                        Color(0xFFF4722B).copy(alpha = if (enabled) 1f else 0.4f),
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = if (enabled) 1f else 0.4f),
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = if (enabled) 0.6f else 0.3f)
                     )
                 }
             }

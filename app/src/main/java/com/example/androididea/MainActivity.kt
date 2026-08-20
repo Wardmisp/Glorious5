@@ -27,16 +27,18 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            AndroidIdeaTheme (darkTheme = true) {
-                BasketballDraftApp()
+            val viewModel: GameViewModel = viewModel()
+            val uiState = viewModel.uiState.value
+
+            AndroidIdeaTheme (darkTheme = uiState.isDarkTheme) {
+                BasketballDraftApp(viewModel = viewModel)
             }
         }
     }
 }
 
 @Composable
-fun BasketballDraftApp(modifier: Modifier = Modifier) {
-    val viewModel: GameViewModel = viewModel()
+fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) {
     val uiState = viewModel.uiState.value
 
     Box(
@@ -85,6 +87,7 @@ fun BasketballDraftApp(modifier: Modifier = Modifier) {
                 }
                 is Screen.Options -> {
                     OptionsScreen(
+                        viewModel = viewModel,
                         onBack = {
                             viewModel.navigateToScreen(Screen.Home)
                         }
@@ -99,6 +102,7 @@ fun BasketballDraftApp(modifier: Modifier = Modifier) {
 @Composable
 fun BasketballDraftAppPreview() {
     AndroidIdeaTheme {
-        BasketballDraftApp()
+        val viewModel: GameViewModel = viewModel()
+        BasketballDraftApp(viewModel = viewModel)
     }
 }
