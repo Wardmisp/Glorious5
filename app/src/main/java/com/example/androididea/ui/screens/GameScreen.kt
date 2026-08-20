@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material3.Button
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -36,15 +35,15 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.androididea.data.models.NBA_PLAYERS
-import com.example.androididea.data.models.TOTAL
+import com.example.androididea.data.local.NBA_PLAYERS
+import com.example.androididea.data.local.TOTAL
 import com.example.androididea.ui.components.AuctionBanner
 import com.example.androididea.ui.components.BidControl
 import com.example.androididea.ui.components.ComputerPanel
 import com.example.androididea.ui.components.PlayerRevealCard
 import com.example.androididea.ui.components.StatusBar
 import com.example.androididea.ui.components.TeamsPanel
-import com.example.androididea.viewmodel.GameViewModel
+import com.example.androididea.ui.viewmodel.GameViewModel
 
 @Composable
 fun GameScreen(

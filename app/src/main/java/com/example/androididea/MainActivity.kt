@@ -19,8 +19,8 @@ import com.example.androididea.ui.screens.GameScreen
 import com.example.androididea.ui.screens.HomeScreen
 import com.example.androididea.ui.screens.OptionsScreen
 import com.example.androididea.ui.theme.AndroidIdeaTheme
-import com.example.androididea.viewmodel.GameViewModel
-import com.example.androididea.viewmodel.Screen
+import com.example.androididea.ui.viewmodel.GameViewModel
+import com.example.androididea.ui.viewmodel.Screen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

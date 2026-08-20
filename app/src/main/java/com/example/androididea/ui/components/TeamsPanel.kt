@@ -19,7 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.EmojiEvents
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,8 +31,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.androididea.data.models.TeamEntry
-import com.example.androididea.data.models.TOTAL
+import com.example.androididea.domain.model.TeamEntry
+import com.example.androididea.data.local.TOTAL
 
 @Composable
 fun TeamsPanel(
@@ -104,7 +104,7 @@ fun TeamsPanel(
             exit = shrinkVertically()
         ) {
             Column {
-                Divider(
+                HorizontalDivider(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(1.dp),
@@ -123,7 +123,7 @@ fun TeamsPanel(
                         modifier = Modifier.weight(1f)
                     )
 
-                    Divider(
+                    HorizontalDivider(
                         modifier = Modifier
                             .fillMaxWidth(0.005f)
                             .height(200.dp),

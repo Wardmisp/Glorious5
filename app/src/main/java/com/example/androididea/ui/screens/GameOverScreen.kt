@@ -26,7 +26,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.androididea.data.models.TeamEntry
+import com.example.androididea.domain.model.TeamEntry
 import com.example.androididea.domain.model.TeamAnalytics
 import com.example.androididea.ui.components.StatusBar
 

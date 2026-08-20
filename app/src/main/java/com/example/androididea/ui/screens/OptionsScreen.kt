@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -29,7 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.androididea.ui.components.StatusBar
-import com.example.androididea.viewmodel.GameViewModel
+import com.example.androididea.ui.viewmodel.GameViewModel
 
 @Composable
 fun OptionsScreen(
@@ -45,7 +46,7 @@ fun OptionsScreen(
     ) {
         StatusBar()
 
-        androidx.compose.foundation.layout.Row(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(20.dp),
@@ -87,7 +88,7 @@ fun OptionsScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             // Theme Toggle
-            androidx.compose.foundation.layout.Row(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
@@ -98,7 +99,7 @@ fun OptionsScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                androidx.compose.foundation.layout.Row(
+                Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {

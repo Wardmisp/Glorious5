@@ -1,7 +1,7 @@
-package com.example.androididea.viewmodel
+package com.example.androididea.ui.viewmodel
 
-import com.example.androididea.data.models.TeamEntry
-import com.example.androididea.data.models.NBAPlayer
+import com.example.androididea.domain.model.TeamEntry
+import com.example.androididea.domain.model.NBAPlayer
 import com.example.androididea.domain.model.TeamAnalytics
 
 sealed class Screen {

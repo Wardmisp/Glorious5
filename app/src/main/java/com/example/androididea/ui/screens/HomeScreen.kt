@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -33,7 +32,7 @@ import com.example.androididea.ui.components.CourtLines
 import com.example.androididea.ui.components.MenuButton
 import com.example.androididea.ui.components.MenuButtonVariant
 import com.example.androididea.ui.components.StatusBar
-import com.example.androididea.viewmodel.Screen
+import com.example.androididea.ui.viewmodel.Screen
 
 @Composable
 fun HomeScreen(

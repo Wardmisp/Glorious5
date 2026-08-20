@@ -1,4 +1,4 @@
-package com.example.androididea.ui.utils
+package com.example.androididea.core.utils
 
 import android.content.Context
 import android.media.MediaPlayer
@@ -22,9 +22,20 @@ class SoundManager(private val context: Context) {
         }
     }
 
+    fun stopSound() {
+        try {
+            mediaPlayer?.stop()
+            mediaPlayer?.release()
+            mediaPlayer = null
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
     fun playBeginAuction() = playSound(R.raw.begin_auction)
     fun playWinAuction() = playSound(R.raw.win_auction)
     fun playResultScreen() = playSound(R.raw.result_screen)
+    fun playAlarmAuction() = playSound(R.raw.alarm_auction)
 
     fun release() {
         mediaPlayer?.release()

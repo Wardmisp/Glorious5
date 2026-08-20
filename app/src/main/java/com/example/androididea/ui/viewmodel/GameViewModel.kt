@@ -1,17 +1,17 @@
-package com.example.androididea.viewmodel
+package com.example.androididea.ui.viewmodel
 
 import android.app.Application
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.androididea.data.models.BUDGET
-import com.example.androididea.data.models.NBA_PLAYERS
-import com.example.androididea.data.models.TOTAL
-import com.example.androididea.data.models.TeamEntry
+import com.example.androididea.data.local.BUDGET
+import com.example.androididea.data.local.NBA_PLAYERS
+import com.example.androididea.data.local.TOTAL
+import com.example.androididea.domain.model.TeamEntry
 import com.example.androididea.data.repository.PlayerRepository
 import com.example.androididea.domain.usecase.CalculateWinProbabilityUseCase
-import com.example.androididea.ui.utils.SoundManager
+import com.example.androididea.core.utils.SoundManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -101,9 +101,13 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun startTimer() {
         timerJob?.cancel()
+        soundManager.stopSound()
         timerJob = viewModelScope.launch {
             for (i in 15 downTo 0) {
                 updateGameState { it.copy(timer = i) }
+                if (i in 1..5) {
+                    soundManager.playAlarmAuction()
+                }
                 if (i == 0) {
                     val currentState = _uiState.value.gameState
                     if (currentState.bid > 0) {
@@ -322,13 +326,13 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         } else {
             // Les deux sont pleins (ne devrait pas arriver avec TOTAL=10), on skip
             timerJob?.cancel()
+            soundManager.stopSound()
             updateGameState { it.copy(done = true, awardedTo = null, thinking = false) }
         }
     }
 
     override fun onCleared() {
-        super.onCleared()
-        soundManager.release()
+        // soundManager.release() // Optional: depends on lifecycle
     }
 
     fun goBack() {
