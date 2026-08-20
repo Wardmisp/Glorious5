@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "360365428442",
+    "project_id": "androididea-757bfd4a",
+    "storage_bucket": "androididea-757bfd4a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:360365428442:android:b1849268c5354ea1e91fe3",
+        "android_client_info": {
+          "package_name": "com.g5"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAG2KRJcDE1RPJWE5Mu9Gd5b-13g-PPxkE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
