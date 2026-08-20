@@ -32,31 +32,53 @@ class GenerateMatchSimulationUseCase {
     }
 
     private fun generateRandomAction(actor: NBAPlayer, opponent: NBAPlayer, favorsTeamA: Boolean): GameAction {
-        val templates = listOf(
-            "${actor.lastName} marque un 3 points spectaculaire sur la tête de ${opponent.lastName} !",
+        val position = actor.position.lowercase()
+        
+        val commonActions = mutableListOf(
             "Incroyable contre de ${actor.lastName} qui repousse la tentative de dunk de ${opponent.lastName}.",
-            "${actor.lastName} traverse tout le terrain et finit par un lay-up malgré la faute de ${opponent.lastName}.",
-            "Magnifique passe décisive de ${actor.lastName} alors que ${opponent.lastName} était en retard sur la rotation.",
-            "${actor.lastName} intercepte le ballon dans les mains de ${opponent.lastName} et s'en va dunker seul en contre-attaque !",
+            "${actor.lastName} intercepte le ballon dans les mains de ${opponent.lastName} et s'en va finir seul en contre-attaque !",
             "Duel physique intense : ${actor.lastName} gagne son duel au rebond face à ${opponent.lastName}.",
             "${actor.lastName} provoque le passage en force de ${opponent.lastName}, quel engagement !",
-            "Séquence de haute volée : ${actor.lastName} efface ${opponent.lastName} d'un crossover dévastateur.",
-            "${actor.lastName} postérise violemment ${opponent.lastName} avec un dunk dévastateur !",
-            "Passe aveugle chirurgicale de ${actor.lastName} qui laisse ${opponent.lastName} totalement immobile.",
-            "${actor.lastName} plante un step-back longue distance malgré la défense de ${opponent.lastName} !",
-            "${actor.lastName} s'envole pour un alley-oop monumental, ${opponent.lastName} ne peut que regarder.",
-            "Contre illégal ? Non ! ${actor.lastName} scotche proprement le ballon contre la planche devant ${opponent.lastName}.",
-            "Touché de velours : ${actor.lastName} termine avec un floater élégant au-dessus de ${opponent.lastName}.",
-            "${actor.lastName} enchaîne les dribbles et fait mordre la poussière à ${opponent.lastName} sur un cassage de chevilles !",
             "Défense d'acier : ${actor.lastName} ne laisse aucun espace à ${opponent.lastName} et force la perte de balle.",
-            "${actor.lastName} finit en force au cercle avec un 'and-one' spectaculaire face à ${opponent.lastName}.",
-            "Lecture de jeu parfaite : ${actor.lastName} anticipe la passe de ${opponent.lastName} et lance la contre-attaque.",
-            "${actor.lastName} domine la raquette et arrache un rebond offensif crucial devant ${opponent.lastName}.",
+            "Lecture de jeu parfaite : ${actor.lastName} anticipe la passe de ${opponent.lastName} et lance la transition.",
             "Quel sang-froid ! ${actor.lastName} feinte le tir et oblige ${opponent.lastName} à sauter dans le vide avant de marquer."
         )
+
+        val backcourtActions = listOf(
+            "${actor.lastName} marque un 3 points spectaculaire sur la tête de ${opponent.lastName} !",
+            "Passe aveugle chirurgicale de ${actor.lastName} qui laisse ${opponent.lastName} totalement immobile.",
+            "${actor.lastName} plante un step-back longue distance malgré la défense de ${opponent.lastName} !",
+            "Touché de velours : ${actor.lastName} termine avec un floater élégant au-dessus de ${opponent.lastName}.",
+            "${actor.lastName} enchaîne les dribbles et fait mordre la poussière à ${opponent.lastName} sur un cassage de chevilles !",
+            "Séquence de haute volée : ${actor.lastName} efface ${opponent.lastName} d'un crossover dévastateur."
+        )
+
+        val frontcourtActions = listOf(
+            "${actor.lastName} postérise violemment ${opponent.lastName} avec un dunk dévastateur !",
+            "${actor.lastName} s'envole pour un alley-oop monumental, ${opponent.lastName} ne peut que regarder.",
+            "Contre illégal ? Non ! ${actor.lastName} scotche proprement le ballon contre la planche devant ${opponent.lastName}.",
+            "${actor.lastName} finit en force au cercle avec un 'and-one' spectaculaire face à ${opponent.lastName}.",
+            "${actor.lastName} domine la raquette et arrache un rebond offensif crucial devant ${opponent.lastName}.",
+            "Puissance pure : ${actor.lastName} enfonce ${opponent.lastName} au poste bas et finit avec un move d'école."
+        )
+
+        val wingActions = listOf(
+            "${actor.lastName} traverse tout le terrain et finit par un lay-up malgré la faute de ${opponent.lastName}.",
+            "Magnifique passe décisive de ${actor.lastName} alors que ${opponent.lastName} était en retard sur la rotation.",
+            "${actor.lastName} déclenche un tir à mi-distance soyeux au-dessus des bras de ${opponent.lastName}."
+        )
+
+        val finalTemplates = commonActions.apply {
+            when {
+                position.contains("meneur") || position.contains("arrière") -> addAll(backcourtActions + wingActions)
+                position.contains("pivot") || position.contains("intérieur") -> addAll(frontcourtActions)
+                position.contains("fort") -> addAll(frontcourtActions + wingActions)
+                else -> addAll(backcourtActions + frontcourtActions + wingActions)
+            }
+        }
         
         return GameAction(
-            description = templates.random(),
+            description = finalTemplates.random(),
             highlights = listOf(actor, opponent),
             favorsTeamA = favorsTeamA
         )
