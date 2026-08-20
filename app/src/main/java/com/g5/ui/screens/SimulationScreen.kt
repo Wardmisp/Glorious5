@@ -23,6 +23,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import com.g5.ui.components.StatusBar
 import com.g5.ui.viewmodel.GameViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun SimulationScreen(
@@ -42,12 +48,12 @@ fun SimulationScreen(
     val gameState = viewModel.uiState.value.gameState
     val currentQuarter = gameState.currentSimulationQuarter
     val simulation = gameState.matchSimulation
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        // On attend un peu avant de commencer
-        delay(1000)
-        repeat(5) { // 0 to 4 (4 is game over transition)
-            delay(3000)
+        // On attend un peu avant de commencer le 1er quart-temps
+        if (currentQuarter == 0) {
+            delay(1500)
             viewModel.advanceSimulation()
         }
     }
@@ -82,8 +88,20 @@ fun SimulationScreen(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                simulation.take(currentQuarter).forEach { quarter ->
-                    QuarterCard(quarter.quarterNumber, quarter.actions.map { it.description })
+                simulation.take(currentQuarter).forEachIndexed { index, quarter ->
+                    val isLatestRevealed = (index + 1) == currentQuarter
+                    QuarterCard(
+                        number = quarter.quarterNumber,
+                        actions = quarter.actions.map { it.description },
+                        onAllFinished = {
+                            if (isLatestRevealed) {
+                                scope.launch {
+                                    delay(2500) // Délai de confort entre les quarts
+                                    viewModel.advanceSimulation()
+                                }
+                            }
+                        }
+                    )
                 }
                 
                 if (currentQuarter < 4) {
@@ -95,7 +113,9 @@ fun SimulationScreen(
 }
 
 @Composable
-fun QuarterCard(number: Int, actions: List<String>) {
+fun QuarterCard(number: Int, actions: List<String>, onAllFinished: () -> Unit = {}) {
+    var visibleActionsCount by remember { mutableStateOf(1) }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -137,21 +157,57 @@ fun QuarterCard(number: Int, actions: List<String>) {
             )
         }
 
-        actions.forEach { action ->
-            AnimatedVisibility(
-                visible = true,
-                enter = fadeIn(tween(1000)) + slideInVertically()
-            ) {
-                Text(
+        actions.forEachIndexed { index, action ->
+            if (index < visibleActionsCount) {
+                TypewriterText(
                     text = action,
                     fontSize = 14.sp,
                     lineHeight = 20.sp,
                     fontFamily = FontFamily.SansSerif,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                    onFinished = {
+                        if (visibleActionsCount < actions.size) {
+                            visibleActionsCount++
+                        } else {
+                            onAllFinished()
+                        }
+                    }
                 )
             }
         }
     }
+}
+
+@Composable
+fun TypewriterText(
+    text: String,
+    fontSize: androidx.compose.ui.unit.TextUnit,
+    lineHeight: androidx.compose.ui.unit.TextUnit,
+    fontFamily: FontFamily,
+    color: Color,
+    modifier: Modifier = Modifier,
+    delayMillis: Long = 35L,
+    onFinished: () -> Unit = {}
+) {
+    var textToDisplay by remember { mutableStateOf("") }
+
+    LaunchedEffect(text) {
+        textToDisplay = ""
+        text.forEachIndexed { index, _ ->
+            textToDisplay = text.substring(0, index + 1)
+            delay(delayMillis)
+        }
+        onFinished()
+    }
+
+    Text(
+        text = textToDisplay,
+        fontSize = fontSize,
+        lineHeight = lineHeight,
+        fontFamily = fontFamily,
+        color = color,
+        modifier = modifier
+    )
 }
 
 @Composable
