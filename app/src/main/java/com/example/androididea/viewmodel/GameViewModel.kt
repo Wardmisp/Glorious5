@@ -10,12 +10,15 @@ import com.example.androididea.data.models.NBA_PLAYERS
 import com.example.androididea.data.models.TOTAL
 import com.example.androididea.data.models.TeamEntry
 import com.example.androididea.data.repository.PlayerRepository
+import com.example.androididea.domain.usecase.CalculateWinProbabilityUseCase
+import com.example.androididea.ui.utils.SoundManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class GameViewModel(application: Application) : AndroidViewModel(application) {
     private val playerRepository = PlayerRepository(application)
+    private val soundManager = SoundManager(application)
     private val _uiState = mutableStateOf<UiState>(UiState(gameState = GameState(players = NBA_PLAYERS.take(TOTAL))))
     val uiState: State<UiState> = _uiState
     private var timerJob: Job? = null
@@ -44,6 +47,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun toggleTheme() {
+        val currentState = _uiState.value
+        _uiState.value = currentState.copy(isDarkTheme = !currentState.isDarkTheme)
+    }
+
     private fun resetGameState() {
         timerJob?.cancel()
         viewModelScope.launch {
@@ -53,10 +61,12 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                     budgets = Pair(BUDGET, BUDGET),
                     teams = Pair(emptyList(), emptyList()),
                     revealOrder = generateRevealOrder(),
-                    players = players
+                    players = players,
+                    luckyWinner = null
                 )
             }
             startTimer()
+            soundManager.playBeginAuction()
         }
     }
 
@@ -116,7 +126,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun handleP1Bid(minBid: Int, budget: Int) {
-        val amount = maxOf(_uiState.value.gameState.p1Input, minBid)
+        val currentState = _uiState.value.gameState
+        if (currentState.teams.first.size >= TOTAL / 2) return
+        
+        val amount = maxOf(currentState.p1Input, minBid)
         if (amount <= budget) {
             setBid(amount, 1)
             setP1Input(amount + 1)
@@ -124,7 +137,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun handleP2Bid(minBid: Int, budget: Int) {
-        val amount = maxOf(_uiState.value.gameState.p2Input, minBid)
+        val currentState = _uiState.value.gameState
+        if (currentState.teams.second.size >= TOTAL / 2) return
+
+        val amount = maxOf(currentState.p2Input, minBid)
         if (amount <= budget) {
             setBid(amount, 2)
             setP2Input(amount + 1)
@@ -133,7 +149,18 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     fun computerBid(minBid: Int) {
         val currentState = _uiState.value.gameState
-        if (currentState.bidder == 2 || currentState.done) return
+        val p1Full = currentState.teams.first.size >= TOTAL / 2
+        val p2Full = currentState.teams.second.size >= TOTAL / 2
+
+        if (currentState.bidder == 2 || currentState.done || p2Full) return
+
+        // Si l'adversaire est plein, l'ordi DOIT récupérer le joueur
+        if (p1Full) {
+            // On le récupère au prix minimum si on n'a pas encore misé
+            val finalBid = if (currentState.bid > 0) currentState.bid else 1
+            adjudicate(finalBid, 2)
+            return
+        }
 
         val player = currentState.players.getOrNull(currentState.round)
             ?: NBA_PLAYERS.getOrNull(currentState.round)
@@ -225,6 +252,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 thinking = false
             )
         }
+        soundManager.playWinAuction()
     }
 
     fun nextRound() {
@@ -235,7 +263,23 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         val nextRoundIndex = currentState.round + 1
 
         if (nextRoundIndex >= totalPlayers) {
-            updateGameState { it.copy(gameOver = true) }
+            viewModelScope.launch {
+                val allSeasons = playerRepository.getAllSeasons()
+                val useCase = CalculateWinProbabilityUseCase()
+                val results = useCase.execute(
+                    teamA = currentState.teams.first.map { it.player },
+                    teamB = currentState.teams.second.map { it.player },
+                    allSeasons = allSeasons
+                )
+                
+                // Tirage au sort basé sur les pourcentages
+                val p1WinProb = results.first.winProbability
+                val randomValue = Math.random()
+                val winner = if (randomValue < p1WinProb) 1 else 2
+                
+                updateGameState { it.copy(gameOver = true, analytics = results, luckyWinner = winner) }
+                soundManager.playResultScreen()
+            }
         } else {
             updateGameState { state ->
                 GameState(
@@ -253,6 +297,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 )
             }
             startTimer()
+            soundManager.playBeginAuction()
         }
     }
 
@@ -262,14 +307,28 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     fun pass() {
         val currentState = _uiState.value.gameState
-        if (currentState.bid > 0) {
-            // Si une enchère est en cours, le meneur actuel l'emporte immédiatement
-            adjudicate(currentState.bid, currentState.bidder)
+        val p1Full = currentState.teams.first.size >= TOTAL / 2
+        val p2Full = currentState.teams.second.size >= TOTAL / 2
+
+        if (!p2Full) {
+            // L'adversaire a de la place, il récupère le joueur
+            // S'il menait déjà, il garde son prix, sinon prix actuel ou minimum
+            val finalBid = if (currentState.bidder == 2) currentState.bid else maxOf(1, currentState.bid)
+            adjudicate(finalBid, 2)
+        } else if (!p1Full) {
+            // L'adversaire est plein mais j'ai de la place, je récupère le joueur
+            val finalBid = if (currentState.bidder == 1) currentState.bid else maxOf(1, currentState.bid)
+            adjudicate(finalBid, 1)
         } else {
-            // Si personne n'a misé, le joueur est invendu
+            // Les deux sont pleins (ne devrait pas arriver avec TOTAL=10), on skip
             timerJob?.cancel()
             updateGameState { it.copy(done = true, awardedTo = null, thinking = false) }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        soundManager.release()
     }
 
     fun goBack() {

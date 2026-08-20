@@ -2,6 +2,7 @@ package com.example.androididea.viewmodel
 
 import com.example.androididea.data.models.TeamEntry
 import com.example.androididea.data.models.NBAPlayer
+import com.example.androididea.domain.model.TeamAnalytics
 
 sealed class Screen {
     object Home : Screen()
@@ -26,10 +27,13 @@ data class GameState(
     val bidCount: Int = 0,
     val revealOrder: List<Int> = (0..9).toList(),
     val timer: Int = 15,
-    val players: List<NBAPlayer> = emptyList()
+    val players: List<NBAPlayer> = emptyList(),
+    val analytics: Pair<TeamAnalytics, TeamAnalytics>? = null,
+    val luckyWinner: Int? = null
 )
 
 data class UiState(
     val currentScreen: Screen = Screen.Home,
+    val isDarkTheme: Boolean = true,
     val gameState: GameState = GameState()
 )

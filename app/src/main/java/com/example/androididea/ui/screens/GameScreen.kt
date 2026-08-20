@@ -73,6 +73,8 @@ fun GameScreen(
         GameOverScreen(
             teams = gameState.teams,
             budgets = gameState.budgets,
+            analytics = gameState.analytics,
+            luckyWinner = gameState.luckyWinner,
             p1Name = p1Name,
             p2Name = p2Name,
             onBack = {
@@ -212,6 +214,9 @@ fun GameScreen(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
+                            val p1Full = gameState.teams.first.size >= TOTAL / 2
+                            val p2Full = gameState.teams.second.size >= TOTAL / 2
+                            
                             BidControl(
                                 name = p1Name,
                                 budget = gameState.budgets.first,
@@ -220,7 +225,7 @@ fun GameScreen(
                                 minBid = minBid,
                                 onBid = { viewModel.handleP1Bid(minBid, gameState.budgets.first) },
                                 leading = gameState.bidder == 1,
-                                disabled = gameState.done,
+                                disabled = p1Full,
                                 modifier = Modifier.weight(1f)
                             )
 
@@ -240,12 +245,13 @@ fun GameScreen(
                                     minBid = minBid,
                                     onBid = { viewModel.handleP2Bid(minBid, gameState.budgets.second) },
                                     leading = gameState.bidder == 2,
-                                    disabled = gameState.done,
+                                    disabled = p2Full,
                                     modifier = Modifier.weight(1f)
                                 )
                             }
                         }
 
+                        val p2Full = gameState.teams.second.size >= TOTAL / 2
                         Button(
                             onClick = { viewModel.pass() },
                             modifier = Modifier
@@ -253,7 +259,7 @@ fun GameScreen(
                                 .height(40.dp)
                         ) {
                             Text(
-                                text = "PASSER MON TOUR",
+                                text = if (p2Full) "RÉCUPÉRER LE JOUEUR" else "PASSER MON TOUR",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontFamily = FontFamily.SansSerif,
