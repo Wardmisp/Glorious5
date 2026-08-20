@@ -1,0 +1,6 @@
+- [x] Mettre à jour `build.gradle.kts` (namespace et applicationId)
+- [x] Vérifier et mettre à jour `AndroidManifest.xml`
+- [x] Déplacer les fichiers sources vers la nouvelle structure de dossiers `com/g5`
+- [x] Mettre à jour les déclarations `package` dans tous les fichiers Kotlin
+- [x] Mettre à jour les `import` (R, BuildConfig) dans tous les fichiers Kotlin
+- [x] Vérifier la compilation et les tests

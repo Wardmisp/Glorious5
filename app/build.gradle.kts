@@ -5,13 +5,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.androididea"
+    namespace = "com.g5"
     compileSdk {
         version = release(37)
     }
 
     defaultConfig {
-        applicationId = "com.example.androididea"
+        applicationId = "com.g5"
         minSdk = 28
         targetSdk = 36
         versionCode = 1
