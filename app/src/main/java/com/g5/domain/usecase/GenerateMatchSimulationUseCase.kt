@@ -25,13 +25,13 @@ class GenerateMatchSimulationUseCase {
             val actor = if (isTeamAActing) teamA.random() else teamB.random()
             val opponent = if (isTeamAActing) teamB.random() else teamA.random()
             
-            actions.add(generateRandomAction(actor, opponent))
+            actions.add(generateRandomAction(actor, opponent, isTeamAActing))
         }
         
         return actions
     }
 
-    private fun generateRandomAction(actor: NBAPlayer, opponent: NBAPlayer): GameAction {
+    private fun generateRandomAction(actor: NBAPlayer, opponent: NBAPlayer, favorsTeamA: Boolean): GameAction {
         val templates = listOf(
             "${actor.lastName} marque un 3 points spectaculaire sur la tête de ${opponent.lastName} !",
             "Incroyable contre de ${actor.lastName} qui repousse la tentative de dunk de ${opponent.lastName}.",
@@ -45,7 +45,8 @@ class GenerateMatchSimulationUseCase {
         
         return GameAction(
             description = templates.random(),
-            highlights = listOf(actor, opponent)
+            highlights = listOf(actor, opponent),
+            favorsTeamA = favorsTeamA
         )
     }
 }
