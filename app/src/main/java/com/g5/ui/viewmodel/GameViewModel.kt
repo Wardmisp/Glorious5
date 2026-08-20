@@ -336,6 +336,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         updateGameState { it.copy(showTeams = !it.showTeams) }
     }
 
+    fun playActionBuzzer() {
+        soundManager.playActionBuzzer()
+    }
+
     fun pass() {
         val currentState = _uiState.value.gameState
         val p1Full = currentState.teams.first.size >= TOTAL / 2

@@ -96,6 +96,7 @@ fun SimulationScreen(
                         actions = quarter.actions,
                         onAllFinished = {
                             if (isLatestRevealed) {
+                                viewModel.playActionBuzzer()
                                 scope.launch {
                                     delay(2500) // Délai de confort entre les quarts
                                     viewModel.advanceSimulation()
