@@ -327,7 +327,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         } else {
             updateGameState { it.copy(gameOver = true) }
             navigateToScreen(Screen.VsComputer, reset = false) // On revient sur l'écran de jeu SANS reset
-            soundManager.playResultScreen()
+            val winner = _uiState.value.gameState.luckyWinner
+            soundManager.playResultScreen(isWinner = winner == 1)
         }
     }
 
