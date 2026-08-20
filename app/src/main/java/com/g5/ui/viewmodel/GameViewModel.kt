@@ -286,7 +286,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 val simUseCase = GenerateMatchSimulationUseCase()
                 val simulation = simUseCase.execute(
                     teamA = currentState.teams.first.map { it.player },
-                    teamB = currentState.teams.second.map { it.player }
+                    teamB = currentState.teams.second.map { it.player },
+                    winProbA = p1WinProb
                 )
 
                 updateGameState { it.copy(
