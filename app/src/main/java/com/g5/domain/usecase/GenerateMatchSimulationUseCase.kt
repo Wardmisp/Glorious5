@@ -6,22 +6,22 @@ import com.g5.domain.model.QuarterSimulation
 
 class GenerateMatchSimulationUseCase {
 
-    fun execute(teamA: List<NBAPlayer>, teamB: List<NBAPlayer>): List<QuarterSimulation> {
+    fun execute(teamA: List<NBAPlayer>, teamB: List<NBAPlayer>, winProbA: Double): List<QuarterSimulation> {
         return (1..4).map { q ->
             QuarterSimulation(
                 quarterNumber = q,
-                actions = generateActionsForQuarter(q, teamA, teamB)
+                actions = generateActionsForQuarter(q, teamA, teamB, winProbA)
             )
         }
     }
 
-    private fun generateActionsForQuarter(q: Int, teamA: List<NBAPlayer>, teamB: List<NBAPlayer>): List<GameAction> {
+    private fun generateActionsForQuarter(q: Int, teamA: List<NBAPlayer>, teamB: List<NBAPlayer>, winProbA: Double): List<GameAction> {
         val actions = mutableListOf<GameAction>()
         if (teamA.isEmpty() || teamB.isEmpty()) return actions
         
         // On génère 2 actions par quart-temps
         repeat(2) {
-            val isTeamAActing = (0..1).random() == 0
+            val isTeamAActing = Math.random() < winProbA
             val actor = if (isTeamAActing) teamA.random() else teamB.random()
             val opponent = if (isTeamAActing) teamB.random() else teamA.random()
             
