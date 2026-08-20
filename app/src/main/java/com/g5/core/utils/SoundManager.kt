@@ -34,7 +34,10 @@ class SoundManager(private val context: Context) {
 
     fun playBeginAuction() = playSound(R.raw.begin_auction)
     fun playWinAuction() = playSound(R.raw.win_auction)
-    fun playResultScreen() = playSound(R.raw.result_screen)
+    fun playResultScreen(isWinner: Boolean = true) {
+        if (isWinner) playSound(R.raw.result_screen)
+        else playSound(R.raw.result_screen_lose)
+    }
     fun playAlarmAuction() = playSound(R.raw.alarm_auction)
 
     fun release() {
