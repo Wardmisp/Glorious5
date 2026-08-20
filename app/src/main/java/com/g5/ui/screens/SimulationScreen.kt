@@ -35,6 +35,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.g5.domain.model.GameAction
 import com.g5.ui.components.StatusBar
 import com.g5.ui.viewmodel.GameViewModel
 import kotlinx.coroutines.delay
@@ -92,7 +93,7 @@ fun SimulationScreen(
                     val isLatestRevealed = (index + 1) == currentQuarter
                     QuarterCard(
                         number = quarter.quarterNumber,
-                        actions = quarter.actions.map { it.description },
+                        actions = quarter.actions,
                         onAllFinished = {
                             if (isLatestRevealed) {
                                 scope.launch {
@@ -113,7 +114,7 @@ fun SimulationScreen(
 }
 
 @Composable
-fun QuarterCard(number: Int, actions: List<String>, onAllFinished: () -> Unit = {}) {
+fun QuarterCard(number: Int, actions: List<GameAction>, onAllFinished: () -> Unit = {}) {
     var visibleActionsCount by remember { mutableStateOf(1) }
 
     Column(
@@ -159,20 +160,31 @@ fun QuarterCard(number: Int, actions: List<String>, onAllFinished: () -> Unit = 
 
         actions.forEachIndexed { index, action ->
             if (index < visibleActionsCount) {
-                TypewriterText(
-                    text = action,
-                    fontSize = 14.sp,
-                    lineHeight = 20.sp,
-                    fontFamily = FontFamily.SansSerif,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                    onFinished = {
-                        if (visibleActionsCount < actions.size) {
-                            visibleActionsCount++
-                        } else {
-                            onAllFinished()
+                val backgroundColor = if (action.favorsTeamA) Color(0xFF4CAF50).copy(alpha = 0.1f) else Color(0xFFF44336).copy(alpha = 0.1f)
+                val borderColor = if (action.favorsTeamA) Color(0xFF4CAF50).copy(alpha = 0.3f) else Color(0xFFF44336).copy(alpha = 0.3f)
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(color = backgroundColor, shape = RoundedCornerShape(8.dp))
+                        .border(width = 1.dp, color = borderColor, shape = RoundedCornerShape(8.dp))
+                        .padding(10.dp)
+                ) {
+                    TypewriterText(
+                        text = action.description,
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp,
+                        fontFamily = FontFamily.SansSerif,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        onFinished = {
+                            if (visibleActionsCount < actions.size) {
+                                visibleActionsCount++
+                            } else {
+                                onAllFinished()
+                            }
                         }
-                    }
-                )
+                    )
+                }
             }
         }
     }
