@@ -39,11 +39,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
 
-    fun navigateToScreen(screen: Screen) {
+    fun navigateToScreen(screen: Screen, reset: Boolean = false) {
         val currentState = _uiState.value
         _uiState.value = currentState.copy(currentScreen = screen)
         
-        if (screen == Screen.VsComputer || screen == Screen.VsHuman) {
+        if (reset && (screen == Screen.VsComputer || screen == Screen.VsHuman)) {
             resetGameState()
         }
     }
@@ -325,7 +325,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             updateGameState { it.copy(currentSimulationQuarter = it.currentSimulationQuarter + 1) }
         } else {
             updateGameState { it.copy(gameOver = true) }
-            navigateToScreen(Screen.VsComputer) // On revient sur l'écran de jeu qui affichera GameOverScreen
+            navigateToScreen(Screen.VsComputer, reset = false) // On revient sur l'écran de jeu SANS reset
             soundManager.playResultScreen()
         }
     }
