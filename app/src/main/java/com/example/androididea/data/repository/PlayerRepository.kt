@@ -1,11 +1,11 @@
 package com.example.androididea.data.repository
 
 import android.content.Context
-import com.example.androididea.data.AppDatabase
-import com.example.androididea.data.PlayerSeason
-import com.example.androididea.data.PlayerSeasonDao
-import com.example.androididea.data.models.NBA_PLAYERS
-import com.example.androididea.data.models.NBAPlayer
+import com.example.androididea.data.local.AppDatabase
+import com.example.androididea.data.local.PlayerSeason
+import com.example.androididea.data.local.PlayerSeasonDao
+import com.example.androididea.data.local.NBA_PLAYERS
+import com.example.androididea.domain.model.NBAPlayer
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -123,8 +123,4 @@ fun PlayerSeason.toNBAPlayer(): NBAPlayer {
         winShares = winShares ?: 0.0,
         games = games ?: 0
     )
-}
-
-suspend fun PlayerSeasonDao.getAllSeasonsList(): List<PlayerSeason> {
-    return getAllList()
 }

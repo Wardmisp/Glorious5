@@ -1,4 +1,6 @@
-package com.example.androididea.data.models
+package com.example.androididea.data.local
+
+import com.example.androididea.domain.model.NBAPlayer
 
 val NBA_PLAYERS = listOf(
     NBAPlayer(

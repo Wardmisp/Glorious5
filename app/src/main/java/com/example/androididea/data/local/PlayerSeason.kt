@@ -1,4 +1,4 @@
-package com.example.androididea.data
+package com.example.androididea.data.local
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

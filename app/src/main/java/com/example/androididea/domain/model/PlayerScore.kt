@@ -1,7 +1,5 @@
 package com.example.androididea.domain.model
 
-import com.example.androididea.data.models.NBAPlayer
-
 data class PlayerScore(
     val player: NBAPlayer,
     val ptsPercentile: Double,

@@ -1,6 +1,6 @@
 package com.example.androididea.domain.usecase
 
-import com.example.androididea.data.models.NBAPlayer
+import com.example.androididea.domain.model.NBAPlayer
 import com.example.androididea.domain.model.PlayerScore
 import com.example.androididea.domain.model.TeamAnalytics
 import kotlin.math.exp

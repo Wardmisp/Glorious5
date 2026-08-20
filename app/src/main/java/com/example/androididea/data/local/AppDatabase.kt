@@ -1,4 +1,4 @@
-package com.example.androididea.data
+package com.example.androididea.data.local
 
 import android.content.Context
 import androidx.room.Database

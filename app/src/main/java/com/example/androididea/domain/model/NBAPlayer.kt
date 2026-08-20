@@ -1,4 +1,4 @@
-package com.example.androididea.data.models
+package com.example.androididea.domain.model
 
 data class NBAPlayer(
     val id: Int,
