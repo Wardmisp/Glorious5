@@ -19,13 +19,17 @@ class GenerateMatchSimulationUseCase {
         val actions = mutableListOf<GameAction>()
         if (teamA.isEmpty() || teamB.isEmpty()) return actions
         
-        // On génère 2 actions par quart-temps
-        repeat(2) {
+        // On génère 3 actions par quart-temps
+        val actionCount = 3
+        val times = (1 until 720).shuffled().take(actionCount).sortedDescending()
+        
+        repeat(actionCount) { i ->
             val isTeamAActing = Math.random() < winProbA
             val actor = if (isTeamAActing) teamA.random() else teamB.random()
             val opponent = if (isTeamAActing) teamB.random() else teamA.random()
             
-            actions.add(generateRandomAction(actor, opponent, isTeamAActing))
+            val action = generateRandomAction(actor, opponent, isTeamAActing)
+            actions.add(action.copy(timeSeconds = times[i]))
         }
         
         return actions
