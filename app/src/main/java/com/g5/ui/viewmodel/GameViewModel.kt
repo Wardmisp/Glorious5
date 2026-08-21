@@ -33,6 +33,14 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 updateGameState { it.copy(players = initialPlayers) }
             }
         }
+        
+        // Auto-start tutorial highlight on first launch
+        if (_uiState.value.isFirstLaunch) {
+            _uiState.value = _uiState.value.copy(
+                isTutorialActive = true,
+                tutorialStep = 0
+            )
+        }
     }
 
     private fun updateGameState(update: (GameState) -> GameState) {
@@ -44,6 +52,12 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     fun navigateToScreen(screen: Screen, reset: Boolean = false) {
         val currentState = _uiState.value
         _uiState.value = currentState.copy(currentScreen = screen)
+        
+        // Arrêt systématique du timer si on quitte l'écran de jeu
+        if (screen != Screen.VsComputer && screen != Screen.VsHuman) {
+            timerJob?.cancel()
+            soundManager.stopSound()
+        }
         
         if (reset && (screen == Screen.VsComputer || screen == Screen.VsHuman)) {
             resetGameState()
@@ -64,6 +78,80 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     fun setDifficulty(difficulty: Difficulty) {
         _uiState.value = _uiState.value.copy(difficulty = difficulty)
+    }
+
+    fun startTutorial() {
+        _uiState.value = _uiState.value.copy(
+            isTutorialActive = true,
+            isFirstLaunch = false,
+            tutorialStep = 0,
+            currentScreen = Screen.Home
+        )
+    }
+
+    fun nextTutorialStep() {
+        val currentStep = _uiState.value.tutorialStep
+        val nextStep = currentStep + 1
+        _uiState.value = _uiState.value.copy(
+            tutorialStep = nextStep,
+            isFirstLaunch = false
+        )
+        
+        // Navigation logic for tutorial
+        when (nextStep) {
+            3 -> navigateToScreen(Screen.VsComputer, reset = true)
+            9 -> setupTutorialScoutingState()
+            13 -> skipTutorial()
+        }
+    }
+
+    private fun setupTutorialScoutingState() {
+        viewModelScope.launch {
+            val allPlayers = playerRepository.getAllSeasons().ifEmpty { NBA_PLAYERS }
+            
+            // L'IA reçoit le gratin (les 5 meilleurs)
+            val aiPlayers = allPlayers.take(5)
+            
+            // L'utilisateur reçoit des joueurs nettement moins forts (le bas du classement)
+            // Dans le top 300, les derniers sont d'excellents joueurs mais bien moins "historiques"
+            val userPlayers = if (allPlayers.size > 10) allPlayers.takeLast(5) else allPlayers.drop(5).take(5)
+
+            val useCase = CalculateWinProbabilityUseCase()
+            val results = useCase.execute(
+                teamA = userPlayers,
+                teamB = aiPlayers,
+                allSeasons = allPlayers
+            )
+
+            val simUseCase = GenerateMatchSimulationUseCase()
+            val simulation = simUseCase.execute(
+                teamA = userPlayers,
+                teamB = aiPlayers,
+                winProbA = results.first.winProbability
+            )
+
+            updateGameState { it.copy(
+                teams = Pair(
+                    userPlayers.map { p -> TeamEntry(p, 5) },
+                    aiPlayers.map { p -> TeamEntry(p, 45) }
+                ),
+                analytics = results,
+                luckyWinner = 2,
+                matchSimulation = simulation
+            ) }
+            
+            navigateToScreen(Screen.ScoutingReport)
+        }
+    }
+
+    fun skipTutorial() {
+        timerJob?.cancel() // Arrêt du timer si on quitte le tuto
+        soundManager.stopSound()
+        _uiState.value = _uiState.value.copy(
+            isTutorialActive = false,
+            isFirstLaunch = false
+        )
+        navigateToScreen(Screen.Home)
     }
 
     private fun resetGameState() {
@@ -125,18 +213,23 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         timerJob?.cancel()
         soundManager.stopSound()
         timerJob = viewModelScope.launch {
-            for (i in 15 downTo 0) {
-                updateGameState { it.copy(timer = i) }
-                if (i in 1..5) {
-                    soundManager.playAlarmAuction()
-                }
-                if (i == 0) {
-                    val currentState = _uiState.value.gameState
-                    if (currentState.bid > 0) {
-                        adjudicate(currentState.bid, currentState.bidder)
-                    } else {
-                        pass()
+            var seconds = 15
+            while (seconds >= 0) {
+                if (!_uiState.value.isTutorialActive) {
+                    updateGameState { it.copy(timer = seconds) }
+                    if (seconds in 1..5) {
+                        soundManager.playAlarmAuction()
                     }
+                    if (seconds == 0) {
+                        val currentState = _uiState.value.gameState
+                        if (currentState.bid > 0) {
+                            adjudicate(currentState.bid, currentState.bidder)
+                        } else {
+                            pass()
+                        }
+                        break
+                    }
+                    seconds--
                 }
                 delay(1000)
             }

@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Devices
 import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
@@ -34,9 +35,15 @@ import com.g5.ui.components.MenuButtonVariant
 import com.g5.ui.components.StatusBar
 import com.g5.ui.viewmodel.Screen
 
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInRoot
+
 @Composable
 fun HomeScreen(
     onNavigate: (Screen) -> Unit,
+    onStartTutorial: () -> Unit,
+    tutorialPositions: MutableMap<String, Rect> = mutableMapOf(),
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -111,7 +118,10 @@ fun HomeScreen(
                 label = "JOUER CONTRE L'IA",
                 sublabel = "Affronte l'ordinateur",
                 onClick = { onNavigate(Screen.VsComputer) },
-                variant = MenuButtonVariant.Primary
+                variant = MenuButtonVariant.Primary,
+                modifier = Modifier.onGloballyPositioned { coords ->
+                    tutorialPositions["home_ia"] = coords.boundsInRoot()
+                }
             )
 
             MenuButton(
@@ -121,6 +131,17 @@ fun HomeScreen(
                 onClick = { onNavigate(Screen.VsHuman) },
                 variant = MenuButtonVariant.Secondary,
                 enabled = false
+            )
+
+            MenuButton(
+                icon = Icons.Default.School,
+                label = "PRÉSENTATION",
+                sublabel = "Apprendre les règles",
+                onClick = onStartTutorial,
+                variant = MenuButtonVariant.Secondary,
+                modifier = Modifier.onGloballyPositioned { coords ->
+                    tutorialPositions["home_tutorial"] = coords.boundsInRoot()
+                }
             )
 
             MenuButton(
