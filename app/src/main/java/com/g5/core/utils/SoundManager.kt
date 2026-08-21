@@ -40,6 +40,7 @@ class SoundManager(private val context: Context) {
     }
     fun playAlarmAuction() = playSound(R.raw.alarm_auction)
     fun playActionBuzzer() = playSound(R.raw.action_buzzer)
+    fun playActionBegin() = playSound(R.raw.action_begin)
 
     fun release() {
         mediaPlayer?.release()

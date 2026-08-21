@@ -324,6 +324,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         val currentState = _uiState.value.gameState
         if (currentState.currentSimulationQuarter < 4) {
             updateGameState { it.copy(currentSimulationQuarter = it.currentSimulationQuarter + 1) }
+            playActionBeginSound()
         } else {
             updateGameState { it.copy(gameOver = true) }
             navigateToScreen(Screen.VsComputer, reset = false) // On revient sur l'écran de jeu SANS reset
@@ -338,6 +339,10 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     fun playActionBuzzer() {
         soundManager.playActionBuzzer()
+    }
+
+    fun playActionBeginSound() {
+        soundManager.playActionBegin()
     }
 
     fun pass() {
