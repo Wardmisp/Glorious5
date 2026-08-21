@@ -79,8 +79,8 @@ fun HomeScreen(
                 BasketballVisual(size = 112.dp)
 
                 Text(
-                    text = "BASKET",
-                    fontSize = 48.sp,
+                    text = "GLORIOUS 5",
+                    fontSize = 42.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = FontFamily.SansSerif,
                     letterSpacing = 2.sp,
@@ -89,7 +89,7 @@ fun HomeScreen(
                 )
 
                 Text(
-                    text = "JEU DE SIMULATION",
+                    text = "CONSTRUISEZ VOTRE ÉQUIPE",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                     fontFamily = FontFamily.SansSerif,
