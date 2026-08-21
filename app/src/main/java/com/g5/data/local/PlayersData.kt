@@ -6,7 +6,7 @@ val NBA_PLAYERS = listOf(
     NBAPlayer(
         id = 1,
         firstName = "Nikola",
-        lastName = "Jokić",
+        lastName = "Jokic",
         position = "Pivot",
         team = "Denver Nuggets",
         teamColor = "#0E2240",
@@ -20,7 +20,7 @@ val NBA_PLAYERS = listOf(
     NBAPlayer(
         id = 2,
         firstName = "Luka",
-        lastName = "Dončić",
+        lastName = "Doncic",
         position = "Meneur",
         team = "Dallas Mavericks",
         teamColor = "#00538C",

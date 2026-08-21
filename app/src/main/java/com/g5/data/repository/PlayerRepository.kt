@@ -100,8 +100,20 @@ fun getTeamColor(team: String?): String {
 }
 
 fun PlayerSeason.toNBAPlayer(): NBAPlayer {
-    val nameParts = player.trim().split(" ", limit = 2)
-    val firstName = nameParts.getOrNull(0) ?: player
+    val cleanName = player.trim()
+        .replace("ć", "c")
+        .replace("Ć", "C")
+        .replace("č", "c")
+        .replace("Č", "C")
+        .replace("š", "s")
+        .replace("Š", "S")
+        .replace("ž", "z")
+        .replace("Ž", "Z")
+        .replace("đ", "d")
+        .replace("Đ", "D")
+    
+    val nameParts = cleanName.split(" ", limit = 2)
+    val firstName = nameParts.getOrNull(0) ?: cleanName
     val lastName = nameParts.getOrNull(1) ?: ""
     return NBAPlayer(
         id = id ?: 0,

@@ -271,6 +271,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             currentState.copy(
+                bid = bid,
                 budgets = newBudgets,
                 teams = newTeams,
                 awardedTo = bidder,
