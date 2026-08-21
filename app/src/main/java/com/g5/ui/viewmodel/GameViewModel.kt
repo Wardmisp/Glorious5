@@ -11,6 +11,7 @@ import com.g5.data.local.TOTAL
 import com.g5.domain.model.TeamEntry
 import com.g5.data.repository.PlayerRepository
 import com.g5.domain.usecase.CalculateWinProbabilityUseCase
+import com.g5.domain.usecase.GenerateMatchSimulationUseCase
 import com.g5.core.utils.SoundManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -38,11 +39,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
 
-    fun navigateToScreen(screen: Screen) {
+    fun navigateToScreen(screen: Screen, reset: Boolean = false) {
         val currentState = _uiState.value
         _uiState.value = currentState.copy(currentScreen = screen)
         
-        if (screen == Screen.VsComputer || screen == Screen.VsHuman) {
+        if (reset && (screen == Screen.VsComputer || screen == Screen.VsHuman)) {
             resetGameState()
         }
     }
@@ -281,8 +282,22 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 val randomValue = Math.random()
                 val winner = if (randomValue < p1WinProb) 1 else 2
                 
-                updateGameState { it.copy(gameOver = true, analytics = results, luckyWinner = winner) }
-                soundManager.playResultScreen()
+                // Génération de la simulation
+                val simUseCase = GenerateMatchSimulationUseCase()
+                val simulation = simUseCase.execute(
+                    teamA = currentState.teams.first.map { it.player },
+                    teamB = currentState.teams.second.map { it.player },
+                    winProbA = p1WinProb
+                )
+
+                updateGameState { it.copy(
+                    analytics = results, 
+                    luckyWinner = winner,
+                    matchSimulation = simulation,
+                    currentSimulationQuarter = 0
+                ) }
+                
+                navigateToScreen(Screen.Simulation)
             }
         } else {
             updateGameState { state ->
@@ -305,8 +320,29 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun advanceSimulation() {
+        val currentState = _uiState.value.gameState
+        if (currentState.currentSimulationQuarter < 4) {
+            updateGameState { it.copy(currentSimulationQuarter = it.currentSimulationQuarter + 1) }
+            playActionBeginSound()
+        } else {
+            updateGameState { it.copy(gameOver = true) }
+            navigateToScreen(Screen.VsComputer, reset = false) // On revient sur l'écran de jeu SANS reset
+            val winner = _uiState.value.gameState.luckyWinner
+            soundManager.playResultScreen(isWinner = winner == 1)
+        }
+    }
+
     fun toggleTeamsPanel() {
         updateGameState { it.copy(showTeams = !it.showTeams) }
+    }
+
+    fun playActionBuzzer() {
+        soundManager.playActionBuzzer()
+    }
+
+    fun playActionBeginSound() {
+        soundManager.playActionBegin()
     }
 
     fun pass() {
