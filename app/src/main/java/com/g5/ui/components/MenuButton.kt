@@ -5,7 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,15 +15,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontFamily
@@ -42,6 +42,7 @@ fun MenuButton(
     modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
     
     Box(
         modifier = modifier
@@ -56,19 +57,30 @@ fun MenuButton(
         val (backgroundColor, borderColor, iconBackgroundColor, iconColor, textColor, subtextColor) =
             when (variant) {
                 MenuButtonVariant.Primary -> {
-                    Tuple6(
-                        Color(0xFFF4722B).copy(alpha = if (enabled) 0.9f else 0.3f),
-                        Color(0xFFF4722B).copy(alpha = if (enabled) 0.4f else 0.1f),
-                        Color.White.copy(alpha = if (enabled) 0.2f else 0.1f),
-                        Color.White.copy(alpha = if (enabled) 1f else 0.4f),
-                        Color.White.copy(alpha = if (enabled) 1f else 0.4f),
-                        Color.White.copy(alpha = if (enabled) 0.7f else 0.3f)
-                    )
+                    if (isPressed) {
+                        Tuple6(
+                            Color(0xFFF4722B),
+                            Color(0xFFF4722B),
+                            Color.White.copy(alpha = 0.2f),
+                            Color.White,
+                            Color.White,
+                            Color.White.copy(alpha = 0.7f)
+                        )
+                    } else {
+                        Tuple6(
+                            MaterialTheme.colorScheme.surface.copy(alpha = if (enabled) 1f else 0.4f),
+                            Color(0xFFF4722B).copy(alpha = if (enabled) 0.4f else 0.1f),
+                            Color(0xFFF4722B).copy(alpha = if (enabled) 0.15f else 0.05f),
+                            Color(0xFFF4722B).copy(alpha = if (enabled) 1f else 0.4f),
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = if (enabled) 1f else 0.4f),
+                            MaterialTheme.colorScheme.onSurface.copy(alpha = if (enabled) 0.6f else 0.3f)
+                        )
+                    }
                 }
                 MenuButtonVariant.Secondary,
                 MenuButtonVariant.Default -> {
                     Tuple6(
-                        MaterialTheme.colorScheme.surface.copy(alpha = if (enabled) 1f else 0.4f),
+                        if (isPressed) Color.White.copy(alpha = 0.05f) else MaterialTheme.colorScheme.surface.copy(alpha = if (enabled) 1f else 0.4f),
                         MaterialTheme.colorScheme.outline.copy(alpha = if (enabled) 0.3f else 0.1f),
                         Color(0xFFF4722B).copy(alpha = if (enabled) 0.15f else 0.05f),
                         Color(0xFFF4722B).copy(alpha = if (enabled) 1f else 0.4f),
@@ -133,9 +145,9 @@ fun MenuButton(
             }
 
             Icon(
-                imageVector = Icons.Default.Settings, // Placeholder - will use ChevronRight
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                 contentDescription = null,
-                tint = if (variant == MenuButtonVariant.Primary) Color.White.copy(alpha = 0.6f) else Color(0xFFF4722B).copy(alpha = 0.5f),
+                tint = if (isPressed && variant == MenuButtonVariant.Primary) Color.White.copy(alpha = 0.6f) else Color(0xFFF4722B).copy(alpha = 0.5f),
                 modifier = Modifier.size(20.dp)
             )
         }
