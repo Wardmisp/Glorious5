@@ -18,6 +18,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.g5.ui.screens.GameScreen
 import com.g5.ui.screens.HomeScreen
 import com.g5.ui.screens.OptionsScreen
+import com.g5.ui.screens.SimulationScreen
 import com.g5.ui.theme.AndroidIdeaTheme
 import com.g5.ui.viewmodel.GameViewModel
 import com.g5.ui.viewmodel.Screen
@@ -67,7 +68,7 @@ fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) 
                 is Screen.Home -> {
                     HomeScreen(
                         onNavigate = { screen ->
-                            viewModel.navigateToScreen(screen)
+                            viewModel.navigateToScreen(screen, reset = true)
                         }
                     )
                 }
@@ -95,6 +96,11 @@ fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) 
                         onBack = {
                             viewModel.navigateToScreen(Screen.Home)
                         }
+                    )
+                }
+                is Screen.Simulation -> {
+                    SimulationScreen(
+                        viewModel = viewModel
                     )
                 }
             }
