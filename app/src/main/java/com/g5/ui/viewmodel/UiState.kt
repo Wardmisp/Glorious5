@@ -14,6 +14,10 @@ sealed class Screen {
     object ScoutingReport : Screen()
 }
 
+enum class Difficulty {
+    BEGINNER, NORMAL, DIFFICULT
+}
+
 data class GameState(
     val round: Int = 0,
     val bid: Int = 0,
@@ -40,5 +44,7 @@ data class GameState(
 data class UiState(
     val currentScreen: Screen = Screen.Home,
     val isDarkTheme: Boolean = true,
+    val isSoundEnabled: Boolean = true,
+    val difficulty: Difficulty = Difficulty.NORMAL,
     val gameState: GameState = GameState()
 )

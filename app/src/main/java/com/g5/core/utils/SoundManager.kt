@@ -6,8 +6,10 @@ import com.g5.R
 
 class SoundManager(private val context: Context) {
     private var mediaPlayer: MediaPlayer? = null
+    var isEnabled: Boolean = true
 
     fun playSound(resId: Int) {
+        if (!isEnabled) return
         try {
             mediaPlayer?.stop()
             mediaPlayer?.release()
