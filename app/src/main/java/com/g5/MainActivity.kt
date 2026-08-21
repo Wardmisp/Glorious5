@@ -57,7 +57,7 @@ fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) 
     val tutorialPositions = remember { mutableStateMapOf<String, Rect>() }
 
     val tutorialSteps = listOf(
-        TutorialStep("Bienvenue !", "Découvrez comment bâtir votre équipe de légende dans Basket Simulation.", "home_tutorial"),
+        TutorialStep("Bienvenue !", "Découvrez comment bâtir votre équipe de légende dans Glorious 5.", "home_tutorial"),
         TutorialStep("Le Marché", "Le but est de recruter 5 joueurs. Mais attention, votre budget est limité à 50$ !"),
         TutorialStep("Commencer", "Commençons par lancer une partie contre l'ordinateur.", "home_ia"),
         TutorialStep("La Carte Joueur", "Voici le joueur mis en vente. Ses statistiques sont cachées au début et se révèlent au fil des enchères.", "game_card"),
