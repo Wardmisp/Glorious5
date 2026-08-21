@@ -289,32 +289,13 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         val totalPlayers = if (currentState.players.isNotEmpty()) currentState.players.size else TOTAL
         val nextRoundIndex = currentState.round + 1
 
-        val p1Full = currentState.teams.first.size >= TOTAL / 2
-        val p2Full = currentState.teams.second.size >= TOTAL / 2
-
-        if (nextRoundIndex >= totalPlayers || p1Full || p2Full) {
+        if (nextRoundIndex >= totalPlayers) {
             viewModelScope.launch {
-                // Si quelqu'un est plein, l'autre récupère TOUT le reste gratuitement
-                var updatedTeams = currentState.teams
-                if (p1Full && !p2Full) {
-                    val remainingPlayers = currentState.players.drop(nextRoundIndex)
-                    updatedTeams = Pair(
-                        updatedTeams.first,
-                        updatedTeams.second + remainingPlayers.map { TeamEntry(it, 0) }
-                    )
-                } else if (p2Full && !p1Full) {
-                    val remainingPlayers = currentState.players.drop(nextRoundIndex)
-                    updatedTeams = Pair(
-                        updatedTeams.first + remainingPlayers.map { TeamEntry(it, 0) },
-                        updatedTeams.second
-                    )
-                }
-
                 val allSeasons = playerRepository.getAllSeasons()
                 val useCase = CalculateWinProbabilityUseCase()
                 val results = useCase.execute(
-                    teamA = updatedTeams.first.map { it.player },
-                    teamB = updatedTeams.second.map { it.player },
+                    teamA = currentState.teams.first.map { it.player },
+                    teamB = currentState.teams.second.map { it.player },
                     allSeasons = allSeasons
                 )
                 
@@ -326,13 +307,12 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 // Génération de la simulation
                 val simUseCase = GenerateMatchSimulationUseCase()
                 val simulation = simUseCase.execute(
-                    teamA = updatedTeams.first.map { it.player },
-                    teamB = updatedTeams.second.map { it.player },
+                    teamA = currentState.teams.first.map { it.player },
+                    teamB = currentState.teams.second.map { it.player },
                     winProbA = p1WinProb
                 )
 
                 updateGameState { it.copy(
-                    teams = updatedTeams,
                     analytics = results, 
                     luckyWinner = winner,
                     matchSimulation = simulation,
@@ -357,8 +337,18 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                     players = state.players
                 )
             }
-            startTimer()
-            soundManager.playBeginAuction()
+
+            val p1Full = currentState.teams.first.size >= TOTAL / 2
+            val p2Full = currentState.teams.second.size >= TOTAL / 2
+
+            if (p1Full || p2Full) {
+                // Attribution automatique
+                val winner = if (p1Full) 2 else 1
+                adjudicate(0, winner)
+            } else {
+                startTimer()
+                soundManager.playBeginAuction()
+            }
         }
     }
 
