@@ -256,6 +256,7 @@ fun GameScreen(
 
                         Button(
                             onClick = { viewModel.pass() },
+                            enabled = !gameState.thinking,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(40.dp)
