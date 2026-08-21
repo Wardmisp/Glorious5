@@ -40,10 +40,15 @@ import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
 
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.geometry.Rect
+
 @Composable
 fun ScoutingReportScreen(
     gameState: GameState,
     onStartSimulation: () -> Unit,
+    tutorialPositions: MutableMap<String, Rect> = mutableMapOf(),
     modifier: Modifier = Modifier
 ) {
     val analytics = gameState.analytics ?: return
@@ -82,11 +87,19 @@ fun ScoutingReportScreen(
             }
 
             // Win Probability Visual
-            WinProbabilityCard(analytics.first, analytics.second)
+            WinProbabilityCard(
+                analytics.first, 
+                analytics.second,
+                modifier = Modifier.onGloballyPositioned { coords ->
+                    tutorialPositions["scouting_win"] = coords.boundsInRoot()
+                }
+            )
 
             // Team Comparisons Header with Toggle
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().onGloballyPositioned { coords ->
+                    tutorialPositions["scouting_stats"] = coords.boundsInRoot()
+                },
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -146,7 +159,13 @@ fun ScoutingReportScreen(
             // Matchup Advantages (Sorted by position rank for better comparison)
             val sortedA = analytics.first.scoredPlayers.sortedBy { getPositionRank(it.player.position) }
             val sortedB = analytics.second.scoredPlayers.sortedBy { getPositionRank(it.player.position) }
-            MatchupAdvantages(sortedA, sortedB)
+            MatchupAdvantages(
+                sortedA, 
+                sortedB,
+                modifier = Modifier.onGloballyPositioned { coords ->
+                    tutorialPositions["scouting_matchups"] = coords.boundsInRoot()
+                }
+            )
 
             // X-Factors
             XFactors(analytics.first, analytics.second)
@@ -185,12 +204,12 @@ private fun getPositionRank(position: String): Int {
 }
 
 @Composable
-fun WinProbabilityCard(teamA: TeamAnalytics, teamB: TeamAnalytics) {
+fun WinProbabilityCard(teamA: TeamAnalytics, teamB: TeamAnalytics, modifier: Modifier = Modifier) {
     val probA = (teamA.winProbability * 100).roundToInt()
     val probB = (teamB.winProbability * 100).roundToInt()
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
             .border(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f), RoundedCornerShape(24.dp))
@@ -457,9 +476,9 @@ fun ComparisonRow(label: String, valA: Double, valB: Double) {
 }
 
 @Composable
-fun MatchupAdvantages(playersA: List<PlayerScore>, playersB: List<PlayerScore>) {
+fun MatchupAdvantages(playersA: List<PlayerScore>, playersB: List<PlayerScore>, modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface, RoundedCornerShape(24.dp))
             .padding(20.dp),
