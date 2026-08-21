@@ -251,6 +251,9 @@ fun GameScreen(
                         }
 
                         val p2Full = gameState.teams.second.size >= TOTAL / 2
+                        val priceToOpponent = if (gameState.bidder == 2) gameState.bid else maxOf(1, gameState.bid)
+                        val priceToMe = if (gameState.bidder == 1) gameState.bid else maxOf(1, gameState.bid)
+
                         Button(
                             onClick = { viewModel.pass() },
                             modifier = Modifier
@@ -258,7 +261,7 @@ fun GameScreen(
                                 .height(40.dp)
                         ) {
                             Text(
-                                text = if (p2Full) "RÉCUPÉRER LE JOUEUR" else "PASSER MON TOUR",
+                                text = if (p2Full) "RÉCUPÉRER LE JOUEUR ($priceToMe$)" else "PASSER (laisser à $p2Name pour $priceToOpponent$)",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontFamily = FontFamily.SansSerif,
