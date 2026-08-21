@@ -4,7 +4,7 @@ Ce document détaille la logique mathématique utilisée pour déterminer la pro
 
 ## 1. Score Individuel des Joueurs (Player Score)
 
-Chaque joueur reçoit un score basé sur ses statistiques réelles, converties en **percentiles** par rapport à l'ensemble de la base de données (tous les joueurs de toutes les saisons). Un percentile de 90 signifie que le joueur est meilleur que 90% des autres joueurs dans cette catégorie.
+Chaque joueur reçoit un score basé sur ses statistiques réelles, converties en **percentiles** par rapport à l'ensemble de la base de données (les 300 meilleures saisons individuelles réalisées depuis 1970). Un percentile de 90 signifie que le joueur est meilleur que 90% des autres joueurs dans cette catégorie.
 
 ### A. Calcul des Percentiles
 Pour chaque statistique ($PTS, REB, AST, STL, BLK, FG\%, 3P\%, FT\%, PER, WS/Game$), on calcule :
