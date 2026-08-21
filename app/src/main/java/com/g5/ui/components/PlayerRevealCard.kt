@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -143,27 +143,32 @@ fun PlayerRevealCard(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
+                    .heightIn(min = 64.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
                 val showFirst = isRevealed(idxFirstName)
                 val showLast = isRevealed(idxLastName)
 
                 if (showFirst || showLast) {
-                    Column(verticalArrangement = Arrangement.Center) {
+                    Column(
+                        modifier = Modifier.padding(vertical = 4.dp),
+                        verticalArrangement = Arrangement.Center
+                    ) {
                         Text(
                             text = if (showFirst) player.firstName else "???",
-                            fontSize = 32.sp,
+                            fontSize = 24.sp,
                             fontWeight = FontWeight.ExtraBold,
                             fontFamily = FontFamily.SansSerif,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
+                            lineHeight = 28.sp
                         )
                         Text(
                             text = if (showLast) player.lastName.uppercase() else "????????",
-                            fontSize = 32.sp,
+                            fontSize = 24.sp,
                             fontWeight = FontWeight.ExtraBold,
                             fontFamily = FontFamily.SansSerif,
-                            color = Color(0xFFF4722B)
+                            color = Color(0xFFF4722B),
+                            lineHeight = 28.sp
                         )
                     }
                 } else {

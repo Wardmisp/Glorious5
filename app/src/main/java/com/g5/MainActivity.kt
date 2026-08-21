@@ -14,9 +14,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.g5.ui.screens.GameScreen
 import com.g5.ui.screens.HomeScreen
 import com.g5.ui.screens.OptionsScreen
+import com.g5.ui.screens.ScoutingReportScreen
+import com.g5.ui.screens.SimulationScreen
 import com.g5.ui.theme.AndroidIdeaTheme
 import com.g5.ui.viewmodel.GameViewModel
 import com.g5.ui.viewmodel.Screen
@@ -25,6 +28,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Log app launch event
+        FirebaseAnalytics.getInstance(this).logEvent("app_launch", null)
+
         setContent {
             val viewModel: GameViewModel = viewModel()
             val uiState = viewModel.uiState.value
@@ -62,7 +69,7 @@ fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) 
                 is Screen.Home -> {
                     HomeScreen(
                         onNavigate = { screen ->
-                            viewModel.navigateToScreen(screen)
+                            viewModel.navigateToScreen(screen, reset = true)
                         }
                     )
                 }
@@ -89,6 +96,19 @@ fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) 
                         viewModel = viewModel,
                         onBack = {
                             viewModel.navigateToScreen(Screen.Home)
+                        }
+                    )
+                }
+                is Screen.Simulation -> {
+                    SimulationScreen(
+                        viewModel = viewModel
+                    )
+                }
+                is Screen.ScoutingReport -> {
+                    ScoutingReportScreen(
+                        gameState = uiState.gameState,
+                        onStartSimulation = {
+                            viewModel.navigateToScreen(Screen.Simulation)
                         }
                     )
                 }
