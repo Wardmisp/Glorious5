@@ -1,24 +1,20 @@
 package com.g5.ui.screens
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +32,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.g5.domain.model.GameAction
+import com.g5.ui.components.GymActionTime
+import com.g5.ui.components.GymClock
 import com.g5.ui.components.StatusBar
 import com.g5.ui.viewmodel.GameViewModel
 import kotlinx.coroutines.delay
@@ -50,6 +48,20 @@ fun SimulationScreen(
     val currentQuarter = gameState.currentSimulationQuarter
     val simulation = gameState.matchSimulation
     val scope = rememberCoroutineScope()
+
+    // Gestion de l'horloge
+    var secondsRemaining by remember { mutableStateOf(720) }
+    
+    LaunchedEffect(currentQuarter) {
+        if (currentQuarter > 0 && currentQuarter <= 4) {
+            secondsRemaining = 720
+            // Animation simple du temps qui défile (très rapide pour la simu)
+            while (secondsRemaining > 0) {
+                delay(10) // Vitesse de l'horloge
+                secondsRemaining--
+            }
+        }
+    }
 
     LaunchedEffect(Unit) {
         // On attend un peu avant de commencer le 1er quart-temps
@@ -81,6 +93,10 @@ fun SimulationScreen(
                 letterSpacing = 2.sp,
                 color = Color(0xFFF4722B)
             )
+
+            if (currentQuarter > 0) {
+                GymClock(secondsRemaining)
+            }
 
             // Quart-temps s'affichant au fur et à mesure
             Column(
@@ -171,20 +187,25 @@ fun QuarterCard(number: Int, actions: List<GameAction>, onAllFinished: () -> Uni
                         .border(width = 1.dp, color = borderColor, shape = RoundedCornerShape(8.dp))
                         .padding(10.dp)
                 ) {
-                    TypewriterText(
-                        text = action.description,
-                        fontSize = 14.sp,
-                        lineHeight = 20.sp,
-                        fontFamily = FontFamily.SansSerif,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        onFinished = {
-                            if (visibleActionsCount < actions.size) {
-                                visibleActionsCount++
-                            } else {
-                                onAllFinished()
+                    Row(verticalAlignment = Alignment.Top) {
+                        GymActionTime(action.timeSeconds)
+                        Spacer(modifier = Modifier.width(10.dp))
+                        TypewriterText(
+                            text = action.description,
+                            fontSize = 14.sp,
+                            lineHeight = 20.sp,
+                            fontFamily = FontFamily.SansSerif,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.weight(1f),
+                            onFinished = {
+                                if (visibleActionsCount < actions.size) {
+                                    visibleActionsCount++
+                                } else {
+                                    onAllFinished()
+                                }
                             }
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }
