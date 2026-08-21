@@ -6,8 +6,10 @@ import com.g5.R
 
 class SoundManager(private val context: Context) {
     private var mediaPlayer: MediaPlayer? = null
+    var isEnabled: Boolean = true
 
     fun playSound(resId: Int) {
+        if (!isEnabled) return
         try {
             mediaPlayer?.stop()
             mediaPlayer?.release()
@@ -34,8 +36,13 @@ class SoundManager(private val context: Context) {
 
     fun playBeginAuction() = playSound(R.raw.begin_auction)
     fun playWinAuction() = playSound(R.raw.win_auction)
-    fun playResultScreen() = playSound(R.raw.result_screen)
+    fun playResultScreen(isWinner: Boolean = true) {
+        if (isWinner) playSound(R.raw.result_screen)
+        else playSound(R.raw.result_screen_lose)
+    }
     fun playAlarmAuction() = playSound(R.raw.alarm_auction)
+    fun playActionBuzzer() = playSound(R.raw.action_buzzer)
+    fun playActionBegin() = playSound(R.raw.action_begin)
 
     fun release() {
         mediaPlayer?.release()
