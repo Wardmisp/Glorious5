@@ -13,9 +13,9 @@ $$P_x = \frac{\text{Nombre de joueurs } < \text{ valeur } + 0.5 \times \text{Nom
 ### B. Scores Intermédiaires
 Deux scores d'agrégation sont calculés :
 *   **Efficacité (EFF)** : Mesure la précision au tir.
-    $$EFF = 0.40 \times P_{FG\%} + 0.35 \times P_{3P\%} + 0.25 \times P_{FT\%}$$
+    $$EFF = 0.40 \times P_{\text{FG\%}} + 0.35 \times P_{\text{3P\%}} + 0.25 \times P_{\text{FT\%}}$$
 *   **Impact** : Mesure la domination globale et la contribution à la victoire (Win Shares).
-    $$IMPACT = 0.60 \times P_{PER} + 0.40 \times P_{WS/Game}$$
+    $$IMPACT = 0.60 \times P_{\text{PER}} + 0.40 \times P_{\text{WS/Game}}$$
 
 ### C. Score Final du Joueur
 Le score total est une moyenne pondérée des percentiles et des agrégats :
