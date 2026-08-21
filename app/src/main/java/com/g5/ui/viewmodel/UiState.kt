@@ -11,6 +11,7 @@ sealed class Screen {
     object VsHuman : Screen()
     object Options : Screen()
     object Simulation : Screen()
+    object ScoutingReport : Screen()
 }
 
 data class GameState(
