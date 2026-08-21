@@ -523,6 +523,8 @@ fun MatchupAdvantages(playersA: List<PlayerScore>, playersB: List<PlayerScore>, 
                                 color = Color.White.copy(alpha = 0.3f)
                             )
                         }
+                        Spacer(Modifier.height(4.dp))
+                        PlayerImpactRow(scoreA, Alignment.Start)
                     }
                     
                     Column(
@@ -576,6 +578,8 @@ fun MatchupAdvantages(playersA: List<PlayerScore>, playersB: List<PlayerScore>, 
                                 color = if (!isAWinner) Color(0xFFF4722B) else Color.White.copy(alpha = 0.4f)
                             )
                         }
+                        Spacer(Modifier.height(4.dp))
+                        PlayerImpactRow(scoreB, Alignment.End)
                     }
                 }
                 
@@ -583,6 +587,63 @@ fun MatchupAdvantages(playersA: List<PlayerScore>, playersB: List<PlayerScore>, 
                     HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.1f))
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun PlayerImpactRow(score: PlayerScore, alignment: Alignment.Horizontal) {
+    // Calcul pondéré : 60% Volume (Points) + 40% Efficacité au tir
+    val attackScore = (score.ptsPercentile * 0.6 + score.effScore * 0.4) / 100.0
+    val defenseScore = (score.stlPercentile + score.blkPercentile) / 200.0
+    val playmakingScore = score.astPercentile / 100.0
+    val dominanceScore = score.impactScore / 100.0
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = if (alignment == Alignment.Start) Arrangement.Start else Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        ImpactGauge("ATT", attackScore)
+        Spacer(Modifier.width(6.dp))
+        ImpactGauge("DEF", defenseScore)
+        Spacer(Modifier.width(6.dp))
+        ImpactGauge("ORG", playmakingScore)
+        Spacer(Modifier.width(6.dp))
+        ImpactGauge("IMP", dominanceScore)
+    }
+}
+
+@Composable
+fun ImpactGauge(label: String, value: Double) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = label,
+            fontSize = 7.sp,
+            fontWeight = FontWeight.Black,
+            color = Color.White.copy(alpha = 0.4f),
+            letterSpacing = 0.5.sp
+        )
+        Spacer(Modifier.height(3.dp))
+        Box(
+            modifier = Modifier
+                .width(22.dp)
+                .height(3.dp)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.1f))
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(value.toFloat().coerceIn(0.05f, 1f))
+                    .background(
+                        when {
+                            value > 0.7 -> Color(0xFF4CAF50)
+                            value > 0.4 -> Color(0xFFFFC107)
+                            else -> Color(0xFFF44336)
+                        }
+                    )
+            )
         }
     }
 }
@@ -655,7 +716,7 @@ private fun calculateTeamStats(players: List<PlayerScore>): CalculatedStats {
     if (players.isEmpty()) return CalculatedStats(0.0, 0.0, 0.0, 0.0)
     
     return CalculatedStats(
-        shooting = players.map { (it.fgPercentile + it.fg3Percentile + it.ftPercentile) / 300.0 }.average(),
+        shooting = players.map { (it.ptsPercentile * 0.6 + it.effScore * 0.4) / 100.0 }.average(),
         defense = players.map { (it.stlPercentile + it.blkPercentile) / 200.0 }.average(),
         playmaking = players.map { it.astPercentile / 100.0 }.average(),
         dominance = players.map { it.impactScore / 100.0 }.average()
