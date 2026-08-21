@@ -46,5 +46,8 @@ data class UiState(
     val isDarkTheme: Boolean = true,
     val isSoundEnabled: Boolean = true,
     val difficulty: Difficulty = Difficulty.NORMAL,
+    val isTutorialActive: Boolean = false,
+    val isFirstLaunch: Boolean = true,
+    val tutorialStep: Int = 0,
     val gameState: GameState = GameState()
 )
