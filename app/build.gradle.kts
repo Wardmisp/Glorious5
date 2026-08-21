@@ -16,8 +16,8 @@ android {
         applicationId = "com.g5"
         minSdk = 28
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.0.1-beta"
+        versionCode = 2
+        versionName = "0.0.2-beta"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
