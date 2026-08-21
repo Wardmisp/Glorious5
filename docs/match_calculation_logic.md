@@ -11,11 +11,16 @@ Pour chaque statistique ($PTS, REB, AST, STL, BLK, FG\%, 3P\%, FT\%, PER, WS/Gam
 $$P_x = \frac{\text{Nombre de joueurs } < \text{ valeur } + 0.5 \times \text{Nombre de joueurs } = \text{ valeur}}{\text{Nombre total de joueurs}} \times 100$$
 
 ### B. Scores Intermédiaires
-Deux scores d'agrégation sont calculés :
-*   **Efficacité (EFF)** : Mesure la précision au tir.
+Quatre scores d'agrégation sont calculés pour évaluer les piliers du jeu :
+
+*   **Efficacité au Tir (EFF)** : Mesure la précision pure.
     $$EFF = 0.40 \times P_{\text{FG\%}} + 0.35 \times P_{\text{3P\%}} + 0.25 \times P_{\text{FT\%}}$$
-*   **Impact** : Mesure la domination globale et la contribution à la victoire (Win Shares).
-    $$IMPACT = 0.60 \times P_{\text{PER}} + 0.40 \times P_{\text{WS/Game}}$$
+*   **Attaque (ATT)** : Combine le volume de points et la précision.
+    $$ATT = 0.60 \times P_{\text{PTS}} + 0.40 \times EFF$$
+*   **Défense (DEF)** : Mesure la protection du panier et les interceptions.
+    $$DEF = 0.50 \times P_{\text{STL}} + 0.50 \times P_{\text{BLK}}$$
+*   **Dominance (IMP)** : Mesure l'impact global et la contribution à la victoire.
+    $$IMP = 0.60 \times P_{\text{PER}} + 0.40 \times P_{\text{WS/Game}}$$
 
 ### C. Score Final du Joueur
 Le score total est une moyenne pondérée des percentiles et des agrégats :
