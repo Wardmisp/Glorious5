@@ -19,9 +19,11 @@ import kotlinx.coroutines.launch
 
 class GameViewModel(application: Application) : AndroidViewModel(application) {
     private val playerRepository = PlayerRepository(application)
-    private val soundManager = SoundManager(application)
     private val _uiState = mutableStateOf<UiState>(UiState(gameState = GameState(players = NBA_PLAYERS.take(TOTAL))))
     val uiState: State<UiState> = _uiState
+    private val soundManager = SoundManager(application).apply {
+        isEnabled = _uiState.value.isSoundEnabled
+    }
     private var timerJob: Job? = null
 
     init {
@@ -53,13 +55,32 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.value = currentState.copy(isDarkTheme = !currentState.isDarkTheme)
     }
 
+    fun toggleSound() {
+        val currentState = _uiState.value
+        val newState = !currentState.isSoundEnabled
+        _uiState.value = currentState.copy(isSoundEnabled = newState)
+        soundManager.isEnabled = newState
+    }
+
+    fun setDifficulty(difficulty: Difficulty) {
+        _uiState.value = _uiState.value.copy(difficulty = difficulty)
+    }
+
     private fun resetGameState() {
         timerJob?.cancel()
         viewModelScope.launch {
             val players = playerRepository.getAuctionPlayers(TOTAL)
+            val difficulty = _uiState.value.difficulty
+            
+            val (playerBudget, aiBudget) = when (difficulty) {
+                Difficulty.BEGINNER -> Pair(BUDGET + 10, BUDGET)
+                Difficulty.NORMAL -> Pair(BUDGET, BUDGET)
+                Difficulty.DIFFICULT -> Pair(BUDGET, BUDGET + 10)
+            }
+
             updateGameState { 
                 GameState(
-                    budgets = Pair(BUDGET, BUDGET),
+                    budgets = Pair(playerBudget, aiBudget),
                     teams = Pair(emptyList(), emptyList()),
                     revealOrder = generateRevealOrder(),
                     players = players,
