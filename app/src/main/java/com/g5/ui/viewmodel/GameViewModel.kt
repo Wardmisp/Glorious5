@@ -182,8 +182,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
         // Si l'adversaire est plein, l'ordi DOIT récupérer le joueur
         if (p1Full) {
-            // On le récupère au prix minimum si on n'a pas encore misé
-            val finalBid = if (currentState.bid > 0) currentState.bid else 1
+            // On le récupère gratuitement si on n'a pas encore misé
+            val finalBid = if (currentState.bid > 0) currentState.bid else 0
             adjudicate(finalBid, 2)
             return
         }
@@ -243,7 +243,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun adjudicate(bid: Int, bidder: Int?) {
-        if (bid == 0 || bidder == null) return
+        if (bidder == null) return
         
         timerJob?.cancel()
         
@@ -289,13 +289,32 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         val totalPlayers = if (currentState.players.isNotEmpty()) currentState.players.size else TOTAL
         val nextRoundIndex = currentState.round + 1
 
-        if (nextRoundIndex >= totalPlayers) {
+        val p1Full = currentState.teams.first.size >= TOTAL / 2
+        val p2Full = currentState.teams.second.size >= TOTAL / 2
+
+        if (nextRoundIndex >= totalPlayers || p1Full || p2Full) {
             viewModelScope.launch {
+                // Si quelqu'un est plein, l'autre récupère TOUT le reste gratuitement
+                var updatedTeams = currentState.teams
+                if (p1Full && !p2Full) {
+                    val remainingPlayers = currentState.players.drop(nextRoundIndex)
+                    updatedTeams = Pair(
+                        updatedTeams.first,
+                        updatedTeams.second + remainingPlayers.map { TeamEntry(it, 0) }
+                    )
+                } else if (p2Full && !p1Full) {
+                    val remainingPlayers = currentState.players.drop(nextRoundIndex)
+                    updatedTeams = Pair(
+                        updatedTeams.first + remainingPlayers.map { TeamEntry(it, 0) },
+                        updatedTeams.second
+                    )
+                }
+
                 val allSeasons = playerRepository.getAllSeasons()
                 val useCase = CalculateWinProbabilityUseCase()
                 val results = useCase.execute(
-                    teamA = currentState.teams.first.map { it.player },
-                    teamB = currentState.teams.second.map { it.player },
+                    teamA = updatedTeams.first.map { it.player },
+                    teamB = updatedTeams.second.map { it.player },
                     allSeasons = allSeasons
                 )
                 
@@ -307,12 +326,13 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 // Génération de la simulation
                 val simUseCase = GenerateMatchSimulationUseCase()
                 val simulation = simUseCase.execute(
-                    teamA = currentState.teams.first.map { it.player },
-                    teamB = currentState.teams.second.map { it.player },
+                    teamA = updatedTeams.first.map { it.player },
+                    teamB = updatedTeams.second.map { it.player },
                     winProbA = p1WinProb
                 )
 
                 updateGameState { it.copy(
+                    teams = updatedTeams,
                     analytics = results, 
                     luckyWinner = winner,
                     matchSimulation = simulation,
@@ -374,12 +394,20 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
         if (!p2Full) {
             // L'adversaire a de la place, il récupère le joueur
-            // S'il menait déjà, il garde son prix, sinon prix actuel ou minimum
-            val finalBid = if (currentState.bidder == 2) currentState.bid else maxOf(1, currentState.bid)
+            // S'il menait déjà, il garde son prix, sinon prix actuel ou 0 (si p1Full)
+            val finalBid = if (currentState.bidder == 2) {
+                currentState.bid 
+            } else {
+                if (p1Full) 0 else maxOf(1, currentState.bid)
+            }
             adjudicate(finalBid, 2)
         } else if (!p1Full) {
             // L'adversaire est plein mais j'ai de la place, je récupère le joueur
-            val finalBid = if (currentState.bidder == 1) currentState.bid else maxOf(1, currentState.bid)
+            val finalBid = if (currentState.bidder == 1) {
+                currentState.bid
+            } else {
+                if (p2Full) 0 else maxOf(1, currentState.bid)
+            }
             adjudicate(finalBid, 1)
         } else {
             // Les deux sont pleins (ne devrait pas arriver avec TOTAL=10), on skip
