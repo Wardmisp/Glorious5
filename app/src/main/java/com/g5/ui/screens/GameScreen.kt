@@ -241,7 +241,9 @@ fun GameScreen(
                                 onBid = { viewModel.handleP1Bid(minBid, gameState.budgets.first) },
                                 leading = gameState.bidder == 1,
                                 disabled = p1Full,
-                                modifier = Modifier.weight(1f)
+                                modifier = Modifier.weight(1f).onGloballyPositioned { coords ->
+                                    tutorialPositions["game_bid"] = coords.boundsInRoot()
+                                }
                             )
 
                             if (vsComputer) {
@@ -266,12 +268,16 @@ fun GameScreen(
                             }
                         }
 
+                        val p1Full = gameState.teams.first.size >= TOTAL / 2
                         val p2Full = gameState.teams.second.size >= TOTAL / 2
-                        val priceToOpponent = if (gameState.bidder == 2) gameState.bid else maxOf(1, gameState.bid)
-                        val priceToMe = if (gameState.bidder == 1) gameState.bid else maxOf(1, gameState.bid)
+                        
+                        // Si l'adversaire est plein, le prix tombe à 0
+                        val priceToOpponent = if (gameState.bidder == 2) gameState.bid else (if (p1Full) 0 else maxOf(1, gameState.bid))
+                        val priceToMe = if (gameState.bidder == 1) gameState.bid else (if (p2Full) 0 else maxOf(1, gameState.bid))
 
                         Button(
                             onClick = { viewModel.pass() },
+                            enabled = !gameState.thinking && (gameState.timer <= 13 || !vsComputer), // Sécurité 2s au début
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(40.dp)
@@ -279,8 +285,11 @@ fun GameScreen(
                                     tutorialPositions["game_pass"] = coords.boundsInRoot()
                                 }
                         ) {
+                            val opponentLabel = if (priceToOpponent == 0) "Gratuit" else "$priceToOpponent$"
+                            val meLabel = if (priceToMe == 0) "Gratuit" else "$priceToMe$"
+                            
                             Text(
-                                text = if (p2Full) "RÉCUPÉRER LE JOUEUR ($priceToMe$)" else "PASSER (laisser à $p2Name pour $priceToOpponent$)",
+                                text = if (p2Full) "RÉCUPÉRER LE JOUEUR ($meLabel)" else "PASSER (laisser à $p2Name pour $opponentLabel)",
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontFamily = FontFamily.SansSerif,
