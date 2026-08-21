@@ -45,11 +45,16 @@ import com.g5.ui.components.StatusBar
 import com.g5.ui.components.TeamsPanel
 import com.g5.ui.viewmodel.GameViewModel
 
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
+
 @Composable
 fun GameScreen(
     vsComputer: Boolean,
     viewModel: GameViewModel,
     onBack: () -> Unit,
+    tutorialPositions: MutableMap<String, Rect> = mutableMapOf(),
     modifier: Modifier = Modifier
 ) {
     val gameState = viewModel.uiState.value.gameState
@@ -150,7 +155,10 @@ fun GameScreen(
                             color = MaterialTheme.colorScheme.surface,
                             shape = RoundedCornerShape(8.dp)
                         )
-                        .clickable { viewModel.toggleTeamsPanel() },
+                        .clickable { viewModel.toggleTeamsPanel() }
+                        .onGloballyPositioned { coords ->
+                            tutorialPositions["game_teams"] = coords.boundsInRoot()
+                        },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -190,7 +198,10 @@ fun GameScreen(
                     player = player,
                     bidCount = gameState.bidCount,
                     revealOrder = gameState.revealOrder,
-                    revealed = gameState.done
+                    revealed = gameState.done,
+                    modifier = Modifier.onGloballyPositioned { coords ->
+                        tutorialPositions["game_card"] = coords.boundsInRoot()
+                    }
                 )
 
                 AuctionBanner(
@@ -201,7 +212,10 @@ fun GameScreen(
                     thinking = gameState.thinking && vsComputer,
                     done = gameState.done,
                     awardedTo = gameState.awardedTo,
-                    timer = gameState.timer
+                    timer = gameState.timer,
+                    modifier = Modifier.onGloballyPositioned { coords ->
+                        tutorialPositions["game_timer"] = coords.boundsInRoot()
+                    }
                 )
 
                 if (!gameState.done) {
@@ -210,7 +224,9 @@ fun GameScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().onGloballyPositioned { coords ->
+                                tutorialPositions["game_bid"] = coords.boundsInRoot()
+                            },
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             val p1Full = gameState.teams.first.size >= TOTAL / 2
@@ -259,6 +275,9 @@ fun GameScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(40.dp)
+                                .onGloballyPositioned { coords ->
+                                    tutorialPositions["game_pass"] = coords.boundsInRoot()
+                                }
                         ) {
                             Text(
                                 text = if (p2Full) "RÉCUPÉRER LE JOUEUR ($priceToMe$)" else "PASSER (laisser à $p2Name pour $priceToOpponent$)",
