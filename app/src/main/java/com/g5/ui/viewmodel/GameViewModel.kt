@@ -297,7 +297,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                     currentSimulationQuarter = 0
                 ) }
                 
-                navigateToScreen(Screen.Simulation)
+                navigateToScreen(Screen.ScoutingReport)
             }
         } else {
             updateGameState { state ->

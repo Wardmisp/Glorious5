@@ -18,6 +18,7 @@ import com.google.firebase.analytics.FirebaseAnalytics
 import com.g5.ui.screens.GameScreen
 import com.g5.ui.screens.HomeScreen
 import com.g5.ui.screens.OptionsScreen
+import com.g5.ui.screens.ScoutingReportScreen
 import com.g5.ui.screens.SimulationScreen
 import com.g5.ui.theme.AndroidIdeaTheme
 import com.g5.ui.viewmodel.GameViewModel
@@ -101,6 +102,14 @@ fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) 
                 is Screen.Simulation -> {
                     SimulationScreen(
                         viewModel = viewModel
+                    )
+                }
+                is Screen.ScoutingReport -> {
+                    ScoutingReportScreen(
+                        gameState = uiState.gameState,
+                        onStartSimulation = {
+                            viewModel.navigateToScreen(Screen.Simulation)
+                        }
                     )
                 }
             }
