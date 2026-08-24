@@ -107,7 +107,7 @@ Glorious5/
 ### Étapes
 1. Clonez le dépôt Git :
    ```bash
-   git clone <url-du-depot>
+   git clone [<url-du-depot>](https://github.com/Wardmisp/Glorious5.git)
    cd Glorious5
    ```
 2. Ouvrez le projet dans Android Studio.
