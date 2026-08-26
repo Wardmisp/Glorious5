@@ -11,17 +11,18 @@ import com.g5.data.local.TOTAL
 import com.g5.domain.model.TeamEntry
 import com.g5.data.repository.PlayerRepository
 import com.g5.domain.usecase.CalculateWinProbabilityUseCase
+import com.g5.domain.usecase.GenerateMatchSimulationUseCase
 import com.g5.core.utils.SoundManager
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class GameViewModel(application: Application) : AndroidViewModel(application) {
     private val playerRepository = PlayerRepository(application)
-    private val soundManager = SoundManager(application)
     private val _uiState = mutableStateOf<UiState>(UiState(gameState = GameState(players = NBA_PLAYERS.take(TOTAL))))
     val uiState: State<UiState> = _uiState
-    private var timerJob: Job? = null
+    private val soundManager = SoundManager(application).apply {
+        isEnabled = _uiState.value.isSoundEnabled
+    }
 
     init {
         viewModelScope.launch {
@@ -29,6 +30,14 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             if (initialPlayers.isNotEmpty()) {
                 updateGameState { it.copy(players = initialPlayers) }
             }
+        }
+        
+        // Auto-start tutorial highlight on first launch
+        if (_uiState.value.isFirstLaunch) {
+            _uiState.value = _uiState.value.copy(
+                isTutorialActive = true,
+                tutorialStep = 0
+            )
         }
     }
 
@@ -38,11 +47,16 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         )
     }
 
-    fun navigateToScreen(screen: Screen) {
+    fun navigateToScreen(screen: Screen, reset: Boolean = false) {
         val currentState = _uiState.value
         _uiState.value = currentState.copy(currentScreen = screen)
         
-        if (screen == Screen.VsComputer || screen == Screen.VsHuman) {
+        // Arrêt systématique du timer si on quitte l'écran de jeu
+        if (screen != Screen.VsComputer && screen != Screen.VsHuman) {
+            soundManager.stopSound()
+        }
+        
+        if (reset && (screen == Screen.VsComputer || screen == Screen.VsHuman)) {
             resetGameState()
         }
     }
@@ -52,20 +66,110 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         _uiState.value = currentState.copy(isDarkTheme = !currentState.isDarkTheme)
     }
 
+    fun toggleSound() {
+        val currentState = _uiState.value
+        val newState = !currentState.isSoundEnabled
+        _uiState.value = currentState.copy(isSoundEnabled = newState)
+        soundManager.isEnabled = newState
+    }
+
+    fun setDifficulty(difficulty: Difficulty) {
+        _uiState.value = _uiState.value.copy(difficulty = difficulty)
+    }
+
+    fun startTutorial() {
+        _uiState.value = _uiState.value.copy(
+            isTutorialActive = true,
+            isFirstLaunch = false,
+            tutorialStep = 0,
+            currentScreen = Screen.Home
+        )
+    }
+
+    fun nextTutorialStep() {
+        val currentStep = _uiState.value.tutorialStep
+        val nextStep = currentStep + 1
+        _uiState.value = _uiState.value.copy(
+            tutorialStep = nextStep,
+            isFirstLaunch = false
+        )
+        
+        // Navigation logic for tutorial
+        when (nextStep) {
+            3 -> navigateToScreen(Screen.VsComputer, reset = true)
+            9 -> setupTutorialScoutingState()
+            13 -> skipTutorial()
+        }
+    }
+
+    private fun setupTutorialScoutingState() {
+        viewModelScope.launch {
+            val allPlayers = playerRepository.getAllSeasons().ifEmpty { NBA_PLAYERS }
+            
+            // L'IA reçoit le gratin (les 5 meilleurs)
+            val aiPlayers = allPlayers.take(5)
+            
+            // L'utilisateur reçoit des joueurs nettement moins forts (le bas du classement)
+            // Dans le top 300, les derniers sont d'excellents joueurs mais bien moins "historiques"
+            val userPlayers = if (allPlayers.size > 10) allPlayers.takeLast(5) else allPlayers.drop(5).take(5)
+
+            val useCase = CalculateWinProbabilityUseCase()
+            val results = useCase.execute(
+                teamA = userPlayers,
+                teamB = aiPlayers,
+                allSeasons = allPlayers
+            )
+
+            val simUseCase = GenerateMatchSimulationUseCase()
+            val simulation = simUseCase.execute(
+                teamA = userPlayers,
+                teamB = aiPlayers,
+                winProbA = results.first.winProbability
+            )
+
+            updateGameState { it.copy(
+                teams = Pair(
+                    userPlayers.map { p -> TeamEntry(p, 5) },
+                    aiPlayers.map { p -> TeamEntry(p, 45) }
+                ),
+                analytics = results,
+                luckyWinner = 2,
+                matchSimulation = simulation
+            ) }
+            
+            navigateToScreen(Screen.ScoutingReport)
+        }
+    }
+
+    fun skipTutorial() {
+        soundManager.stopSound()
+        _uiState.value = _uiState.value.copy(
+            isTutorialActive = false,
+            isFirstLaunch = false
+        )
+        navigateToScreen(Screen.Home)
+    }
+
     private fun resetGameState() {
-        timerJob?.cancel()
         viewModelScope.launch {
             val players = playerRepository.getAuctionPlayers(TOTAL)
+            val difficulty = _uiState.value.difficulty
+            
+            val (playerBudget, aiBudget) = when (difficulty) {
+                Difficulty.BEGINNER -> Pair(BUDGET + 10, BUDGET)
+                Difficulty.NORMAL -> Pair(BUDGET, BUDGET)
+                Difficulty.DIFFICULT -> Pair(BUDGET, BUDGET + 10)
+            }
+
             updateGameState { 
                 GameState(
-                    budgets = Pair(BUDGET, BUDGET),
+                    budgets = Pair(playerBudget, aiBudget),
                     teams = Pair(emptyList(), emptyList()),
                     revealOrder = generateRevealOrder(),
                     players = players,
                     luckyWinner = null
                 )
             }
-            startTimer()
             soundManager.playBeginAuction()
         }
     }
@@ -96,29 +200,23 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 bidCount = currentState.bidCount + 1
             )
         }
-        startTimer()
     }
 
-    private fun startTimer() {
-        timerJob?.cancel()
-        soundManager.stopSound()
-        timerJob = viewModelScope.launch {
-            for (i in 15 downTo 0) {
-                updateGameState { it.copy(timer = i) }
-                if (i in 1..5) {
-                    soundManager.playAlarmAuction()
-                }
-                if (i == 0) {
-                    val currentState = _uiState.value.gameState
-                    if (currentState.bid > 0) {
-                        adjudicate(currentState.bid, currentState.bidder)
-                    } else {
-                        pass()
-                    }
-                }
-                delay(1000)
-            }
+    fun updateTimer(seconds: Int) {
+        updateGameState { it.copy(timer = seconds) }
+    }
+
+    fun onTimerExpired() {
+        val currentState = _uiState.value.gameState
+        if (currentState.bid > 0) {
+            adjudicate(currentState.bid, currentState.bidder)
+        } else {
+            pass()
         }
+    }
+
+    fun playAlarmSound() {
+        soundManager.playAlarmAuction()
     }
 
     fun setP1Input(value: Int) {
@@ -151,7 +249,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun computerBid(minBid: Int) {
+    suspend fun computerBid() {
         val currentState = _uiState.value.gameState
         val p1Full = currentState.teams.first.size >= TOTAL / 2
         val p2Full = currentState.teams.second.size >= TOTAL / 2
@@ -160,8 +258,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
         // Si l'adversaire est plein, l'ordi DOIT récupérer le joueur
         if (p1Full) {
-            // On le récupère au prix minimum si on n'a pas encore misé
-            val finalBid = if (currentState.bid > 0) currentState.bid else 1
+            // On le récupère gratuitement si on n'a pas encore misé
+            val finalBid = if (currentState.bid > 0) currentState.bid else 0
             adjudicate(finalBid, 2)
             return
         }
@@ -193,62 +291,64 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         if (currentState.bid >= maxBid) return
 
         updateGameState { it.copy(thinking = true) }
-        viewModelScope.launch {
-            val baseDelay = if (currentState.bid == 0) 2400L else 1200L
-            val extraDelay = (1000..2600).random().toLong()
+        
+        val baseDelay = if (currentState.bid == 0) 2400L else 1200L
+        val extraDelay = (1000..2600).random().toLong()
+        
+        delay(baseDelay + extraDelay)
+        
+        val updatedState = _uiState.value.gameState
+        if (!updatedState.done && updatedState.bidder != 2 && updatedState.bid < maxBid) {
+            val budgetRatio = updatedState.budgets.second.toFloat() / BUDGET
+            val interestRatio = personalValuation.toFloat() / 25f 
             
-            delay(baseDelay + extraDelay)
-            
-            val updatedState = _uiState.value.gameState
-            if (!updatedState.done && updatedState.bidder != 2 && updatedState.bid < maxBid) {
-                val budgetRatio = updatedState.budgets.second.toFloat() / BUDGET
-                val interestRatio = personalValuation.toFloat() / 25f 
-                
-                val maxJump = when {
-                    interestRatio > 0.9f && budgetRatio > 0.7f -> 5
-                    interestRatio > 0.7f && budgetRatio > 0.4f -> 3
-                    interestRatio > 0.5f -> 2
-                    else -> 1
-                }
-                
-                val jump = (1..maxJump).random()
-                val nextBid = minOf(updatedState.bid + jump, maxBid)
-                
-                setBid(nextBid, 2)
+            val maxJump = when {
+                interestRatio > 0.9f && budgetRatio > 0.7f -> 5
+                interestRatio > 0.7f && budgetRatio > 0.4f -> 3
+                interestRatio > 0.5f -> 2
+                else -> 1
             }
-            updateGameState { it.copy(thinking = false) }
+            
+            val jump = (1..maxJump).random()
+            val nextBid = minOf(updatedState.bid + jump, maxBid)
+            
+            setBid(nextBid, 2)
         }
+        updateGameState { it.copy(thinking = false) }
     }
 
     fun adjudicate(bid: Int, bidder: Int?) {
-        if (bid == 0 || bidder == null) return
-        
-        timerJob?.cancel()
+        if (bidder == null) return
         
         updateGameState { currentState ->
             val player = currentState.players.getOrNull(currentState.round)
                 ?: NBA_PLAYERS.getOrNull(currentState.round)
                 ?: return@updateGameState currentState
             
+            // Plafonnement du coût par le budget restant pour éviter les budgets négatifs
+            val currentBudget = if (bidder == 1) currentState.budgets.first else currentState.budgets.second
+            val actualCost = minOf(bid, currentBudget)
+            
             val newBudgets = if (bidder == 1) {
-                Pair(currentState.budgets.first - bid, currentState.budgets.second)
+                Pair(currentState.budgets.first - actualCost, currentState.budgets.second)
             } else {
-                Pair(currentState.budgets.first, currentState.budgets.second - bid)
+                Pair(currentState.budgets.first, currentState.budgets.second - actualCost)
             }
 
             val newTeams = if (bidder == 1) {
                 Pair(
-                    currentState.teams.first + TeamEntry(player, bid),
+                    currentState.teams.first + TeamEntry(player, actualCost),
                     currentState.teams.second
                 )
             } else {
                 Pair(
                     currentState.teams.first,
-                    currentState.teams.second + TeamEntry(player, bid)
+                    currentState.teams.second + TeamEntry(player, actualCost)
                 )
             }
 
             currentState.copy(
+                bid = actualCost,
                 budgets = newBudgets,
                 teams = newTeams,
                 awardedTo = bidder,
@@ -260,8 +360,6 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun nextRound() {
-        timerJob?.cancel()
-        
         val currentState = _uiState.value.gameState
         val totalPlayers = if (currentState.players.isNotEmpty()) currentState.players.size else TOTAL
         val nextRoundIndex = currentState.round + 1
@@ -281,8 +379,22 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 val randomValue = Math.random()
                 val winner = if (randomValue < p1WinProb) 1 else 2
                 
-                updateGameState { it.copy(gameOver = true, analytics = results, luckyWinner = winner) }
-                soundManager.playResultScreen()
+                // Génération de la simulation
+                val simUseCase = GenerateMatchSimulationUseCase()
+                val simulation = simUseCase.execute(
+                    teamA = currentState.teams.first.map { it.player },
+                    teamB = currentState.teams.second.map { it.player },
+                    winProbA = p1WinProb
+                )
+
+                updateGameState { it.copy(
+                    analytics = results, 
+                    luckyWinner = winner,
+                    matchSimulation = simulation,
+                    currentSimulationQuarter = 0
+                ) }
+                
+                navigateToScreen(Screen.ScoutingReport)
             }
         } else {
             updateGameState { state ->
@@ -300,13 +412,43 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                     players = state.players
                 )
             }
-            startTimer()
-            soundManager.playBeginAuction()
+
+            val p1Full = currentState.teams.first.size >= TOTAL / 2
+            val p2Full = currentState.teams.second.size >= TOTAL / 2
+
+            if (p1Full || p2Full) {
+                // Attribution automatique
+                val winner = if (p1Full) 2 else 1
+                adjudicate(0, winner)
+            } else {
+                soundManager.playBeginAuction()
+            }
+        }
+    }
+
+    fun advanceSimulation() {
+        val currentState = _uiState.value.gameState
+        if (currentState.currentSimulationQuarter < 4) {
+            updateGameState { it.copy(currentSimulationQuarter = it.currentSimulationQuarter + 1) }
+            playActionBeginSound()
+        } else {
+            updateGameState { it.copy(gameOver = true) }
+            navigateToScreen(Screen.VsComputer, reset = false) // On revient sur l'écran de jeu SANS reset
+            val winner = _uiState.value.gameState.luckyWinner
+            soundManager.playResultScreen(isWinner = winner == 1)
         }
     }
 
     fun toggleTeamsPanel() {
         updateGameState { it.copy(showTeams = !it.showTeams) }
+    }
+
+    fun playActionBuzzer() {
+        soundManager.playActionBuzzer()
+    }
+
+    fun playActionBeginSound() {
+        soundManager.playActionBegin()
     }
 
     fun pass() {
@@ -316,22 +458,30 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
         if (!p2Full) {
             // L'adversaire a de la place, il récupère le joueur
-            // S'il menait déjà, il garde son prix, sinon prix actuel ou minimum
-            val finalBid = if (currentState.bidder == 2) currentState.bid else maxOf(1, currentState.bid)
+            // S'il menait déjà, il garde son prix, sinon prix actuel ou 0 (si p1Full)
+            val finalBid = if (currentState.bidder == 2) {
+                currentState.bid 
+            } else {
+                if (p1Full) 0 else maxOf(1, currentState.bid)
+            }
             adjudicate(finalBid, 2)
         } else if (!p1Full) {
             // L'adversaire est plein mais j'ai de la place, je récupère le joueur
-            val finalBid = if (currentState.bidder == 1) currentState.bid else maxOf(1, currentState.bid)
+            val finalBid = if (currentState.bidder == 1) {
+                currentState.bid
+            } else {
+                0
+            }
             adjudicate(finalBid, 1)
         } else {
             // Les deux sont pleins (ne devrait pas arriver avec TOTAL=10), on skip
-            timerJob?.cancel()
             soundManager.stopSound()
             updateGameState { it.copy(done = true, awardedTo = null, thinking = false) }
         }
     }
 
     override fun onCleared() {
+        soundManager.stopSound()
         // soundManager.release() // Optional: depends on lifecycle
     }
 

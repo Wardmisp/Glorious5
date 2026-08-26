@@ -3,12 +3,19 @@ package com.g5.ui.viewmodel
 import com.g5.domain.model.TeamEntry
 import com.g5.domain.model.NBAPlayer
 import com.g5.domain.model.TeamAnalytics
+import com.g5.domain.model.QuarterSimulation
 
 sealed class Screen {
     object Home : Screen()
     object VsComputer : Screen()
     object VsHuman : Screen()
     object Options : Screen()
+    object Simulation : Screen()
+    object ScoutingReport : Screen()
+}
+
+enum class Difficulty {
+    BEGINNER, NORMAL, DIFFICULT
 }
 
 data class GameState(
@@ -29,11 +36,18 @@ data class GameState(
     val timer: Int = 15,
     val players: List<NBAPlayer> = emptyList(),
     val analytics: Pair<TeamAnalytics, TeamAnalytics>? = null,
-    val luckyWinner: Int? = null
+    val luckyWinner: Int? = null,
+    val matchSimulation: List<QuarterSimulation> = emptyList(),
+    val currentSimulationQuarter: Int = 0
 )
 
 data class UiState(
     val currentScreen: Screen = Screen.Home,
     val isDarkTheme: Boolean = true,
+    val isSoundEnabled: Boolean = true,
+    val difficulty: Difficulty = Difficulty.NORMAL,
+    val isTutorialActive: Boolean = false,
+    val isFirstLaunch: Boolean = true,
+    val tutorialStep: Int = 0,
     val gameState: GameState = GameState()
 )

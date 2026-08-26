@@ -14,9 +14,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.firebase.analytics.FirebaseAnalytics
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
+import com.g5.ui.components.TutorialOverlay
+import com.g5.ui.components.TutorialStep
 import com.g5.ui.screens.GameScreen
 import com.g5.ui.screens.HomeScreen
 import com.g5.ui.screens.OptionsScreen
+import com.g5.ui.screens.ScoutingReportScreen
+import com.g5.ui.screens.SimulationScreen
 import com.g5.ui.theme.AndroidIdeaTheme
 import com.g5.ui.viewmodel.GameViewModel
 import com.g5.ui.viewmodel.Screen
@@ -25,6 +36,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Log app launch event
+        FirebaseAnalytics.getInstance(this).logEvent("app_launch", null)
+
         setContent {
             val viewModel: GameViewModel = viewModel()
             val uiState = viewModel.uiState.value
@@ -39,6 +54,23 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) {
     val uiState = viewModel.uiState.value
+    val tutorialPositions = remember { mutableStateMapOf<String, Rect>() }
+
+    val tutorialSteps = listOf(
+        TutorialStep("Bienvenue !", "Découvrez comment bâtir votre équipe de légende dans Glorious 5.", "home_tutorial"),
+        TutorialStep("Le Marché", "Le but est de recruter 5 joueurs. Mais attention, votre budget est limité à 50$ !"),
+        TutorialStep("Commencer", "Commençons par lancer une partie contre l'ordinateur.", "home_ia"),
+        TutorialStep("La Carte Joueur", "Voici le joueur mis en vente. Ses statistiques sont cachées au début et se révèlent au fil des enchères.", "game_card"),
+        TutorialStep("Le Chronomètre", "Chaque tour dure 15 secondes. Si personne ne mise avant la fin, le dernier enchéreur emporte le joueur.", "game_timer"),
+        TutorialStep("Miser", "Utilisez ces boutons pour augmenter l'enchère. Soyez stratégique pour ne pas vider votre budget trop vite !", "game_bid"),
+        TutorialStep("Passer", "Si le prix est trop élevé ou si le joueur ne vous intéresse pas, vous pouvez passer.", "game_pass"),
+        TutorialStep("Votre Équipe", "Consultez l'état de votre effectif et votre argent restant à tout moment ici.", "game_teams"),
+        TutorialStep("Analyse d'avant-match", "Une fois l'équipe bâtie, le Scouting Report analyse vos chances de victoire."),
+        TutorialStep("Probabilités", "Découvrez vos chances de succès basées sur l'équilibre et le talent de votre effectif.", "scouting_win"),
+        TutorialStep("Forces & Faiblesses", "Comparez les secteurs de jeu : Attaque, Défense, Playmaking...", "scouting_stats"),
+        TutorialStep("Duels Clés", "Voyez qui domine à chaque poste. Les noms en gras indiquent un avantage statistique.", "scouting_matchups"),
+        TutorialStep("C'est parti !", "Vous savez tout ! Bonne chance pour monter la meilleure équipe possible.")
+    )
 
     Box(
         modifier = modifier
@@ -62,8 +94,10 @@ fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) 
                 is Screen.Home -> {
                     HomeScreen(
                         onNavigate = { screen ->
-                            viewModel.navigateToScreen(screen)
-                        }
+                            viewModel.navigateToScreen(screen, reset = true)
+                        },
+                        onStartTutorial = { viewModel.startTutorial() },
+                        tutorialPositions = tutorialPositions
                     )
                 }
                 is Screen.VsComputer -> {
@@ -72,7 +106,8 @@ fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) 
                         viewModel = viewModel,
                         onBack = {
                             viewModel.navigateToScreen(Screen.Home)
-                        }
+                        },
+                        tutorialPositions = tutorialPositions
                     )
                 }
                 is Screen.VsHuman -> {
@@ -92,7 +127,32 @@ fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) 
                         }
                     )
                 }
+                is Screen.Simulation -> {
+                    SimulationScreen(
+                        viewModel = viewModel
+                    )
+                }
+                is Screen.ScoutingReport -> {
+                    ScoutingReportScreen(
+                        gameState = uiState.gameState,
+                        onStartSimulation = {
+                            viewModel.navigateToScreen(Screen.Simulation)
+                        },
+                        tutorialPositions = tutorialPositions
+                    )
+                }
             }
+        }
+
+        // Tutorial Overlay (Moved outside the scaled box to match boundsInRoot)
+        if (uiState.isTutorialActive && uiState.tutorialStep < tutorialSteps.size) {
+            val currentStep = tutorialSteps[uiState.tutorialStep]
+            TutorialOverlay(
+                step = currentStep,
+                targetRect = currentStep.targetId?.let { tutorialPositions[it] },
+                onNext = { viewModel.nextTutorialStep() },
+                onSkip = { viewModel.skipTutorial() }
+            )
         }
     }
 }
