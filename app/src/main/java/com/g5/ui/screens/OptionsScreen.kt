@@ -34,7 +34,6 @@ import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
-import com.g5.ui.components.StatusBar
 import com.g5.ui.viewmodel.Difficulty
 import com.g5.ui.viewmodel.GameViewModel
 
@@ -50,7 +49,6 @@ fun OptionsScreen(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(0.dp)
     ) {
-        StatusBar()
 
         Row(
             modifier = Modifier
