@@ -28,7 +28,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.g5.domain.model.TeamEntry
 import com.g5.domain.model.TeamAnalytics
-import com.g5.ui.components.StatusBar
 
 @Composable
 fun GameOverScreen(
@@ -51,7 +50,6 @@ fun GameOverScreen(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(0.dp)
     ) {
-        StatusBar()
 
         Column(
             modifier = Modifier
