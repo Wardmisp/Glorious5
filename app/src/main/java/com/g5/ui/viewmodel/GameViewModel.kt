@@ -209,6 +209,11 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         startTimer()
     }
 
+    fun stopTimer() {
+        timerJob?.cancel()
+        soundManager.stopSound()
+    }
+
     private fun startTimer() {
         timerJob?.cancel()
         soundManager.stopSound()
@@ -345,26 +350,30 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 ?: NBA_PLAYERS.getOrNull(currentState.round)
                 ?: return@updateGameState currentState
             
+            // Plafonnement du coût par le budget restant pour éviter les budgets négatifs
+            val currentBudget = if (bidder == 1) currentState.budgets.first else currentState.budgets.second
+            val actualCost = minOf(bid, currentBudget)
+            
             val newBudgets = if (bidder == 1) {
-                Pair(currentState.budgets.first - bid, currentState.budgets.second)
+                Pair(currentState.budgets.first - actualCost, currentState.budgets.second)
             } else {
-                Pair(currentState.budgets.first, currentState.budgets.second - bid)
+                Pair(currentState.budgets.first, currentState.budgets.second - actualCost)
             }
 
             val newTeams = if (bidder == 1) {
                 Pair(
-                    currentState.teams.first + TeamEntry(player, bid),
+                    currentState.teams.first + TeamEntry(player, actualCost),
                     currentState.teams.second
                 )
             } else {
                 Pair(
                     currentState.teams.first,
-                    currentState.teams.second + TeamEntry(player, bid)
+                    currentState.teams.second + TeamEntry(player, actualCost)
                 )
             }
 
             currentState.copy(
-                bid = bid,
+                bid = actualCost,
                 budgets = newBudgets,
                 teams = newTeams,
                 awardedTo = bidder,
@@ -501,6 +510,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     override fun onCleared() {
+        stopTimer()
         // soundManager.release() // Optional: depends on lifecycle
     }
 
