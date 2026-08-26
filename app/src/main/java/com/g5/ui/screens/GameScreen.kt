@@ -30,7 +30,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -41,13 +44,9 @@ import com.g5.ui.components.AuctionBanner
 import com.g5.ui.components.BidControl
 import com.g5.ui.components.ComputerPanel
 import com.g5.ui.components.PlayerRevealCard
-import com.g5.ui.components.StatusBar
 import com.g5.ui.components.TeamsPanel
 import com.g5.ui.viewmodel.GameViewModel
-
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.layout.boundsInRoot
-import androidx.compose.ui.layout.onGloballyPositioned
+import kotlinx.coroutines.delay
 
 import androidx.compose.runtime.DisposableEffect
 
@@ -67,19 +66,33 @@ fun GameScreen(
     val p2Name = if (vsComputer) "Ordi" else "Joueur 2"
     val minBid = gameState.bid + 1
 
-    // Arrêt du timer quand on quitte l'écran (composition)
-    DisposableEffect(Unit) {
-        onDispose {
-            viewModel.stopTimer()
+    // Logic du Timer - Liée à la composition et reset par round/bid
+    LaunchedEffect(gameState.round, gameState.bid, gameState.bidder, gameState.done, gameState.gameOver) {
+        if (gameState.done || gameState.gameOver) return@LaunchedEffect
+        
+        var seconds = 15
+        while (seconds >= 0) {
+            if (!viewModel.uiState.value.isTutorialActive) {
+                viewModel.updateTimer(seconds)
+                if (seconds in 1..5) {
+                    viewModel.playAlarmSound()
+                }
+                if (seconds == 0) {
+                    viewModel.onTimerExpired()
+                    break
+                }
+                seconds--
+            }
+            delay(1000)
         }
     }
 
-    // Computer AI logic
-    LaunchedEffect(gameState.bid, gameState.bidder, gameState.round, vsComputer) {
+    // Computer AI logic - Désormais suspendu et lié à ce LaunchedEffect
+    LaunchedEffect(gameState.bid, gameState.bidder, gameState.round, vsComputer, gameState.done, gameState.gameOver) {
         if (!vsComputer || gameState.done || gameState.gameOver) return@LaunchedEffect
         if (gameState.bidder == 2) return@LaunchedEffect
         
-        viewModel.computerBid(minBid)
+        viewModel.computerBid()
     }
 
     if (gameState.gameOver) {
@@ -101,7 +114,6 @@ fun GameScreen(
             modifier = modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
-            StatusBar()
 
             // Header
             Row(
