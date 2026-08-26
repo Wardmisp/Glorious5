@@ -33,7 +33,6 @@ import com.g5.domain.model.PlayerScore
 import com.g5.domain.model.TeamAnalytics
 import com.g5.ui.components.MenuButton
 import com.g5.ui.components.MenuButtonVariant
-import com.g5.ui.components.StatusBar
 import com.g5.ui.viewmodel.GameState
 import kotlin.math.PI
 import kotlin.math.cos
@@ -59,7 +58,6 @@ fun ScoutingReportScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        StatusBar()
 
         Column(
             modifier = Modifier

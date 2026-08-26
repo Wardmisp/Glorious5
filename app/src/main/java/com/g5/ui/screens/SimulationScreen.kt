@@ -34,7 +34,6 @@ import androidx.compose.ui.unit.sp
 import com.g5.domain.model.GameAction
 import com.g5.ui.components.GymActionTime
 import com.g5.ui.components.GymClock
-import com.g5.ui.components.StatusBar
 import com.g5.ui.viewmodel.GameViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -76,8 +75,6 @@ fun SimulationScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        StatusBar()
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
