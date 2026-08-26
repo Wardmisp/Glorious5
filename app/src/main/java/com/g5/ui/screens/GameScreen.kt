@@ -30,7 +30,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -41,13 +44,9 @@ import com.g5.ui.components.AuctionBanner
 import com.g5.ui.components.BidControl
 import com.g5.ui.components.ComputerPanel
 import com.g5.ui.components.PlayerRevealCard
-import com.g5.ui.components.StatusBar
 import com.g5.ui.components.TeamsPanel
 import com.g5.ui.viewmodel.GameViewModel
-
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.layout.boundsInRoot
-import androidx.compose.ui.layout.onGloballyPositioned
+import kotlinx.coroutines.delay
 
 @Composable
 fun GameScreen(
@@ -65,12 +64,33 @@ fun GameScreen(
     val p2Name = if (vsComputer) "Ordi" else "Joueur 2"
     val minBid = gameState.bid + 1
 
-    // Computer AI logic
-    LaunchedEffect(gameState.bid, gameState.bidder, gameState.round, vsComputer) {
+    // Logic du Timer - Liée à la composition et reset par round/bid
+    LaunchedEffect(gameState.round, gameState.bid, gameState.bidder, gameState.done, gameState.gameOver) {
+        if (gameState.done || gameState.gameOver) return@LaunchedEffect
+        
+        var seconds = 15
+        while (seconds >= 0) {
+            if (!viewModel.uiState.value.isTutorialActive) {
+                viewModel.updateTimer(seconds)
+                if (seconds in 1..5) {
+                    viewModel.playAlarmSound()
+                }
+                if (seconds == 0) {
+                    viewModel.onTimerExpired()
+                    break
+                }
+                seconds--
+            }
+            delay(1000)
+        }
+    }
+
+    // Computer AI logic - Désormais suspendu et lié à ce LaunchedEffect
+    LaunchedEffect(gameState.bid, gameState.bidder, gameState.round, vsComputer, gameState.done, gameState.gameOver) {
         if (!vsComputer || gameState.done || gameState.gameOver) return@LaunchedEffect
         if (gameState.bidder == 2) return@LaunchedEffect
         
-        viewModel.computerBid(minBid)
+        viewModel.computerBid()
     }
 
     if (gameState.gameOver) {
@@ -92,7 +112,6 @@ fun GameScreen(
             modifier = modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
-            StatusBar()
 
             // Header
             Row(
@@ -271,13 +290,24 @@ fun GameScreen(
                         val p1Full = gameState.teams.first.size >= TOTAL / 2
                         val p2Full = gameState.teams.second.size >= TOTAL / 2
                         
-                        // Si l'adversaire est plein, le prix tombe à 0
-                        val priceToOpponent = if (gameState.bidder == 2) gameState.bid else (if (p1Full) 0 else maxOf(1, gameState.bid))
-                        val priceToMe = if (gameState.bidder == 1) gameState.bid else (if (p2Full) 0 else maxOf(1, gameState.bid))
+                        // Le prix est plafonné par le budget restant de celui qui va récupérer le joueur
+                        val priceToOpponent = if (gameState.bidder == 2) {
+                            gameState.bid 
+                        } else {
+                            val rawPrice = if (p1Full) 0 else maxOf(1, gameState.bid)
+                            minOf(rawPrice, gameState.budgets.second)
+                        }
+                        
+                        val priceToMe = if (gameState.bidder == 1) {
+                            gameState.bid
+                        } else {
+                            val rawPrice = if (p2Full) 0 else maxOf(1, gameState.bid)
+                            minOf(rawPrice, gameState.budgets.first)
+                        }
 
                         Button(
                             onClick = { viewModel.pass() },
-                            enabled = !gameState.thinking && (gameState.timer <= 13 || !vsComputer), // Sécurité 2s au début
+                            enabled = !gameState.thinking && (gameState.timer <= 13 || !vsComputer) && gameState.bidder != 1,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(40.dp)
