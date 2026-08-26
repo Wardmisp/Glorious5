@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.remember
@@ -32,9 +33,10 @@ import com.g5.ui.components.BasketballVisual
 import com.g5.ui.components.CourtLines
 import com.g5.ui.components.MenuButton
 import com.g5.ui.components.MenuButtonVariant
-import com.g5.ui.components.StatusBar
 import com.g5.ui.viewmodel.Screen
 
+import androidx.compose.ui.tooling.preview.Preview
+import com.g5.ui.theme.AndroidIdeaTheme
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInRoot
@@ -56,15 +58,15 @@ fun HomeScreen(
     }
 
     Column(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(0.dp)
     ) {
-        StatusBar()
-
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .weight(1f)
+                .height(300.dp)
                 .background(color = MaterialTheme.colorScheme.background)
         ) {
             CourtLines(modifier = Modifier.fillMaxSize())
@@ -72,11 +74,11 @@ fun HomeScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(32.dp),
+                    .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                BasketballVisual(size = 112.dp)
+                BasketballVisual(size = 100.dp)
 
                 Text(
                     text = "GLORIOUS 5",
@@ -84,8 +86,9 @@ fun HomeScreen(
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = FontFamily.SansSerif,
                     letterSpacing = 2.sp,
+                    textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onBackground,
-                    modifier = Modifier.padding(top = 16.dp)
+                    modifier = Modifier.padding(top = 12.dp)
                 )
 
                 Text(
@@ -94,6 +97,7 @@ fun HomeScreen(
                     fontWeight = FontWeight.Medium,
                     fontFamily = FontFamily.SansSerif,
                     letterSpacing = 2.4.sp,
+                    textAlign = TextAlign.Center,
                     color = Color(0xFFF4722B),
                     modifier = Modifier.padding(top = 8.dp)
                 )
@@ -161,6 +165,17 @@ fun HomeScreen(
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(bottom = 24.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HomeScreenPreview() {
+    AndroidIdeaTheme {
+        HomeScreen(
+            onNavigate = {},
+            onStartTutorial = {}
         )
     }
 }
