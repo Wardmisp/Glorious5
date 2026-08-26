@@ -48,6 +48,8 @@ import com.g5.ui.components.TeamsPanel
 import com.g5.ui.viewmodel.GameViewModel
 import kotlinx.coroutines.delay
 
+import androidx.compose.runtime.DisposableEffect
+
 @Composable
 fun GameScreen(
     vsComputer: Boolean,
