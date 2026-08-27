@@ -31,6 +31,12 @@ import com.g5.ui.screens.SimulationScreen
 import com.g5.ui.theme.AndroidIdeaTheme
 import com.g5.ui.viewmodel.GameViewModel
 import com.g5.ui.viewmodel.Screen
+import com.g5.core.network.SupabaseClient
+import com.g5.domain.model.NBAPlayer
+import io.github.jan.supabase.postgrest.postgrest
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import android.util.Log
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,6 +45,22 @@ class MainActivity : ComponentActivity() {
 
         // Log app launch event
         FirebaseAnalytics.getInstance(this).logEvent("app_launch", null)
+
+        // Supabase Test Request
+        lifecycleScope.launch {
+            Log.d("SupabaseTest", "Starting request...")
+            try {
+                val result = SupabaseClient.client.postgrest["NbaBest1000"]
+                    .select {
+                        filter {
+                            eq("id", 1)
+                        }
+                    }
+                Log.d("SupabaseTest", "Data fetched: ${result.data}")
+            } catch (e: Exception) {
+                Log.e("SupabaseTest", "Error fetching data", e)
+            }
+        }
 
         setContent {
             val viewModel: GameViewModel = viewModel()
