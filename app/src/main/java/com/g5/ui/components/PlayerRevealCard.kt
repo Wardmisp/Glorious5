@@ -155,7 +155,7 @@ fun PlayerRevealCard(
                         verticalArrangement = Arrangement.Center
                     ) {
                         Text(
-                            text = if (showFirst) player.firstName else "???",
+                            text = if (showFirst) player.displayFirstName else "???",
                             fontSize = 24.sp,
                             fontWeight = FontWeight.ExtraBold,
                             fontFamily = FontFamily.SansSerif,
@@ -163,7 +163,7 @@ fun PlayerRevealCard(
                             lineHeight = 28.sp
                         )
                         Text(
-                            text = if (showLast) player.lastName.uppercase() else "????????",
+                            text = if (showLast) player.displayLastName.uppercase() else "????????",
                             fontSize = 24.sp,
                             fontWeight = FontWeight.ExtraBold,
                             fontFamily = FontFamily.SansSerif,

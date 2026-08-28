@@ -33,6 +33,7 @@ import com.g5.ui.viewmodel.GameViewModel
 import com.g5.ui.viewmodel.Screen
 import com.g5.core.network.SupabaseClient
 import com.g5.domain.model.NBAPlayer
+import com.g5.core.utils.TeamColors
 import io.github.jan.supabase.postgrest.postgrest
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.launch
@@ -50,13 +51,21 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             Log.d("SupabaseTest", "Starting request...")
             try {
-                val result = SupabaseClient.client.postgrest["NbaBest1000"]
+                val player = SupabaseClient.client.postgrest["NbaBest1000"]
                     .select {
                         filter {
                             eq("id", 1)
                         }
                     }
-                Log.d("SupabaseTest", "Data fetched: ${result.data}")
+                    .decodeSingle<NBAPlayer>()
+                
+                // Augment with local team color
+                val playerWithColor = player.copy(
+                    teamColor = TeamColors.getHexColor(player.team)
+                )
+                
+                Log.d("SupabaseTest", "Player fetched and augmented: $playerWithColor")
+                Log.d("SupabaseTest", "Display Name: ${playerWithColor.displayFirstName} ${playerWithColor.displayLastName}")
             } catch (e: Exception) {
                 Log.e("SupabaseTest", "Error fetching data", e)
             }

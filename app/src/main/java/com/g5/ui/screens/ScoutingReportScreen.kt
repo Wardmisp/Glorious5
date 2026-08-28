@@ -501,7 +501,7 @@ fun MatchupAdvantages(playersA: List<PlayerScore>, playersB: List<PlayerScore>, 
                     
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = scoreA.player.lastName,
+                            text = scoreA.player.displayLastName,
                             fontSize = 14.sp,
                             fontWeight = if (isAWinner) FontWeight.Black else FontWeight.Normal,
                             color = if (isAWinner) Color.White else Color.White.copy(alpha = 0.5f)
@@ -554,7 +554,7 @@ fun MatchupAdvantages(playersA: List<PlayerScore>, playersB: List<PlayerScore>, 
                         horizontalAlignment = Alignment.End
                     ) {
                         Text(
-                            text = scoreB.player.lastName,
+                            text = scoreB.player.displayLastName,
                             textAlign = TextAlign.End,
                             fontSize = 14.sp,
                             fontWeight = if (!isAWinner) FontWeight.Black else FontWeight.Normal,
