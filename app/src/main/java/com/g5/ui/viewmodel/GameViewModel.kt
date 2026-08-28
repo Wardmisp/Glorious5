@@ -152,7 +152,13 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun resetGameState() {
         viewModelScope.launch {
-            val players = playerRepository.getAuctionPlayers(TOTAL)
+            val isVsHuman = _uiState.value.currentScreen == Screen.VsHuman
+            val players = if (isVsHuman) {
+                playerRepository.getSupabaseAuctionPlayers(TOTAL)
+            } else {
+                playerRepository.getAuctionPlayers(TOTAL)
+            }
+            
             val difficulty = _uiState.value.difficulty
             
             val (playerBudget, aiBudget) = when (difficulty) {

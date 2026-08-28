@@ -364,7 +364,7 @@ fun GameScreen(
                                             modifier = Modifier.size(14.dp)
                                         )
                                         Text(
-                                            text = "${if (gameState.awardedTo == 1) p1Name else p2Name} remporte ${player.lastName} pour $${gameState.bid} !",
+                                            text = "${if (gameState.awardedTo == 1) p1Name else p2Name} remporte ${player.displayLastName} pour $${gameState.bid} !",
                                             fontSize = 14.sp,
                                             color = MaterialTheme.colorScheme.onBackground,
                                             fontFamily = FontFamily.SansSerif

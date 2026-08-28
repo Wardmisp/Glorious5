@@ -148,7 +148,7 @@ fun GameOverScreen(
                                             )
                                     )
                                     Text(
-                                        text = entry.player.lastName,
+                                        text = entry.player.displayLastName,
                                         fontSize = 10.sp,
                                         fontFamily = FontFamily.SansSerif,
                                         color = MaterialTheme.colorScheme.onSurface,
