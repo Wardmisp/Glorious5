@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -25,7 +26,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,7 +43,9 @@ import androidx.compose.ui.unit.sp
 import com.g5.domain.model.TeamEntry
 import com.g5.ui.components.BidControl
 import com.g5.ui.components.PlayerRevealCard
+import com.g5.ui.viewmodel.CompletedAuctionInfo
 import com.g5.ui.viewmodel.MatchUiState
+import kotlinx.coroutines.delay
 
 @Composable
 fun MultiplayerMatchScreen(
@@ -47,6 +54,8 @@ fun MultiplayerMatchScreen(
     onBidInputChange: (Int) -> Unit,
     onPlaceBid: () -> Unit,
     onPass: () -> Unit,
+    onTimerExpired: () -> Unit,
+    onDismissPendingResult: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val match = state.match
@@ -119,13 +128,22 @@ fun MultiplayerMatchScreen(
                     contentAlignment = Alignment.Center
                 ) { CircularProgressIndicator(color = Color(0xFFF4722B)) }
 
+                // Prioritaire sur tout le reste : tant que le joueur n'a pas fermé cet écran,
+                // on ne bascule pas vers l'enchère suivante (ou le résultat) même si elle est
+                // déjà prête côté serveur — évite que l'écran change brusquement de joueur.
+                state.pendingResult != null -> AuctionResultBuffer(
+                    result = state.pendingResult,
+                    onContinue = onDismissPendingResult
+                )
+
                 match.status == "waiting" -> WaitingForOpponent(matchId = match.id)
 
                 match.status == "drafting" -> DraftingContent(
                     state = state,
                     onBidInputChange = onBidInputChange,
                     onPlaceBid = onPlaceBid,
-                    onPass = onPass
+                    onPass = onPass,
+                    onTimerExpired = onTimerExpired
                 )
 
                 else -> Box(
@@ -155,6 +173,65 @@ private fun generateRevealOrder(): List<Int> {
     return (0..9).map { index ->
         index to (baseWeights[index] + ((-10..10).random()))
     }.sortedBy { it.second }.map { it.first }
+}
+
+@Composable
+private fun AuctionResultBuffer(result: CompletedAuctionInfo, onContinue: () -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        PlayerRevealCard(
+            player = result.player,
+            bidCount = 0,
+            revealOrder = (0..9).toList(),
+            revealed = true
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(color = Color(0xFFF59E0B).copy(alpha = 0.1f), shape = RoundedCornerShape(12.dp))
+                .border(width = 1.dp, color = Color(0xFFF59E0B).copy(alpha = 0.3f), shape = RoundedCornerShape(12.dp))
+                .padding(14.dp)
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.EmojiEvents,
+                    contentDescription = null,
+                    tint = Color(0xFFF59E0B),
+                    modifier = Modifier.size(16.dp)
+                )
+                val who = if (result.isAutoAssigned) {
+                    if (result.winnerIsMe) "Tu récupères automatiquement" else "L'adversaire récupère automatiquement"
+                } else {
+                    if (result.winnerIsMe) "Tu remportes" else "L'adversaire remporte"
+                }
+                val price = if (result.pricePaid == 0) "gratuitement" else "pour $${result.pricePaid}"
+                Text(
+                    text = "$who ${result.player.displayLastName} $price !",
+                    fontSize = 14.sp,
+                    fontFamily = FontFamily.SansSerif,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+
+        Button(
+            onClick = onContinue,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+        ) {
+            Text(
+                text = if (result.isLastPick) "VOIR LES RÉSULTATS →" else "JOUEUR SUIVANT →",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.ExtraBold,
+                fontFamily = FontFamily.SansSerif,
+                letterSpacing = 1.sp,
+                modifier = Modifier.padding(vertical = 6.dp)
+            )
+        }
+    }
 }
 
 @Composable
@@ -213,12 +290,19 @@ private fun WaitingForOpponent(matchId: String) {
     }
 }
 
+private fun secondsRemaining(deadlineMillis: Long?): Int? {
+    if (deadlineMillis == null) return null
+    val remainingMs = deadlineMillis - System.currentTimeMillis()
+    return (remainingMs / 1000L).toInt().coerceIn(0, 15)
+}
+
 @Composable
 private fun DraftingContent(
     state: MatchUiState,
     onBidInputChange: (Int) -> Unit,
     onPlaceBid: () -> Unit,
-    onPass: () -> Unit
+    onPass: () -> Unit,
+    onTimerExpired: () -> Unit
 ) {
     val auction = state.currentAuction
     val player = state.currentPlayer
@@ -226,6 +310,26 @@ private fun DraftingContent(
     val opponentBudget = state.opponentTeam?.budgetRemaining ?: 0
 
     val revealOrder = remember(auction?.id) { generateRevealOrder() }
+
+    val deadline = state.turnDeadlineAtMillis
+    var timeLeft by remember(auction?.id, deadline) { mutableStateOf(secondsRemaining(deadline)) }
+    LaunchedEffect(auction?.id, deadline) {
+        if (deadline == null) return@LaunchedEffect
+        while (true) {
+            val remaining = secondsRemaining(deadline)
+            timeLeft = remaining
+            if (remaining != null && remaining <= 0) {
+                // N'importe quel client peut déclencher la résolution côté serveur (voir
+                // expire_turn_if_overdue) — utile si c'est l'adversaire qui est hors ligne.
+                // On continue de réessayer (pas de "break") : la RPC est un no-op si le
+                // serveur n'est pas encore d'accord que le délai est dépassé (léger décalage
+                // d'horloge entre l'appareil et Supabase) ou si l'appel réseau échoue — sans
+                // retry, un seul essai raté laissait le tour bloqué indéfiniment.
+                onTimerExpired()
+            }
+            delay(500)
+        }
+    }
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (player != null) {
@@ -243,7 +347,7 @@ private fun DraftingContent(
         }
 
         if (auction != null) {
-            TurnBanner(state = state)
+            TurnBanner(state = state, secondsLeft = timeLeft)
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 BidControl(
@@ -315,9 +419,17 @@ private fun DraftingContent(
 }
 
 @Composable
-private fun TurnBanner(state: MatchUiState) {
+private fun TurnBanner(state: MatchUiState, secondsLeft: Int?) {
     val auction = state.currentAuction ?: return
-    Box(
+    val isOpening = auction.currentBidderId == null
+    val turnLabel = when {
+        state.isMyTurn && isOpening -> "TU OUVRES L'ENCHÈRE"
+        state.isMyTurn -> "À TOI DE MISER"
+        isOpening -> "L'ADVERSAIRE OUVRE L'ENCHÈRE"
+        else -> "AU TOUR DE L'ADVERSAIRE"
+    }
+
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(
@@ -329,7 +441,8 @@ private fun TurnBanner(state: MatchUiState) {
                 color = if (state.isMyTurn) Color(0xFFF4722B).copy(alpha = 0.4f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
                 shape = RoundedCornerShape(12.dp)
             )
-            .padding(14.dp)
+            .padding(14.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -337,7 +450,7 @@ private fun TurnBanner(state: MatchUiState) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = if (state.isMyTurn) "À TOI DE MISER" else "AU TOUR DE L'ADVERSAIRE",
+                text = turnLabel,
                 fontSize = 13.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = FontFamily.SansSerif,
@@ -345,11 +458,37 @@ private fun TurnBanner(state: MatchUiState) {
                 color = if (state.isMyTurn) Color(0xFFF4722B) else MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = if (auction.currentBidderId != null) "Mise actuelle : $${auction.currentBid}" else "Aucune mise",
+                text = if (!isOpening) "Mise actuelle : $${auction.currentBid}" else "Aucune mise",
                 fontSize = 12.sp,
                 fontFamily = FontFamily.SansSerif,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
+        }
+
+        if (secondsLeft != null) {
+            val urgent = secondsLeft <= 5
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .background(
+                            color = (if (urgent) Color(0xFFE03A3E) else Color(0xFFF4722B)).copy(alpha = 0.15f),
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = "${secondsLeft}s",
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        fontFamily = FontFamily.Monospace,
+                        color = if (urgent) Color(0xFFE03A3E) else Color(0xFFF4722B)
+                    )
+                }
+            }
         }
     }
 }

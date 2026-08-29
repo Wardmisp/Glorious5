@@ -18,9 +18,12 @@ import io.github.jan.supabase.realtime.RealtimeChannel
 import io.github.jan.supabase.realtime.channel
 import io.github.jan.supabase.realtime.postgresChangeFlow
 import io.github.jan.supabase.realtime.realtime
+import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 /**
  * Toutes les interactions Supabase pour le mode multijoueur en ligne
@@ -29,6 +32,33 @@ import kotlinx.serialization.Serializable
  */
 class MultiplayerRepository {
     private val client get() = SupabaseClient.client
+
+    /**
+     * Décalage entre l'horloge de cet appareil et celle du serveur (estimé une fois via l'en-tête
+     * HTTP Date d'une réponse Supabase). Un chrono basé sur turn_deadline (timestamp serveur) et
+     * comparé à l'horloge locale brute serait faux en continu — pas juste "en retard" — sur un
+     * appareil dont l'heure système est décalée (courant sur émulateur, ou horloge mal réglée).
+     */
+    @Volatile
+    private var clockOffsetMillis: Long = 0L
+
+    /** À appeler une fois avant d'afficher un chrono basé sur une deadline serveur. */
+    suspend fun syncClock() {
+        try {
+            val localBefore = System.currentTimeMillis()
+            val result = client.postgrest["matches"].select { limit(1) }
+            val localAfter = System.currentTimeMillis()
+            val dateHeader = result.headers[HttpHeaders.Date] ?: return
+            val serverMillis = ZonedDateTime.parse(dateHeader, DateTimeFormatter.RFC_1123_DATE_TIME)
+                .toInstant().toEpochMilli()
+            clockOffsetMillis = serverMillis - (localBefore + localAfter) / 2
+        } catch (e: Exception) {
+            clockOffsetMillis = 0L
+        }
+    }
+
+    /** Convertit un timestamp serveur (déjà en millis) en une valeur comparable à System.currentTimeMillis() sur cet appareil. */
+    fun toLocalMillis(serverMillis: Long): Long = serverMillis - clockOffsetMillis
 
     // --- Auth (anonyme) ---
 
@@ -70,6 +100,27 @@ class MultiplayerRepository {
     suspend fun presentNextPlayer(matchId: String): String? =
         client.postgrest.rpc("present_next_player", MatchIdParam(matchId)).decodeAs<String?>()
 
+    @Serializable
+    private data class AuctionIdParam(@SerialName("p_auction_id") val auctionId: String)
+
+    /**
+     * Force la résolution d'une enchère dont le délai de 15s est dépassé (mise/passe "au nom" du
+     * joueur en retard). Sans danger à appeler spéculativement : no-op côté serveur si l'enchère
+     * n'est plus active ou si le délai n'est pas encore dépassé.
+     */
+    suspend fun expireTurnIfOverdue(auctionId: String) {
+        client.postgrest.rpc("expire_turn_if_overdue", AuctionIdParam(auctionId))
+    }
+
+    /**
+     * Démarre le chrono d'ouverture d'une enchère — à appeler par le joueur qui doit ouvrir,
+     * une fois qu'il voit effectivement cette enchère (turn_deadline encore null) à l'écran.
+     * Sans effet si le chrono est déjà lancé ou si ce n'est pas à lui d'ouvrir.
+     */
+    suspend fun startTurnClock(auctionId: String) {
+        client.postgrest.rpc("start_turn_clock", AuctionIdParam(auctionId))
+    }
+
     // --- Mises ---
 
     suspend fun placeBid(auctionId: String, userId: String, amount: Int) {
@@ -98,16 +149,18 @@ class MultiplayerRepository {
     suspend fun getAuctionById(auctionId: String): Auction? =
         client.postgrest["auctions"].select { filter { eq("id", auctionId) } }.decodeList<Auction>().firstOrNull()
 
-    /** Nombre de vraies mises (hors passe) déjà posées sur cette enchère — pilote le reveal progressif. */
-    suspend fun getBidCount(auctionId: String): Int =
-        client.postgrest["bids"].select { filter { eq("auction_id", auctionId) } }
-            .decodeList<Bid>().count { it.amount != null }
+    /** Historique des mises d'une enchère — sert au compteur de reveal progressif et au chrono
+     * (basé sur l'horodatage de la dernière mise, ou de la création de l'enchère si aucune). */
+    suspend fun getBids(auctionId: String): List<Bid> =
+        client.postgrest["bids"].select { filter { eq("auction_id", auctionId) } }.decodeList()
 
-    suspend fun getActiveAuction(matchId: String): Auction? =
+    /** La toute dernière enchère du match, quel que soit son statut/type — sert à savoir si
+     * c'est une enchère en cours à afficher (active) ou une déjà résolue à faire acquitter
+     * (bid conclu, passe, timeout, ou attribution automatique) avant de passer à la suite. */
+    suspend fun getLatestAuction(matchId: String): Auction? =
         client.postgrest["auctions"].select {
             filter {
                 eq("match_id", matchId)
-                eq("status", "active")
             }
             order("created_at", Order.DESCENDING)
             limit(1)

@@ -192,7 +192,9 @@ fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) 
                                 onBack = onLeave,
                                 onBidInputChange = { multiplayerViewModel.onBidInputChange(it) },
                                 onPlaceBid = { multiplayerViewModel.placeBid() },
-                                onPass = { multiplayerViewModel.pass() }
+                                onPass = { multiplayerViewModel.pass() },
+                                onTimerExpired = { multiplayerViewModel.handleTimeout() },
+                                onDismissPendingResult = { multiplayerViewModel.dismissPendingResult() }
                             )
                         }
                         is MultiplayerScreen.Scouting -> {

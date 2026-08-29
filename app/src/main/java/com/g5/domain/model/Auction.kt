@@ -15,6 +15,7 @@ data class Auction(
     @SerialName("turn_user_id") val turnUserId: String,
     @SerialName("winner_id") val winnerId: String? = null,
     @SerialName("final_price") val finalPrice: Int? = null,
+    @SerialName("turn_deadline") val turnDeadline: String? = null,
     @SerialName("created_at") val createdAt: String? = null,
     @SerialName("completed_at") val completedAt: String? = null
 )
