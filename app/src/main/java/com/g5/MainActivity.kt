@@ -30,6 +30,8 @@ import com.g5.ui.screens.HomeScreen
 import com.g5.ui.screens.MultiplayerLobbyScreen
 import com.g5.ui.screens.MultiplayerMatchScreen
 import com.g5.ui.screens.MultiplayerResultScreen
+import com.g5.ui.screens.MultiplayerScoutingScreen
+import com.g5.ui.screens.MultiplayerSimulationScreen
 import com.g5.ui.screens.OptionsScreen
 import com.g5.ui.screens.ScoutingReportScreen
 import com.g5.ui.screens.SimulationScreen
@@ -191,6 +193,18 @@ fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) 
                                 onBidInputChange = { multiplayerViewModel.onBidInputChange(it) },
                                 onPlaceBid = { multiplayerViewModel.placeBid() },
                                 onPass = { multiplayerViewModel.pass() }
+                            )
+                        }
+                        is MultiplayerScreen.Scouting -> {
+                            MultiplayerScoutingScreen(
+                                state = mpState.match,
+                                onStartSimulation = { multiplayerViewModel.startSimulation() }
+                            )
+                        }
+                        is MultiplayerScreen.Simulation -> {
+                            MultiplayerSimulationScreen(
+                                state = mpState.match,
+                                onAdvance = { multiplayerViewModel.advanceSimulation() }
                             )
                         }
                         is MultiplayerScreen.Result -> {
