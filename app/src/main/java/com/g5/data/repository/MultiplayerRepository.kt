@@ -22,8 +22,12 @@ import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.time.Instant
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
+
+/** Doit rester en phase avec la même limite appliquée côté SQL dans join_match(). */
+private const val LOBBY_MATCH_TTL_SECONDS = 10L * 60L
 
 /**
  * Toutes les interactions Supabase pour le mode multijoueur en ligne
@@ -204,14 +208,20 @@ class MultiplayerRepository {
         )
     }
 
-    suspend fun listOpenMatches(): List<Match> =
-        client.postgrest["matches"].select {
+    /** Une partie en attente disparaît du lobby après ce délai sans adversaire (voir aussi
+     * join_match côté SQL, qui applique la même limite pour empêcher de la rejoindre via un
+     * code une fois qu'elle a expiré). */
+    suspend fun listOpenMatches(): List<Match> {
+        val cutoffIso = Instant.now().minusSeconds(LOBBY_MATCH_TTL_SECONDS).toString()
+        return client.postgrest["matches"].select {
             filter {
                 eq("status", "waiting")
                 filter("player2_id", FilterOperator.IS, null)
+                filter("created_at", FilterOperator.GTE, cutoffIso)
             }
             order("created_at", Order.DESCENDING)
         }.decodeList()
+    }
 
     // --- Realtime : un channel par match, plusieurs flows dessus ---
 
