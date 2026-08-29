@@ -131,7 +131,7 @@ fun HomeScreen(
 
             MenuButton(
                 icon = Icons.Default.Group,
-                label = "JOUER À DEUX",
+                label = "SPLIT SCREEN",
                 sublabel = "Bientôt disponible",
                 onClick = { onNavigate(Screen.VsHuman) },
                 variant = MenuButtonVariant.Secondary,
