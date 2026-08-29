@@ -79,10 +79,10 @@ class MultiplayerViewModel : ViewModel() {
     }
 
     fun setBudgetInput(value: Int) = updateLobby { it.copy(budgetInput = value) }
-    fun setTeamSizeInput(value: Int) = updateLobby { it.copy(teamSizeInput = value) }
     fun setJoinCodeInput(value: String) = updateLobby { it.copy(joinCodeInput = value) }
 
-    /** Crée un match en attente : visible dans le lobby public ET partageable via son id (le "code"). */
+    /** Crée un match en attente : visible dans le lobby public ET partageable via son id (le "code").
+     * La taille d'équipe n'est pas configurable côté client : toujours 5. */
     fun createMatch() {
         viewModelScope.launch {
             updateLobby { it.copy(isLoading = true, error = null) }
@@ -91,7 +91,7 @@ class MultiplayerViewModel : ViewModel() {
                 val matchId = repository.createMatch(
                     opponentId = null,
                     budget = lobby.budgetInput,
-                    teamSize = lobby.teamSizeInput
+                    teamSize = 5
                 )
                 updateLobby { it.copy(isLoading = false) }
                 enterMatch(matchId)
