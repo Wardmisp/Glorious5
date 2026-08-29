@@ -1,0 +1,46 @@
+package com.g5.ui.viewmodel
+
+import com.g5.domain.model.Auction
+import com.g5.domain.model.Match
+import com.g5.domain.model.MatchTeam
+import com.g5.domain.model.NBAPlayer
+import com.g5.domain.model.TeamEntry
+
+sealed class MultiplayerScreen {
+    object Lobby : MultiplayerScreen()
+    object InMatch : MultiplayerScreen()
+    object Result : MultiplayerScreen()
+}
+
+data class LobbyUiState(
+    val isLoading: Boolean = false,
+    val openMatches: List<Match> = emptyList(),
+    val joinCodeInput: String = "",
+    val budgetInput: Int = 50,
+    val teamSizeInput: Int = 5,
+    val error: String? = null
+)
+
+data class MatchUiState(
+    val myUserId: String = "",
+    val match: Match? = null,
+    val myTeam: MatchTeam? = null,
+    val opponentTeam: MatchTeam? = null,
+    val myRoster: List<TeamEntry> = emptyList(),
+    val opponentRoster: List<TeamEntry> = emptyList(),
+    val currentAuction: Auction? = null,
+    val currentPlayer: NBAPlayer? = null,
+    val isMyTurn: Boolean = false,
+    val bidInput: Int = 1,
+    val isSubmittingBid: Boolean = false,
+    val isRealtimeConnected: Boolean = true,
+    val error: String? = null
+) {
+    val canPass: Boolean get() = currentAuction?.currentBidderId != null
+}
+
+data class MultiplayerUiState(
+    val screen: MultiplayerScreen = MultiplayerScreen.Lobby,
+    val lobby: LobbyUiState = LobbyUiState(),
+    val match: MatchUiState = MatchUiState()
+)
