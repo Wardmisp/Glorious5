@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -136,6 +137,26 @@ fun MultiplayerMatchScreen(
     }
 }
 
+/** Même logique que GameViewModel.generateRevealOrder() côté mode local, dupliquée ici pour ne
+ * pas dépendre de GameViewModel (qui appartient au mode local, non touché par le mode en ligne). */
+private fun generateRevealOrder(): List<Int> {
+    val baseWeights = listOf(
+        100, // 0: PTS
+        55,  // 1: REB
+        75,  // 2: AST
+        30,  // 3: STL
+        10,  // 4: BLK
+        5,   // 5: Season
+        20,  // 6: Position
+        150, // 7: Team
+        200, // 8: FirstName
+        250  // 9: LastName
+    )
+    return (0..9).map { index ->
+        index to (baseWeights[index] + ((-10..10).random()))
+    }.sortedBy { it.second }.map { it.first }
+}
+
 @Composable
 private fun WaitingForOpponent(matchId: String) {
     val clipboard = LocalClipboardManager.current
@@ -204,13 +225,15 @@ private fun DraftingContent(
     val myBudget = state.myTeam?.budgetRemaining ?: 0
     val opponentBudget = state.opponentTeam?.budgetRemaining ?: 0
 
+    val revealOrder = remember(auction?.id) { generateRevealOrder() }
+
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         if (player != null) {
             PlayerRevealCard(
                 player = player,
-                bidCount = 0,
-                revealOrder = (0..9).toList(),
-                revealed = true
+                bidCount = state.bidCount,
+                revealOrder = revealOrder,
+                revealed = false
             )
         } else {
             Box(

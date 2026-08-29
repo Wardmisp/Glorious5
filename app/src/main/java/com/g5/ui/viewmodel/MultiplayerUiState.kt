@@ -34,6 +34,7 @@ data class MatchUiState(
     val opponentRoster: List<TeamEntry> = emptyList(),
     val currentAuction: Auction? = null,
     val currentPlayer: NBAPlayer? = null,
+    val bidCount: Int = 0,
     val isMyTurn: Boolean = false,
     val bidInput: Int = 1,
     val isSubmittingBid: Boolean = false,
