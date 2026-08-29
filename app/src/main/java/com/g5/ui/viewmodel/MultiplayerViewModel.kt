@@ -17,11 +17,15 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.time.OffsetDateTime
 
 /** Le temps réel nécessite que les tables soient ajoutées à la publication supabase_realtime
  * côté Supabase ; ce polling est un filet de sécurité qui fait avancer le match même si ce
  * n'est pas (ou plus) le cas, au prix d'un délai au lieu d'une mise à jour instantanée. */
 private const val FALLBACK_POLL_INTERVAL_MS = 4000L
+
+private fun parseInstantMillis(iso: String): Long? =
+    runCatching { OffsetDateTime.parse(iso).toInstant().toEpochMilli() }.getOrNull()
 
 /**
  * Pilote le mode multijoueur en ligne (glorious5_multiplayer_schema.sql).
@@ -134,6 +138,11 @@ class MultiplayerViewModel : ViewModel() {
         realtimeJob?.cancel()
         pollingJob?.cancel()
         viewModelScope.launch {
+            // 0. Synchronise l'horloge serveur avant tout calcul de chrono (voir syncClock) :
+            // sans ça, un appareil dont l'heure système est décalée afficherait un compte à
+            // rebours faux en continu, pas juste en retard.
+            repository.syncClock()
+
             // 1. Hydratation classique d'abord (donne aussi les ids d'équipe nécessaires aux filtres realtime)
             val teamIds = reloadMatchState(matchId)
 
@@ -169,7 +178,18 @@ class MultiplayerViewModel : ViewModel() {
         }
     }
 
-    /** Recharge l'état complet depuis Supabase (source de vérité). Retourne les ids d'équipe du match. */
+    /**
+     * Recharge l'état complet depuis Supabase (source de vérité). Retourne les ids d'équipe du
+     * match.
+     *
+     * L'enchère la plus récente du match (quel que soit son type) pilote l'affichage :
+     * - 'active' → c'est l'enchère en cours, affichée normalement.
+     * - 'completed' et pas encore vue → tampon "joueur remporté" (mise conclue, passe, timeout,
+     *   OU attribution automatique — les deux cas sont traités pareil, unifiés ici) tant que
+     *   l'utilisateur ne l'a pas fermé (dismissPendingResult).
+     * Le prochain joueur n'est présenté (par le créateur du match uniquement, cf. plan) qu'une
+     * fois qu'il n'y a plus ni enchère active ni tampon à acquitter — jamais en cascade silencieuse.
+     */
     private suspend fun reloadMatchState(matchId: String): List<String> {
         val myId = repository.currentUserId() ?: return emptyList()
         return try {
@@ -180,8 +200,10 @@ class MultiplayerViewModel : ViewModel() {
             val teamIds = teams.map { it.id }
 
             val rosterRows = repository.getRosters(teamIds)
-            val activeAuction = repository.getActiveAuction(matchId)
-            val playerIds = (rosterRows.map { it.nbaPlayerId } + listOfNotNull(activeAuction?.nbaPlayerId)).distinct()
+            val latestAuction = repository.getLatestAuction(matchId)
+            val activeAuction = latestAuction?.takeIf { it.status == "active" }
+
+            val playerIds = (rosterRows.map { it.nbaPlayerId } + listOfNotNull(latestAuction?.nbaPlayerId)).distinct()
             val players = repository.getNbaPlayers(playerIds).associateBy { it.id }
 
             val myRoster = rosterRows.filter { it.matchTeamId == myTeam?.id }
@@ -190,8 +212,32 @@ class MultiplayerViewModel : ViewModel() {
                 .mapNotNull { row -> players[row.nbaPlayerId]?.let { TeamEntry(it, row.pricePaid) } }
 
             val currentPlayer = activeAuction?.let { players[it.nbaPlayerId] }
-            val bidCount = activeAuction?.let { repository.getBidCount(it.id) } ?: 0
+            val bidCount = activeAuction?.let { repository.getBids(it.id) }?.count { it.amount != null } ?: 0
+            val turnDeadlineAtMillis = activeAuction?.turnDeadline?.let { parseInstantMillis(it) }
+                ?.let { repository.toLocalMillis(it) }
             val isMyTurn = activeAuction?.turnUserId == myId
+
+            val previousState = _uiState.value.match
+            val pendingResult: CompletedAuctionInfo? = when {
+                // Déjà affiché : on ne le remplace pas tant que l'utilisateur ne l'a pas fermé.
+                previousState.pendingResult != null -> previousState.pendingResult
+                latestAuction != null && latestAuction.status == "completed" &&
+                    latestAuction.id != previousState.lastDismissedAuctionId -> {
+                    val winnerId = latestAuction.winnerId
+                    val player = players[latestAuction.nbaPlayerId]
+                    if (winnerId != null && player != null) {
+                        CompletedAuctionInfo(
+                            auctionId = latestAuction.id,
+                            player = player,
+                            winnerIsMe = winnerId == myId,
+                            pricePaid = latestAuction.finalPrice ?: 0,
+                            isAutoAssigned = latestAuction.auctionType == "auto_assign",
+                            isLastPick = myRoster.size >= match.teamSize && opponentRoster.size >= match.teamSize
+                        )
+                    } else null
+                }
+                else -> null
+            }
 
             _uiState.update {
                 val minValidBid = maxOf(1, (activeAuction?.currentBid ?: 0) + 1)
@@ -216,27 +262,41 @@ class MultiplayerViewModel : ViewModel() {
                         currentAuction = activeAuction,
                         currentPlayer = currentPlayer,
                         bidCount = bidCount,
+                        turnDeadlineAtMillis = turnDeadlineAtMillis,
                         isMyTurn = isMyTurn,
                         bidInput = nextBidInput,
+                        pendingResult = pendingResult,
                         error = null
                     )
                 )
             }
 
             if (match.status == "completed") {
-                // Le résultat est déjà décidé côté serveur (compute_match_result) : plus besoin
-                // de temps réel ni de polling, on termine sur le rapport de scouting + simulation
-                // (calculés une seule fois côté client, à titre de mise en scène) avant de révéler
-                // le vrai vainqueur dans MultiplayerResultScreen.
-                finalizeCompletedMatch(myRoster, opponentRoster)
+                // Le résultat est déjà décidé côté serveur (compute_match_result). Si le dernier
+                // pick est encore affiché en tampon, on attend que l'utilisateur le ferme
+                // (dismissPendingResult) avant de passer au rapport de scouting.
+                if (pendingResult == null) {
+                    finalizeCompletedMatch(myRoster, opponentRoster)
+                }
             } else {
                 _uiState.update { it.copy(screen = MultiplayerScreen.InMatch) }
 
-                // Seul le créateur du match (player1) déclenche la présentation du joueur suivant,
-                // pour éviter que les deux clients créent chacun une enchère active en même temps
-                // (present_next_player() ne le protège pas lui-même, cf. plan).
-                if (match.status == "drafting" && activeAuction == null && match.player1Id == myId) {
-                    runPresentNextPlayerLoop(matchId)
+                // Seul le créateur du match (player1) déclenche la présentation du joueur
+                // suivant, pour éviter que les deux clients créent chacun une enchère active en
+                // même temps (present_next_player() ne le protège pas lui-même, cf. plan) — et
+                // seulement quand il n'y a plus rien à acquitter, jamais en cascade silencieuse.
+                if (match.status == "drafting" && activeAuction == null && pendingResult == null && match.player1Id == myId) {
+                    presentNextPlayerOnce(matchId)
+                } else if (activeAuction != null && activeAuction.turnDeadline == null &&
+                    activeAuction.currentBidderId == null && activeAuction.turnUserId == myId
+                ) {
+                    // Le chrono d'ouverture ne démarre que lorsque le joueur dont c'est le tour
+                    // de miser est effectivement présent et prêt (voir start_turn_clock) — pas
+                    // dès la création de l'enchère côté serveur, qui peut survenir avant que son
+                    // écran n'ait fini de charger. Une fois posé, turn_deadline est un timestamp
+                    // serveur partagé : l'adversaire le voit défiler à l'identique dès son
+                    // prochain rechargement (temps réel ou polling), sans action de sa part.
+                    startTurnClockOnce(matchId, activeAuction.id)
                 }
             }
 
@@ -245,6 +305,22 @@ class MultiplayerViewModel : ViewModel() {
             updateMatch { it.copy(error = "Synchronisation impossible : ${e.message}") }
             emptyList()
         }
+    }
+
+    /** Ferme l'écran "tampon" affiché après une enchère résolue ou une attribution automatique. */
+    fun dismissPendingResult() {
+        val matchId = currentMatchId ?: return
+        val dismissedAuctionId = _uiState.value.match.pendingResult?.auctionId
+        updateMatch {
+            it.copy(
+                pendingResult = null,
+                lastDismissedAuctionId = dismissedAuctionId ?: it.lastDismissedAuctionId
+            )
+        }
+        // Réévalue tout de suite (plutôt que d'attendre le prochain polling) : soit un autre
+        // tampon attend déjà (cascade d'attributions), soit c'est au créateur du match de
+        // présenter la suite, soit le match est en réalité terminé.
+        viewModelScope.launch { reloadMatchState(matchId) }
     }
 
     /**
@@ -312,14 +388,21 @@ class MultiplayerViewModel : ViewModel() {
         }
     }
 
-    private suspend fun runPresentNextPlayerLoop(matchId: String) {
-        var guard = 0
-        while (guard < 50) {
-            guard++
-            val auctionId = repository.presentNextPlayer(matchId) ?: return
-            val auction = repository.getAuctionById(auctionId)
-            if (auction?.status == "active") return
-        }
+    /**
+     * Présente le joueur suivant — une seule étape, jamais en boucle silencieuse : que le
+     * résultat soit une enchère active ou une attribution automatique déjà conclue, le
+     * rechargement qui suit se charge de l'afficher (comme tampon dans le second cas) et
+     * d'attendre l'acquittement de l'utilisateur avant d'aller plus loin.
+     */
+    private suspend fun presentNextPlayerOnce(matchId: String) {
+        repository.presentNextPlayer(matchId)
+        reloadMatchState(matchId)
+    }
+
+    /** Démarre le chrono d'ouverture — appelé par l'ouvreur lui-même dès qu'il voit l'enchère. */
+    private suspend fun startTurnClockOnce(matchId: String, auctionId: String) {
+        repository.startTurnClock(auctionId)
+        reloadMatchState(matchId)
     }
 
     fun onBidInputChange(value: Int) = updateMatch { it.copy(bidInput = value) }
@@ -360,6 +443,27 @@ class MultiplayerViewModel : ViewModel() {
                 updateMatch { it.copy(error = "Action refusée, resynchronisation...") }
             }
             updateMatch { it.copy(isSubmittingBid = false) }
+            reloadMatchState(matchId)
+        }
+    }
+
+    /**
+     * Appelé côté client quand le chrono de 15s arrive à zéro — par n'importe lequel des deux
+     * joueurs, que ce soit son propre tour ou non. La RPC expire_turn_if_overdue() est sans
+     * danger à appeler à l'aveugle : elle vérifie elle-même côté serveur que le délai est
+     * réellement dépassé avant d'agir, donc un appel spéculatif ou en double ne fait rien.
+     * C'est ce qui permet de débloquer un tour même si l'appareil du joueur en retard est hors
+     * ligne : l'adversaire peut forcer la résolution depuis le sien.
+     */
+    fun handleTimeout() {
+        val matchId = currentMatchId ?: return
+        val auctionId = _uiState.value.match.currentAuction?.id ?: return
+        viewModelScope.launch {
+            try {
+                repository.expireTurnIfOverdue(auctionId)
+            } catch (e: Exception) {
+                // best-effort : le prochain rechargement (polling/realtime) resynchronisera
+            }
             reloadMatchState(matchId)
         }
     }
