@@ -34,7 +34,6 @@ data class LobbyUiState(
     val openMatches: List<Match> = emptyList(),
     val joinCodeInput: String = "",
     val budgetInput: Int = 50,
-    val teamSizeInput: Int = 5,
     val error: String? = null
 )
 

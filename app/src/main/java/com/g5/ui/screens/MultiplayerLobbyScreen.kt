@@ -46,7 +46,6 @@ fun MultiplayerLobbyScreen(
     onJoinByCode: () -> Unit,
     onJoinCodeChange: (String) -> Unit,
     onBudgetChange: (Int) -> Unit,
-    onTeamSizeChange: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -132,25 +131,13 @@ fun MultiplayerLobbyScreen(
                     letterSpacing = 0.5.sp,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Stepper(
-                        label = "Budget",
-                        value = "${state.budgetInput}$",
-                        onDecrease = { onBudgetChange((state.budgetInput - 10).coerceAtLeast(10)) },
-                        onIncrease = { onBudgetChange(state.budgetInput + 10) },
-                        modifier = Modifier.weight(1f)
-                    )
-                    Stepper(
-                        label = "Taille équipe",
-                        value = "${state.teamSizeInput}",
-                        onDecrease = { onTeamSizeChange((state.teamSizeInput - 1).coerceAtLeast(1)) },
-                        onIncrease = { onTeamSizeChange(state.teamSizeInput + 1) },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
+                Stepper(
+                    label = "Budget",
+                    value = "${state.budgetInput}$",
+                    onDecrease = { onBudgetChange((state.budgetInput - 10).coerceAtLeast(10)) },
+                    onIncrease = { onBudgetChange(state.budgetInput + 10) },
+                    modifier = Modifier.fillMaxWidth(0.5f)
+                )
             }
 
             Button(
