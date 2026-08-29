@@ -2,6 +2,7 @@ package com.g5.data.repository
 
 import com.g5.core.network.SupabaseClient
 import com.g5.domain.model.Auction
+import com.g5.domain.model.Bid
 import com.g5.domain.model.BidInsertRequest
 import com.g5.domain.model.Match
 import com.g5.domain.model.MatchTeam
@@ -96,6 +97,11 @@ class MultiplayerRepository {
 
     suspend fun getAuctionById(auctionId: String): Auction? =
         client.postgrest["auctions"].select { filter { eq("id", auctionId) } }.decodeList<Auction>().firstOrNull()
+
+    /** Nombre de vraies mises (hors passe) déjà posées sur cette enchère — pilote le reveal progressif. */
+    suspend fun getBidCount(auctionId: String): Int =
+        client.postgrest["bids"].select { filter { eq("auction_id", auctionId) } }
+            .decodeList<Bid>().count { it.amount != null }
 
     suspend fun getActiveAuction(matchId: String): Auction? =
         client.postgrest["auctions"].select {
