@@ -190,9 +190,21 @@ class MultiplayerViewModel : ViewModel() {
                 .mapNotNull { row -> players[row.nbaPlayerId]?.let { TeamEntry(it, row.pricePaid) } }
 
             val currentPlayer = activeAuction?.let { players[it.nbaPlayerId] }
+            val bidCount = activeAuction?.let { repository.getBidCount(it.id) } ?: 0
             val isMyTurn = activeAuction?.turnUserId == myId
 
             _uiState.update {
+                val minValidBid = maxOf(1, (activeAuction?.currentBid ?: 0) + 1)
+                val isSameAuction = activeAuction != null && activeAuction.id == it.match.currentAuction?.id
+                // Ne réinitialise l'input que si nécessaire (nouvelle enchère, ou la valeur en
+                // cours n'est plus valide) — sinon un rechargement en arrière-plan (polling,
+                // realtime) effacerait ce que le joueur vient de saisir avant même qu'il valide.
+                val nextBidInput = if (isSameAuction && it.match.bidInput >= minValidBid) {
+                    it.match.bidInput
+                } else {
+                    minValidBid
+                }
+
                 it.copy(
                     match = it.match.copy(
                         myUserId = myId,
@@ -203,8 +215,9 @@ class MultiplayerViewModel : ViewModel() {
                         opponentRoster = opponentRoster,
                         currentAuction = activeAuction,
                         currentPlayer = currentPlayer,
+                        bidCount = bidCount,
                         isMyTurn = isMyTurn,
-                        bidInput = maxOf(1, (activeAuction?.currentBid ?: 0) + 1),
+                        bidInput = nextBidInput,
                         error = null
                     )
                 )
