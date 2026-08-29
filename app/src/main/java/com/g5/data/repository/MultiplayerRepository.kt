@@ -107,14 +107,42 @@ class MultiplayerRepository {
             limit(1)
         }.decodeList<Auction>().firstOrNull()
 
+    /** Pool complet, utilisé comme distribution de référence pour les percentiles du rapport de scouting. */
+    suspend fun getAllNbaPlayers(): List<NBAPlayer> =
+        client.postgrest["NbaBest1000"].select().decodeList<NBAPlayer>().map { applyDisplayFields(it) }
+
     /** Va chercher les joueurs NBA (table NbaBest1000) référencés par une enchère ou un roster. */
     suspend fun getNbaPlayers(ids: List<Int>): List<NBAPlayer> {
         if (ids.isEmpty()) return emptyList()
         return client.postgrest["NbaBest1000"].select {
             filter { filter("id", FilterOperator.IN, ids) }
-        }.decodeList<NBAPlayer>().map { player ->
-            player.copy(position = formatPosition(player.position), teamColor = getTeamColor(player.team))
-        }
+        }.decodeList<NBAPlayer>().map { applyDisplayFields(it) }
+    }
+
+    /**
+     * La table NbaBest1000 n'expose que le nom complet ("player"), pas first_name/last_name :
+     * `firstName`/`lastName` restent vides après décodage, ce qui casse tout code qui les lit
+     * directement (GenerateMatchSimulationUseCase, par ex. — displayFirstName/displayLastName
+     * ont bien un fallback, mais pas les champs bruts). On les dérive ici une fois pour toutes.
+     */
+    private fun applyDisplayFields(player: NBAPlayer): NBAPlayer {
+        val withColors = player.copy(
+            position = formatPosition(player.position),
+            teamColor = getTeamColor(player.team)
+        )
+        if (withColors.firstName.isNotBlank() || withColors.lastName.isNotBlank()) return withColors
+
+        val cleanName = withColors.fullName.trim()
+            .replace("ć", "c").replace("Ć", "C")
+            .replace("č", "c").replace("Č", "C")
+            .replace("š", "s").replace("Š", "S")
+            .replace("ž", "z").replace("Ž", "Z")
+            .replace("đ", "d").replace("Đ", "D")
+        val parts = cleanName.split(" ", limit = 2)
+        return withColors.copy(
+            firstName = parts.getOrNull(0) ?: cleanName,
+            lastName = parts.getOrNull(1) ?: ""
+        )
     }
 
     suspend fun listOpenMatches(): List<Match> =

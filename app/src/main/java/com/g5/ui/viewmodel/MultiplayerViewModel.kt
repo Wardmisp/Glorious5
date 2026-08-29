@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.g5.data.repository.MultiplayerRepository
 import com.g5.domain.model.TeamEntry
+import com.g5.domain.usecase.CalculateWinProbabilityUseCase
+import com.g5.domain.usecase.GenerateMatchSimulationUseCase
 import io.github.jan.supabase.realtime.RealtimeChannel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -158,10 +160,10 @@ class MultiplayerViewModel : ViewModel() {
 
         // Filet de sécurité : fait avancer le match même si le temps réel ne délivre rien
         // (table absente de la publication supabase_realtime, websocket qui tombe, etc.).
+        // S'arrête de lui-même via stopObserving() dès que le match est "completed".
         pollingJob = viewModelScope.launch {
             while (isActive) {
                 delay(FALLBACK_POLL_INTERVAL_MS)
-                if (_uiState.value.screen == MultiplayerScreen.Result) break
                 reloadMatchState(matchId)
             }
         }
@@ -192,7 +194,6 @@ class MultiplayerViewModel : ViewModel() {
 
             _uiState.update {
                 it.copy(
-                    screen = if (match.status == "completed") MultiplayerScreen.Result else MultiplayerScreen.InMatch,
                     match = it.match.copy(
                         myUserId = myId,
                         match = match,
@@ -209,17 +210,92 @@ class MultiplayerViewModel : ViewModel() {
                 )
             }
 
-            // Seul le créateur du match (player1) déclenche la présentation du joueur suivant,
-            // pour éviter que les deux clients créent chacun une enchère active en même temps
-            // (present_next_player() ne le protège pas lui-même, cf. plan).
-            if (match.status == "drafting" && activeAuction == null && match.player1Id == myId) {
-                runPresentNextPlayerLoop(matchId)
+            if (match.status == "completed") {
+                // Le résultat est déjà décidé côté serveur (compute_match_result) : plus besoin
+                // de temps réel ni de polling, on termine sur le rapport de scouting + simulation
+                // (calculés une seule fois côté client, à titre de mise en scène) avant de révéler
+                // le vrai vainqueur dans MultiplayerResultScreen.
+                finalizeCompletedMatch(myRoster, opponentRoster)
+            } else {
+                _uiState.update { it.copy(screen = MultiplayerScreen.InMatch) }
+
+                // Seul le créateur du match (player1) déclenche la présentation du joueur suivant,
+                // pour éviter que les deux clients créent chacun une enchère active en même temps
+                // (present_next_player() ne le protège pas lui-même, cf. plan).
+                if (match.status == "drafting" && activeAuction == null && match.player1Id == myId) {
+                    runPresentNextPlayerLoop(matchId)
+                }
             }
 
             teamIds
         } catch (e: Exception) {
             updateMatch { it.copy(error = "Synchronisation impossible : ${e.message}") }
             emptyList()
+        }
+    }
+
+    /**
+     * Calculé une seule fois : un nouvel appel après coup (poll en vol, etc.) ne réécrase rien.
+     * Volontairement non-suspend : [stopObserving] peut annuler le job (realtime ou polling) qui
+     * est justement en train d'exécuter cet appel, donc le travail réseau se fait dans une
+     * coroutine détachée de viewModelScope plutôt que de continuer dans l'appelant (qui vient
+     * potentiellement de s'auto-annuler et se ferait interrompre au prochain point de suspension).
+     */
+    private fun finalizeCompletedMatch(myRoster: List<TeamEntry>, opponentRoster: List<TeamEntry>) {
+        if (_uiState.value.match.analytics != null) return
+        stopObserving()
+        viewModelScope.launch {
+            try {
+                val allPlayers = repository.getAllNbaPlayers()
+                val analytics = CalculateWinProbabilityUseCase().execute(
+                    teamA = myRoster.map { it.player },
+                    teamB = opponentRoster.map { it.player },
+                    allSeasons = allPlayers
+                )
+                val simulation = GenerateMatchSimulationUseCase().execute(
+                    teamA = myRoster.map { it.player },
+                    teamB = opponentRoster.map { it.player },
+                    winProbA = analytics.first.winProbability
+                )
+                _uiState.update {
+                    it.copy(
+                        screen = MultiplayerScreen.Scouting,
+                        match = it.match.copy(
+                            analytics = analytics,
+                            matchSimulation = simulation,
+                            currentSimulationQuarter = 0
+                        )
+                    )
+                }
+            } catch (e: Exception) {
+                // Pas de rapport possible : on va directement au résultat, déjà connu côté serveur.
+                _uiState.update { it.copy(screen = MultiplayerScreen.Result) }
+            }
+        }
+    }
+
+    fun startSimulation() {
+        _uiState.update { it.copy(screen = MultiplayerScreen.Simulation) }
+    }
+
+    fun advanceSimulation() {
+        val current = _uiState.value.match.currentSimulationQuarter
+        if (current < 4) {
+            updateMatch { it.copy(currentSimulationQuarter = current + 1) }
+        } else {
+            _uiState.update { it.copy(screen = MultiplayerScreen.Result) }
+        }
+    }
+
+    private fun stopObserving() {
+        realtimeJob?.cancel()
+        realtimeJob = null
+        pollingJob?.cancel()
+        pollingJob = null
+        val channel = matchChannel
+        matchChannel = null
+        if (channel != null) {
+            viewModelScope.launch { repository.closeChannel(channel) }
         }
     }
 
@@ -276,23 +352,13 @@ class MultiplayerViewModel : ViewModel() {
     }
 
     fun leaveMatch() {
-        realtimeJob?.cancel()
-        realtimeJob = null
-        pollingJob?.cancel()
-        pollingJob = null
-        val channel = matchChannel
-        matchChannel = null
+        stopObserving()
         currentMatchId = null
         _uiState.update { it.copy(screen = MultiplayerScreen.Lobby, match = MatchUiState()) }
-        if (channel != null) {
-            viewModelScope.launch { repository.closeChannel(channel) }
-        }
         refreshOpenMatches()
     }
 
     override fun onCleared() {
-        realtimeJob?.cancel()
-        pollingJob?.cancel()
-        matchChannel?.let { channel -> viewModelScope.launch { repository.closeChannel(channel) } }
+        stopObserving()
     }
 }
