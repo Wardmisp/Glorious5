@@ -15,6 +15,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.firebase.analytics.FirebaseAnalytics
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
@@ -25,11 +27,16 @@ import com.g5.ui.components.TutorialOverlay
 import com.g5.ui.components.TutorialStep
 import com.g5.ui.screens.GameScreen
 import com.g5.ui.screens.HomeScreen
+import com.g5.ui.screens.MultiplayerLobbyScreen
+import com.g5.ui.screens.MultiplayerMatchScreen
+import com.g5.ui.screens.MultiplayerResultScreen
 import com.g5.ui.screens.OptionsScreen
 import com.g5.ui.screens.ScoutingReportScreen
 import com.g5.ui.screens.SimulationScreen
 import com.g5.ui.theme.AndroidIdeaTheme
 import com.g5.ui.viewmodel.GameViewModel
+import com.g5.ui.viewmodel.MultiplayerScreen
+import com.g5.ui.viewmodel.MultiplayerViewModel
 import com.g5.ui.viewmodel.Screen
 import com.g5.core.network.SupabaseClient
 import com.g5.domain.model.NBAPlayer
@@ -149,6 +156,50 @@ fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) 
                             viewModel.navigateToScreen(Screen.Home)
                         }
                     )
+                }
+                is Screen.VsOnline -> {
+                    val multiplayerViewModel: MultiplayerViewModel = viewModel()
+                    val mpState by multiplayerViewModel.uiState.collectAsState()
+
+                    LaunchedEffect(Unit) {
+                        multiplayerViewModel.enterLobby()
+                    }
+
+                    val onLeave = {
+                        multiplayerViewModel.leaveMatch()
+                        viewModel.navigateToScreen(Screen.Home)
+                    }
+
+                    when (mpState.screen) {
+                        is MultiplayerScreen.Lobby -> {
+                            MultiplayerLobbyScreen(
+                                state = mpState.lobby,
+                                onBack = { viewModel.navigateToScreen(Screen.Home) },
+                                onRefresh = { multiplayerViewModel.refreshOpenMatches() },
+                                onCreateMatch = { multiplayerViewModel.createMatch() },
+                                onJoinMatch = { matchId -> multiplayerViewModel.joinMatch(matchId) },
+                                onJoinByCode = { multiplayerViewModel.joinByCode() },
+                                onJoinCodeChange = { multiplayerViewModel.setJoinCodeInput(it) },
+                                onBudgetChange = { multiplayerViewModel.setBudgetInput(it) },
+                                onTeamSizeChange = { multiplayerViewModel.setTeamSizeInput(it) }
+                            )
+                        }
+                        is MultiplayerScreen.InMatch -> {
+                            MultiplayerMatchScreen(
+                                state = mpState.match,
+                                onBack = onLeave,
+                                onBidInputChange = { multiplayerViewModel.onBidInputChange(it) },
+                                onPlaceBid = { multiplayerViewModel.placeBid() },
+                                onPass = { multiplayerViewModel.pass() }
+                            )
+                        }
+                        is MultiplayerScreen.Result -> {
+                            MultiplayerResultScreen(
+                                state = mpState.match,
+                                onBack = onLeave
+                            )
+                        }
+                    }
                 }
                 is Screen.Options -> {
                     OptionsScreen(

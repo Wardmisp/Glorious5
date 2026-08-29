@@ -9,6 +9,7 @@ sealed class Screen {
     object Home : Screen()
     object VsComputer : Screen()
     object VsHuman : Screen()
+    object VsOnline : Screen()
     object Options : Screen()
     object Simulation : Screen()
     object ScoutingReport : Screen()
