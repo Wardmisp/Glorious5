@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Devices
 import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Divider
@@ -130,11 +131,19 @@ fun HomeScreen(
 
             MenuButton(
                 icon = Icons.Default.Group,
-                label = "JOUER À DEUX",
+                label = "SPLIT SCREEN",
                 sublabel = "Bientôt disponible",
                 onClick = { onNavigate(Screen.VsHuman) },
                 variant = MenuButtonVariant.Secondary,
                 enabled = false
+            )
+
+            MenuButton(
+                icon = Icons.Default.Public,
+                label = "JOUER EN LIGNE",
+                sublabel = "Défie un ami à distance",
+                onClick = { onNavigate(Screen.VsOnline) },
+                variant = MenuButtonVariant.Secondary
             )
 
             MenuButton(
