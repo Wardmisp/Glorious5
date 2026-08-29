@@ -48,7 +48,9 @@ fun ScoutingReportScreen(
     gameState: GameState,
     onStartSimulation: () -> Unit,
     tutorialPositions: MutableMap<String, Rect> = mutableMapOf(),
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    labelA: String = "VOUS",
+    labelB: String = "IA"
 ) {
     val analytics = gameState.analytics ?: return
     var viewMode by remember { mutableStateOf(0) } // 0: Bars, 1: Radar
@@ -86,8 +88,10 @@ fun ScoutingReportScreen(
 
             // Win Probability Visual
             WinProbabilityCard(
-                analytics.first, 
+                analytics.first,
                 analytics.second,
+                labelA = labelA,
+                labelB = labelB,
                 modifier = Modifier.onGloballyPositioned { coords ->
                     tutorialPositions["scouting_win"] = coords.boundsInRoot()
                 }
@@ -202,7 +206,13 @@ private fun getPositionRank(position: String): Int {
 }
 
 @Composable
-fun WinProbabilityCard(teamA: TeamAnalytics, teamB: TeamAnalytics, modifier: Modifier = Modifier) {
+fun WinProbabilityCard(
+    teamA: TeamAnalytics,
+    teamB: TeamAnalytics,
+    modifier: Modifier = Modifier,
+    labelA: String = "VOUS",
+    labelB: String = "IA"
+) {
     val probA = (teamA.winProbability * 100).roundToInt()
     val probB = (teamB.winProbability * 100).roundToInt()
 
@@ -236,7 +246,7 @@ fun WinProbabilityCard(teamA: TeamAnalytics, teamB: TeamAnalytics, modifier: Mod
                     fontWeight = FontWeight.Black,
                     color = if (probA >= probB) Color(0xFFF4722B) else Color.White
                 )
-                Text(text = "VOUS", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White.copy(alpha = 0.7f))
+                Text(text = labelA, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White.copy(alpha = 0.7f))
             }
 
             Box(
@@ -270,7 +280,7 @@ fun WinProbabilityCard(teamA: TeamAnalytics, teamB: TeamAnalytics, modifier: Mod
                     fontWeight = FontWeight.Black,
                     color = if (probB > probA) Color(0xFFF4722B) else Color.White
                 )
-                Text(text = "IA", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White.copy(alpha = 0.7f))
+                Text(text = labelB, fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White.copy(alpha = 0.7f))
             }
         }
     }
