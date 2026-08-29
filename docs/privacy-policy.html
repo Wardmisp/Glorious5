@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Politique de confidentialité — Glorious 5</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --surface: #171a21;
+    --text: #e8e8ec;
+    --muted: #9a9fae;
+    --accent: #F4722B;
+    --border: rgba(255,255,255,0.1);
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #ffffff;
+      --surface: #f6f6f8;
+      --text: #1a1a1e;
+      --muted: #5a5f6e;
+      --accent: #F4722B;
+      --border: rgba(0,0,0,0.1);
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 20px 80px;
+  }
+  h1 {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 4px;
+    letter-spacing: -0.02em;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 40px;
+  }
+  h2 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-top: 40px;
+    margin-bottom: 12px;
+    color: var(--accent);
+  }
+  p, li {
+    font-size: 15px;
+    color: var(--text);
+  }
+  ul {
+    padding-left: 20px;
+  }
+  li {
+    margin-bottom: 8px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+  .card h3 {
+    font-size: 14px;
+    font-weight: 700;
+    margin: 0 0 6px;
+  }
+  .card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  a { color: var(--accent); }
+  .contact {
+    margin-top: 48px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  footer {
+    margin-top: 48px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Politique de confidentialité</h1>
+  <div class="subtitle">Glorious 5 · Dernière mise à jour : 29 août 2026</div>
+
+  <p>
+    Cette politique explique quelles données l'application mobile <strong>Glorious 5</strong>
+    ("l'application") collecte, pourquoi, et comment elles sont utilisées. En utilisant
+    l'application, tu acceptes les pratiques décrites ici.
+  </p>
+
+  <h2>Données collectées</h2>
+
+  <div class="card">
+    <h3>Statistiques d'utilisation et diagnostics (Firebase Analytics &amp; Crashlytics)</h3>
+    <p>
+      L'application utilise <strong>Firebase Analytics</strong> et <strong>Firebase Crashlytics</strong>
+      (fournis par Google) pour comprendre comment l'application est utilisée et détecter les
+      plantages. Cela peut inclure : les écrans consultés, les actions effectuées dans l'app,
+      des identifiants techniques propres à l'installation de l'app, le modèle de l'appareil,
+      la version du système d'exploitation, et les journaux d'erreurs (rapports de plantage,
+      traces techniques). Ces données sont traitées par Google — voir la
+      <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">politique de
+      confidentialité de Google</a>.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>Compte anonyme et données de partie en ligne (Supabase)</h3>
+    <p>
+      Le mode multijoueur en ligne utilise <strong>Supabase</strong> pour la synchronisation
+      des parties. En rejoignant ce mode, un compte <strong>anonyme</strong> est créé
+      automatiquement sur l'appareil (aucune information personnelle — pas de nom, pas
+      d'e-mail, pas de mot de passe — n'est demandée ou nécessaire). Ce compte anonyme est
+      associé aux données de la partie en cours : joueurs enchéris, mises effectuées, équipes
+      constituées, résultat du match. Ces données sont traitées par Supabase — voir la
+      <a href="https://supabase.com/privacy" target="_blank" rel="noopener">politique de
+      confidentialité de Supabase</a>.
+    </p>
+  </div>
+
+  <p>
+    L'application ne demande <strong>aucune permission</strong> autre que l'accès à internet
+    (nécessaire au mode en ligne). Elle n'accède ni à la localisation, ni aux contacts, ni à
+    la caméra, ni au microphone, ni à aucune autre donnée sensible de l'appareil. Aucune
+    inscription par e-mail ou mot de passe n'est proposée ou requise pour utiliser
+    l'application.
+  </p>
+
+  <h2>Comment ces données sont utilisées</h2>
+  <ul>
+    <li>Faire fonctionner le mode multijoueur en ligne (synchroniser une partie entre deux appareils).</li>
+    <li>Comprendre l'usage de l'application pour l'améliorer (statistiques agrégées, écrans les plus utilisés).</li>
+    <li>Diagnostiquer et corriger les bugs et plantages.</li>
+  </ul>
+  <p>Ces données ne sont jamais vendues, et ne sont pas utilisées à des fins publicitaires.</p>
+
+  <h2>Partage des données</h2>
+  <p>
+    Les données ne sont partagées qu'avec les prestataires techniques nécessaires au
+    fonctionnement de l'application, listés ci-dessus (Google Firebase, Supabase), dans le
+    cadre de leurs propres conditions de traitement des données. Aucune donnée n'est vendue
+    ou partagée à des fins commerciales avec d'autres tiers.
+  </p>
+
+  <h2>Conservation et suppression des données</h2>
+  <p>
+    Les données de partie en ligne (liées au compte anonyme de ton appareil) sont conservées
+    tant que nécessaire au fonctionnement du service. Les statistiques d'usage et rapports de
+    plantage sont conservés selon les durées standards de Firebase (généralement jusqu'à 14
+    mois). Pour toute demande de suppression de données te concernant, contacte-nous à
+    l'adresse ci-dessous.
+  </p>
+
+  <h2>Confidentialité des enfants</h2>
+  <p>
+    L'application ne s'adresse pas spécifiquement aux enfants de moins de 13 ans et ne
+    collecte pas sciemment de données personnelles auprès d'eux.
+  </p>
+
+  <h2>Modifications de cette politique</h2>
+  <p>
+    Cette politique peut être mise à jour ponctuellement, notamment si de nouvelles
+    fonctionnalités de l'application le nécessitent. La date de dernière mise à jour en haut
+    de cette page reflète la version en vigueur.
+  </p>
+
+  <div class="contact">
+    <h2>Contact</h2>
+    <p>
+      Pour toute question concernant cette politique de confidentialité ou tes données,
+      contacte-nous à :
+      <a href="mailto:remi.mialonevan@gmail.com">remi.mialonevan@gmail.com</a>
+    </p>
+  </div>
+
+  <footer>Glorious 5 — Politique de confidentialité</footer>
+</div>
+</body>
+</html>
