@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.4-beta] - 2026-08-29
+
+### Added
+- **Online Multiplayer**: Real-time auction draft against another player over the network (Supabase-backed), with a lobby to create a match, browse open ones, or join via a shared invite code.
+- **Turn Timer**: 15-second countdown per bid, resolved server-side on timeout (awarded to the leading bidder, or free to the opponent if nobody opened), with device clock-skew correction so the countdown stays accurate regardless of the phone's system clock.
+- **Auction Result Buffer**: Each pick (won bid, pass, timeout, or automatic assignment) now pauses on a result screen showing the player and who got them, instead of jumping straight to the next round.
+- **Post-Draft Scouting & Simulation**: Online matches now go through the same scouting report and quarter-by-quarter simulation as local mode before revealing the server-decided winner.
+- **Lobby Expiration**: Waiting matches disappear from the lobby (and can no longer be joined) after 10 minutes with no opponent.
+- **Rebranding**: App renamed from "AndroidIdea" to "Glorious 5" (launcher name and project name).
+
+### Fixed
+- **Progressive Reveal Online**: Player stats now reveal gradually with each bid during online auctions, matching local mode instead of showing everything immediately.
+- **Bid Input Reset**: The bid amount you're entering is no longer silently wiped by a background refresh landing mid-edit.
+- **Online Team Size**: Fixed at 5 players per team, removing an inconsistent "team size" option that had no equivalent in local mode.
+
 ## [0.0.3-beta] - 2026-08-26
 
 ### Added
