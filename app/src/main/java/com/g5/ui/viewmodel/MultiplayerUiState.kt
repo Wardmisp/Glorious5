@@ -4,11 +4,15 @@ import com.g5.domain.model.Auction
 import com.g5.domain.model.Match
 import com.g5.domain.model.MatchTeam
 import com.g5.domain.model.NBAPlayer
+import com.g5.domain.model.QuarterSimulation
+import com.g5.domain.model.TeamAnalytics
 import com.g5.domain.model.TeamEntry
 
 sealed class MultiplayerScreen {
     object Lobby : MultiplayerScreen()
     object InMatch : MultiplayerScreen()
+    object Scouting : MultiplayerScreen()
+    object Simulation : MultiplayerScreen()
     object Result : MultiplayerScreen()
 }
 
@@ -34,6 +38,9 @@ data class MatchUiState(
     val bidInput: Int = 1,
     val isSubmittingBid: Boolean = false,
     val isRealtimeConnected: Boolean = true,
+    val analytics: Pair<TeamAnalytics, TeamAnalytics>? = null,
+    val matchSimulation: List<QuarterSimulation> = emptyList(),
+    val currentSimulationQuarter: Int = 0,
     val error: String? = null
 ) {
     val canPass: Boolean get() = currentAuction?.currentBidderId != null
