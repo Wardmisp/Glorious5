@@ -30,6 +30,8 @@ data class GameState(
     val budgets: Pair<Int, Int> = Pair(50, 50),
     val teams: Pair<List<TeamEntry>, List<TeamEntry>> = Pair(emptyList(), emptyList()),
     val showTeams: Boolean = false,
+    val showP1Team: Boolean = false,
+    val showP2Team: Boolean = false,
     val gameOver: Boolean = false,
     val thinking: Boolean = false,
     val bidCount: Int = 0,
@@ -39,7 +41,9 @@ data class GameState(
     val analytics: Pair<TeamAnalytics, TeamAnalytics>? = null,
     val luckyWinner: Int? = null,
     val matchSimulation: List<QuarterSimulation> = emptyList(),
-    val currentSimulationQuarter: Int = 0
+    val currentSimulationQuarter: Int = 0,
+    val activePlayerTurn: Int = 1,
+    val isVsHuman: Boolean = false
 )
 
 data class UiState(

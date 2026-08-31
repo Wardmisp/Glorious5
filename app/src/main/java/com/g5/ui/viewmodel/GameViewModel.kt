@@ -153,18 +153,18 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
     private fun resetGameState() {
         viewModelScope.launch {
             val isVsHuman = _uiState.value.currentScreen == Screen.VsHuman
-            val players = if (isVsHuman) {
-                playerRepository.getSupabaseAuctionPlayers(TOTAL)
-            } else {
-                playerRepository.getAuctionPlayers(TOTAL)
-            }
+            val players = playerRepository.getAuctionPlayers(TOTAL)
             
             val difficulty = _uiState.value.difficulty
             
-            val (playerBudget, aiBudget) = when (difficulty) {
-                Difficulty.BEGINNER -> Pair(BUDGET + 10, BUDGET)
-                Difficulty.NORMAL -> Pair(BUDGET, BUDGET)
-                Difficulty.DIFFICULT -> Pair(BUDGET, BUDGET + 10)
+            val (playerBudget, aiBudget) = if (isVsHuman) {
+                Pair(BUDGET, BUDGET)
+            } else {
+                when (difficulty) {
+                    Difficulty.BEGINNER -> Pair(BUDGET + 10, BUDGET)
+                    Difficulty.NORMAL -> Pair(BUDGET, BUDGET)
+                    Difficulty.DIFFICULT -> Pair(BUDGET, BUDGET + 10)
+                }
             }
 
             updateGameState { 
@@ -173,7 +173,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                     teams = Pair(emptyList(), emptyList()),
                     revealOrder = generateRevealOrder(),
                     players = players,
-                    luckyWinner = null
+                    luckyWinner = null,
+                    activePlayerTurn = 1,
+                    isVsHuman = isVsHuman
                 )
             }
             soundManager.playBeginAuction()
@@ -241,6 +243,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         if (amount <= budget) {
             setBid(amount, 1)
             setP1Input(amount + 1)
+            setP2Input(amount + 1)
+            updateGameState { it.copy(activePlayerTurn = 2) }
         }
     }
 
@@ -252,7 +256,61 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         if (amount <= budget) {
             setBid(amount, 2)
             setP2Input(amount + 1)
+            setP1Input(amount + 1)
+            updateGameState { it.copy(activePlayerTurn = 1) }
         }
+    }
+
+    fun passP1() {
+        val currentState = _uiState.value.gameState
+        if (currentState.done) return
+        val p1Full = currentState.teams.first.size >= TOTAL / 2
+        val p2Full = currentState.teams.second.size >= TOTAL / 2
+
+        if (!p2Full) {
+            val finalBid = if (currentState.bidder == 2) {
+                currentState.bid
+            } else {
+                if (p1Full) 0 else maxOf(1, currentState.bid)
+            }
+            adjudicate(finalBid, 2)
+        } else if (!p1Full) {
+            val finalBid = if (currentState.bidder == 1) currentState.bid else 0
+            adjudicate(finalBid, 1)
+        } else {
+            soundManager.stopSound()
+            updateGameState { it.copy(done = true, awardedTo = null, thinking = false) }
+        }
+    }
+
+    fun passP2() {
+        val currentState = _uiState.value.gameState
+        if (currentState.done) return
+        val p1Full = currentState.teams.first.size >= TOTAL / 2
+        val p2Full = currentState.teams.second.size >= TOTAL / 2
+
+        if (!p1Full) {
+            val finalBid = if (currentState.bidder == 1) {
+                currentState.bid
+            } else {
+                if (p2Full) 0 else maxOf(1, currentState.bid)
+            }
+            adjudicate(finalBid, 1)
+        } else if (!p2Full) {
+            val finalBid = if (currentState.bidder == 2) currentState.bid else 0
+            adjudicate(finalBid, 2)
+        } else {
+            soundManager.stopSound()
+            updateGameState { it.copy(done = true, awardedTo = null, thinking = false) }
+        }
+    }
+
+    fun toggleP1Team() {
+        updateGameState { it.copy(showP1Team = !it.showP1Team) }
+    }
+
+    fun toggleP2Team() {
+        updateGameState { it.copy(showP2Team = !it.showP2Team) }
     }
 
     suspend fun computerBid() {
@@ -403,6 +461,7 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                 navigateToScreen(Screen.ScoutingReport)
             }
         } else {
+            val starter = (nextRoundIndex % 2) + 1
             updateGameState { state ->
                 GameState(
                     round = nextRoundIndex,
@@ -415,7 +474,9 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
                     bidCount = 0,
                     revealOrder = generateRevealOrder(),
                     timer = 15,
-                    players = state.players
+                    players = state.players,
+                    activePlayerTurn = starter,
+                    isVsHuman = state.isVsHuman
                 )
             }
 
@@ -439,7 +500,8 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             playActionBeginSound()
         } else {
             updateGameState { it.copy(gameOver = true) }
-            navigateToScreen(Screen.VsComputer, reset = false) // On revient sur l'écran de jeu SANS reset
+            val targetScreen = if (_uiState.value.gameState.isVsHuman) Screen.VsHuman else Screen.VsComputer
+            navigateToScreen(targetScreen, reset = false) // On revient sur l'écran de jeu SANS reset
             val winner = _uiState.value.gameState.luckyWinner
             soundManager.playResultScreen(isWinner = winner == 1)
         }

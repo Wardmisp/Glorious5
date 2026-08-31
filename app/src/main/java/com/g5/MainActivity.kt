@@ -35,6 +35,7 @@ import com.g5.ui.screens.MultiplayerSimulationScreen
 import com.g5.ui.screens.OptionsScreen
 import com.g5.ui.screens.ScoutingReportScreen
 import com.g5.ui.screens.SimulationScreen
+import com.g5.ui.screens.SplitScreenGameScreen
 import com.g5.ui.theme.AndroidIdeaTheme
 import com.g5.ui.viewmodel.GameViewModel
 import com.g5.ui.viewmodel.MultiplayerScreen
@@ -151,8 +152,7 @@ fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) 
                     )
                 }
                 is Screen.VsHuman -> {
-                    GameScreen(
-                        vsComputer = false,
+                    SplitScreenGameScreen(
                         viewModel = viewModel,
                         onBack = {
                             viewModel.navigateToScreen(Screen.Home)
@@ -230,12 +230,15 @@ fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) 
                     )
                 }
                 is Screen.ScoutingReport -> {
+                    val isVsHuman = uiState.gameState.isVsHuman
                     ScoutingReportScreen(
                         gameState = uiState.gameState,
                         onStartSimulation = {
                             viewModel.navigateToScreen(Screen.Simulation)
                         },
-                        tutorialPositions = tutorialPositions
+                        tutorialPositions = tutorialPositions,
+                        labelA = if (isVsHuman) "JOUEUR 1" else "VOUS",
+                        labelB = if (isVsHuman) "JOUEUR 2" else "IA"
                     )
                 }
             }
