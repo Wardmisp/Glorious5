@@ -42,6 +42,32 @@ class MultiplayerViewModel : ViewModel() {
     private var matchChannel: RealtimeChannel? = null
     private var realtimeJob: Job? = null
     private var pollingJob: Job? = null
+    private var autoPassJob: Job? = null
+    private var autoPassAuctionId: String? = null
+
+    private fun cancelAutoPass() {
+        autoPassJob?.cancel()
+        autoPassJob = null
+        autoPassAuctionId = null
+        if (_uiState.value.match.isAutoPassing) {
+            updateMatch { it.copy(isAutoPassing = false) }
+        }
+    }
+
+    private fun scheduleAutoPass(matchId: String, auctionId: String) {
+        if (autoPassAuctionId == auctionId && autoPassJob?.isActive == true) return
+        cancelAutoPass()
+        autoPassAuctionId = auctionId
+        autoPassJob = viewModelScope.launch {
+            updateMatch { it.copy(isAutoPassing = true) }
+            delay(1200L)
+            val currentState = _uiState.value.match
+            if (currentState.currentAuction?.id == auctionId && currentState.isMyTurn && !currentState.isSubmittingBid && currentState.canPass) {
+                pass()
+            }
+            updateMatch { it.copy(isAutoPassing = false) }
+        }
+    }
 
     private fun updateLobby(update: (LobbyUiState) -> LobbyUiState) {
         _uiState.update { it.copy(lobby = update(it.lobby)) }
@@ -271,7 +297,11 @@ class MultiplayerViewModel : ViewModel() {
                 )
             }
 
+            val cannotAffordNextBid = isMyTurn && activeAuction != null && activeAuction.currentBidderId != null &&
+                (myTeam?.budgetRemaining ?: 0) < ((activeAuction.currentBid) + 1)
+
             if (match.status == "completed") {
+                cancelAutoPass()
                 // Le résultat est déjà décidé côté serveur (compute_match_result). Si le dernier
                 // pick est encore affiché en tampon, on attend que l'utilisateur le ferme
                 // (dismissPendingResult) avant de passer au rapport de scouting.
@@ -286,10 +316,12 @@ class MultiplayerViewModel : ViewModel() {
                 // même temps (present_next_player() ne le protège pas lui-même, cf. plan) — et
                 // seulement quand il n'y a plus rien à acquitter, jamais en cascade silencieuse.
                 if (match.status == "drafting" && activeAuction == null && pendingResult == null && match.player1Id == myId) {
+                    cancelAutoPass()
                     presentNextPlayerOnce(matchId)
                 } else if (activeAuction != null && activeAuction.turnDeadline == null &&
                     activeAuction.currentBidderId == null && activeAuction.turnUserId == myId
                 ) {
+                    cancelAutoPass()
                     // Le chrono d'ouverture ne démarre que lorsque le joueur dont c'est le tour
                     // de miser est effectivement présent et prêt (voir start_turn_clock) — pas
                     // dès la création de l'enchère côté serveur, qui peut survenir avant que son
@@ -297,6 +329,10 @@ class MultiplayerViewModel : ViewModel() {
                     // serveur partagé : l'adversaire le voit défiler à l'identique dès son
                     // prochain rechargement (temps réel ou polling), sans action de sa part.
                     startTurnClockOnce(matchId, activeAuction.id)
+                } else if (cannotAffordNextBid && pendingResult == null) {
+                    scheduleAutoPass(matchId, activeAuction.id)
+                } else {
+                    cancelAutoPass()
                 }
             }
 
@@ -309,6 +345,7 @@ class MultiplayerViewModel : ViewModel() {
 
     /** Ferme l'écran "tampon" affiché après une enchère résolue ou une attribution automatique. */
     fun dismissPendingResult() {
+        cancelAutoPass()
         val matchId = currentMatchId ?: return
         val dismissedAuctionId = _uiState.value.match.pendingResult?.auctionId
         updateMatch {
@@ -377,6 +414,7 @@ class MultiplayerViewModel : ViewModel() {
     }
 
     private fun stopObserving() {
+        cancelAutoPass()
         realtimeJob?.cancel()
         realtimeJob = null
         pollingJob?.cancel()
@@ -418,6 +456,7 @@ class MultiplayerViewModel : ViewModel() {
             updateMatch { it.copy(error = "Mise invalide") }
             return
         }
+        cancelAutoPass()
         viewModelScope.launch {
             updateMatch { it.copy(isSubmittingBid = true, error = null) }
             try {
@@ -435,6 +474,7 @@ class MultiplayerViewModel : ViewModel() {
         val state = _uiState.value.match
         val auction = state.currentAuction ?: return
         if (!state.isMyTurn || state.isSubmittingBid || !state.canPass) return
+        cancelAutoPass()
         viewModelScope.launch {
             updateMatch { it.copy(isSubmittingBid = true, error = null) }
             try {
