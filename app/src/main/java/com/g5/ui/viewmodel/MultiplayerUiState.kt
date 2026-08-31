@@ -49,6 +49,7 @@ data class MatchUiState(
     val bidCount: Int = 0,
     val turnDeadlineAtMillis: Long? = null,
     val isMyTurn: Boolean = false,
+    val isAutoPassing: Boolean = false,
     val bidInput: Int = 1,
     val isSubmittingBid: Boolean = false,
     val isRealtimeConnected: Boolean = true,
@@ -60,6 +61,12 @@ data class MatchUiState(
     val error: String? = null
 ) {
     val canPass: Boolean get() = currentAuction?.currentBidderId != null
+    val cannotAffordNextBid: Boolean get() {
+        val auction = currentAuction ?: return false
+        val budget = myTeam?.budgetRemaining ?: 0
+        val minValidBid = auction.currentBid + 1
+        return isMyTurn && canPass && budget < minValidBid
+    }
 }
 
 data class MultiplayerUiState(

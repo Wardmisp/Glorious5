@@ -358,7 +358,7 @@ private fun DraftingContent(
                     minBid = auction.currentBid + 1,
                     onBid = onPlaceBid,
                     leading = auction.currentBidderId == state.myUserId,
-                    disabled = !state.isMyTurn || state.isSubmittingBid,
+                    disabled = !state.isMyTurn || state.isSubmittingBid || state.isAutoPassing || state.cannotAffordNextBid,
                     modifier = Modifier.weight(1f)
                 )
 
@@ -396,11 +396,11 @@ private fun DraftingContent(
 
             Button(
                 onClick = onPass,
-                enabled = state.isMyTurn && state.canPass && !state.isSubmittingBid,
+                enabled = state.isMyTurn && state.canPass && !state.isSubmittingBid && !state.isAutoPassing,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "PASSER",
+                    text = if (state.isAutoPassing) "PASSE AUTOMATIQUE..." else "PASSER",
                     fontSize = 12.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = FontFamily.SansSerif,
@@ -422,23 +422,31 @@ private fun DraftingContent(
 private fun TurnBanner(state: MatchUiState, secondsLeft: Int?) {
     val auction = state.currentAuction ?: return
     val isOpening = auction.currentBidderId == null
+    val isAutoPassing = state.isAutoPassing || (state.isMyTurn && state.cannotAffordNextBid)
     val turnLabel = when {
+        isAutoPassing -> "BUDGET INSUFFISANT (PASSE AUTO...)"
         state.isMyTurn && isOpening -> "TU OUVRES L'ENCHÈRE"
         state.isMyTurn -> "À TOI DE MISER"
         isOpening -> "L'ADVERSAIRE OUVRE L'ENCHÈRE"
         else -> "AU TOUR DE L'ADVERSAIRE"
     }
 
+    val bannerColor = when {
+        isAutoPassing -> Color(0xFFE03A3E)
+        state.isMyTurn -> Color(0xFFF4722B)
+        else -> null
+    }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = if (state.isMyTurn) Color(0xFFF4722B).copy(alpha = 0.1f) else MaterialTheme.colorScheme.surface,
+                color = bannerColor?.copy(alpha = 0.1f) ?: MaterialTheme.colorScheme.surface,
                 shape = RoundedCornerShape(12.dp)
             )
             .border(
                 width = 1.dp,
-                color = if (state.isMyTurn) Color(0xFFF4722B).copy(alpha = 0.4f) else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
+                color = bannerColor?.copy(alpha = 0.4f) ?: MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
                 shape = RoundedCornerShape(12.dp)
             )
             .padding(14.dp),
@@ -455,7 +463,7 @@ private fun TurnBanner(state: MatchUiState, secondsLeft: Int?) {
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = FontFamily.SansSerif,
                 letterSpacing = 0.5.sp,
-                color = if (state.isMyTurn) Color(0xFFF4722B) else MaterialTheme.colorScheme.onSurface
+                color = bannerColor ?: MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = if (!isOpening) "Mise actuelle : $${auction.currentBid}" else "Aucune mise",
