@@ -8,6 +8,10 @@ import com.g5.domain.model.QuarterSimulation
 import com.g5.domain.model.TeamAnalytics
 import com.g5.domain.model.TeamEntry
 
+/** Budget fixe par joueur pour toutes les parties en ligne : non configurable, contrairement au
+ * mode local, pour garder les parties du lobby public comparables entre elles. */
+const val MULTIPLAYER_BUDGET = 50
+
 sealed class MultiplayerScreen {
     object Lobby : MultiplayerScreen()
     object InMatch : MultiplayerScreen()
@@ -34,7 +38,6 @@ data class LobbyUiState(
     val openMatches: List<Match> = emptyList(),
     val joinCodeInput: String = "",
     val nameInput: String = "",
-    val budgetInput: Int = 50,
     val error: String? = null
 )
 
