@@ -352,7 +352,20 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
             
         val maxBid = minOf(personalValuation, budgetLimit)
         
-        if (currentState.bid >= maxBid) return
+        val cannotBid = currentState.budgets.second <= currentState.bid || maxBid <= currentState.bid
+        
+        if (cannotBid) {
+            updateGameState { it.copy(thinking = true) }
+            val passDelay = (800L..1500L).random()
+            delay(passDelay)
+            
+            val updatedState = _uiState.value.gameState
+            if (!updatedState.done && updatedState.bidder != 2) {
+                pass(passedBy = 2)
+            }
+            updateGameState { it.copy(thinking = false) }
+            return
+        }
 
         updateGameState { it.copy(thinking = true) }
         
@@ -362,21 +375,25 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         delay(baseDelay + extraDelay)
         
         val updatedState = _uiState.value.gameState
-        if (!updatedState.done && updatedState.bidder != 2 && updatedState.bid < maxBid) {
-            val budgetRatio = updatedState.budgets.second.toFloat() / BUDGET
-            val interestRatio = personalValuation.toFloat() / 25f 
-            
-            val maxJump = when {
-                interestRatio > 0.9f && budgetRatio > 0.7f -> 5
-                interestRatio > 0.7f && budgetRatio > 0.4f -> 3
-                interestRatio > 0.5f -> 2
-                else -> 1
+        if (!updatedState.done && updatedState.bidder != 2) {
+            if (updatedState.bid < maxBid && updatedState.budgets.second > updatedState.bid) {
+                val budgetRatio = updatedState.budgets.second.toFloat() / BUDGET
+                val interestRatio = personalValuation.toFloat() / 25f 
+                
+                val maxJump = when {
+                    interestRatio > 0.9f && budgetRatio > 0.7f -> 5
+                    interestRatio > 0.7f && budgetRatio > 0.4f -> 3
+                    interestRatio > 0.5f -> 2
+                    else -> 1
+                }
+                
+                val jump = (1..maxJump).random()
+                val nextBid = minOf(updatedState.bid + jump, maxBid)
+                
+                setBid(nextBid, 2)
+            } else {
+                pass(passedBy = 2)
             }
-            
-            val jump = (1..maxJump).random()
-            val nextBid = minOf(updatedState.bid + jump, maxBid)
-            
-            setBid(nextBid, 2)
         }
         updateGameState { it.copy(thinking = false) }
     }
@@ -519,28 +536,34 @@ class GameViewModel(application: Application) : AndroidViewModel(application) {
         soundManager.playActionBegin()
     }
 
-    fun pass() {
+    fun pass(passedBy: Int = 1) {
         val currentState = _uiState.value.gameState
+        if (currentState.done) return
+
         val p1Full = currentState.teams.first.size >= TOTAL / 2
         val p2Full = currentState.teams.second.size >= TOTAL / 2
 
-        if (!p2Full) {
-            // L'adversaire a de la place, il récupère le joueur
-            // S'il menait déjà, il garde son prix, sinon prix actuel ou 0 (si p1Full)
-            val finalBid = if (currentState.bidder == 2) {
+        val recipient = if (passedBy == 1) 2 else 1
+        val recipientFull = if (recipient == 1) p1Full else p2Full
+        val passerFull = if (passedBy == 1) p1Full else p2Full
+
+        if (!recipientFull) {
+            // Le destinataire a de la place, il récupère le joueur
+            // S'il menait déjà, il garde son prix, sinon prix actuel ou 0 (si le passeur est plein)
+            val finalBid = if (currentState.bidder == recipient) {
                 currentState.bid 
             } else {
-                if (p1Full) 0 else maxOf(1, currentState.bid)
+                if (passerFull) 0 else maxOf(1, currentState.bid)
             }
-            adjudicate(finalBid, 2)
-        } else if (!p1Full) {
-            // L'adversaire est plein mais j'ai de la place, je récupère le joueur
-            val finalBid = if (currentState.bidder == 1) {
+            adjudicate(finalBid, recipient)
+        } else if (!passerFull) {
+            // Le destinataire est plein mais le joueur qui passe a de la place, il récupère le joueur
+            val finalBid = if (currentState.bidder == passedBy) {
                 currentState.bid
             } else {
                 0
             }
-            adjudicate(finalBid, 1)
+            adjudicate(finalBid, passedBy)
         } else {
             // Les deux sont pleins (ne devrait pas arriver avec TOTAL=10), on skip
             soundManager.stopSound()
