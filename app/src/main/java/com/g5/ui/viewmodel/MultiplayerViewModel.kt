@@ -104,6 +104,7 @@ class MultiplayerViewModel : ViewModel() {
         }
     }
 
+    fun setBudgetInput(value: Int) = updateLobby { it.copy(budgetInput = value) }
     fun setJoinCodeInput(value: String) = updateLobby { it.copy(joinCodeInput = value) }
     fun setNameInput(value: String) = updateLobby { it.copy(nameInput = value) }
 
@@ -116,7 +117,7 @@ class MultiplayerViewModel : ViewModel() {
                 val lobby = _uiState.value.lobby
                 val matchId = repository.createMatch(
                     opponentId = null,
-                    budget = MULTIPLAYER_BUDGET,
+                    budget = lobby.budgetInput,
                     teamSize = 5,
                     name = lobby.nameInput.trim().ifBlank { null }
                 )

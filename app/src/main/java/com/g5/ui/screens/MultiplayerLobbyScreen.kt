@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.g5.domain.model.Match
 import com.g5.ui.viewmodel.LobbyUiState
-import com.g5.ui.viewmodel.MULTIPLAYER_BUDGET
 
 @Composable
 fun MultiplayerLobbyScreen(
@@ -46,6 +45,7 @@ fun MultiplayerLobbyScreen(
     onJoinMatch: (String) -> Unit,
     onJoinByCode: () -> Unit,
     onJoinCodeChange: (String) -> Unit,
+    onBudgetChange: (Int) -> Unit,
     onNameChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -139,11 +139,12 @@ fun MultiplayerLobbyScreen(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
-                Text(
-                    text = "Budget : ${MULTIPLAYER_BUDGET}$ par joueur",
-                    fontSize = 13.sp,
-                    fontFamily = FontFamily.SansSerif,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                Stepper(
+                    label = "Budget",
+                    value = "${state.budgetInput}$",
+                    onDecrease = { onBudgetChange((state.budgetInput - 10).coerceAtLeast(10)) },
+                    onIncrease = { onBudgetChange(state.budgetInput + 10) },
+                    modifier = Modifier.fillMaxWidth(0.5f)
                 )
             }
 
@@ -229,6 +230,60 @@ fun MultiplayerLobbyScreen(
             }
 
             Box(modifier = Modifier.size(24.dp))
+        }
+    }
+}
+
+@Composable
+private fun Stepper(
+    label: String,
+    value: String,
+    onDecrease: () -> Unit,
+    onIncrease: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .background(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f), shape = RoundedCornerShape(10.dp))
+            .padding(10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Text(
+            text = label,
+            fontSize = 10.sp,
+            fontFamily = FontFamily.SansSerif,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .background(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(8.dp))
+                    .clickable { onDecrease() },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "–", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFFF4722B))
+            }
+            Text(
+                text = value,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.ExtraBold,
+                fontFamily = FontFamily.SansSerif,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .background(color = MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(8.dp))
+                    .clickable { onIncrease() },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = "+", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFFF4722B))
+            }
         }
     }
 }
