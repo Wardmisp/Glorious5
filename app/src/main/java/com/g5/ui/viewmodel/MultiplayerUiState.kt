@@ -33,7 +33,6 @@ data class LobbyUiState(
     val isLoading: Boolean = false,
     val openMatches: List<Match> = emptyList(),
     val joinCodeInput: String = "",
-    val nameInput: String = "",
     val budgetInput: Int = 50,
     val error: String? = null
 )

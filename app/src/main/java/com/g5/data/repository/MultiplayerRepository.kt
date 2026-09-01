@@ -87,12 +87,11 @@ class MultiplayerRepository {
     private data class CreateMatchParams(
         @SerialName("p_opponent_id") val opponentId: String? = null,
         @SerialName("p_budget") val budget: Int = 50,
-        @SerialName("p_team_size") val teamSize: Int = 5,
-        @SerialName("p_name") val name: String? = null
+        @SerialName("p_team_size") val teamSize: Int = 5
     )
 
-    suspend fun createMatch(opponentId: String? = null, budget: Int = 50, teamSize: Int = 5, name: String? = null): String =
-        client.postgrest.rpc("create_match", CreateMatchParams(opponentId, budget, teamSize, name)).decodeAs<String>()
+    suspend fun createMatch(opponentId: String? = null, budget: Int = 50, teamSize: Int = 5): String =
+        client.postgrest.rpc("create_match", CreateMatchParams(opponentId, budget, teamSize)).decodeAs<String>()
 
     @Serializable
     private data class MatchIdParam(@SerialName("p_match_id") val matchId: String)

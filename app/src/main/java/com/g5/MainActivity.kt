@@ -182,8 +182,7 @@ fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) 
                                 onJoinMatch = { matchId -> multiplayerViewModel.joinMatch(matchId) },
                                 onJoinByCode = { multiplayerViewModel.joinByCode() },
                                 onJoinCodeChange = { multiplayerViewModel.setJoinCodeInput(it) },
-                                onBudgetChange = { multiplayerViewModel.setBudgetInput(it) },
-                                onNameChange = { multiplayerViewModel.setNameInput(it) }
+                                onBudgetChange = { multiplayerViewModel.setBudgetInput(it) }
                             )
                         }
                         is MultiplayerScreen.InMatch -> {
