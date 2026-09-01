@@ -106,6 +106,7 @@ class MultiplayerViewModel : ViewModel() {
 
     fun setBudgetInput(value: Int) = updateLobby { it.copy(budgetInput = value) }
     fun setJoinCodeInput(value: String) = updateLobby { it.copy(joinCodeInput = value) }
+    fun setNameInput(value: String) = updateLobby { it.copy(nameInput = value) }
 
     /** Crée un match en attente : visible dans le lobby public ET partageable via son id (le "code").
      * La taille d'équipe n'est pas configurable côté client : toujours 5. */
@@ -117,7 +118,8 @@ class MultiplayerViewModel : ViewModel() {
                 val matchId = repository.createMatch(
                     opponentId = null,
                     budget = lobby.budgetInput,
-                    teamSize = 5
+                    teamSize = 5,
+                    name = lobby.nameInput.trim().ifBlank { null }
                 )
                 updateLobby { it.copy(isLoading = false) }
                 enterMatch(matchId)

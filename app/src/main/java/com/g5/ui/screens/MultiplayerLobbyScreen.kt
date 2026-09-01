@@ -46,6 +46,7 @@ fun MultiplayerLobbyScreen(
     onJoinByCode: () -> Unit,
     onJoinCodeChange: (String) -> Unit,
     onBudgetChange: (Int) -> Unit,
+    onNameChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -130,6 +131,13 @@ fun MultiplayerLobbyScreen(
                     fontFamily = FontFamily.SansSerif,
                     letterSpacing = 0.5.sp,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+                OutlinedTextField(
+                    value = state.nameInput,
+                    onValueChange = { if (it.length <= 30) onNameChange(it) },
+                    placeholder = { Text("Nom de la partie (optionnel)") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
                 )
                 Stepper(
                     label = "Budget",
@@ -307,14 +315,14 @@ private fun OpenMatchRow(match: Match, onJoin: () -> Unit) {
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = "Budget ${match.budget}$ · ${match.teamSize} joueurs",
+                text = match.name?.takeIf { it.isNotBlank() } ?: "Partie #${match.id.take(4).uppercase()}",
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.SansSerif,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = "En attente d'un adversaire",
+                text = "Budget ${match.budget}$ · ${match.teamSize} joueurs",
                 fontSize = 11.sp,
                 fontFamily = FontFamily.SansSerif,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)

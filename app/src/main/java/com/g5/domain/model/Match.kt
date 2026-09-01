@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class Match(
     val id: String,
+    val name: String? = null,
     @SerialName("player1_id") val player1Id: String,
     @SerialName("player2_id") val player2Id: String? = null,
     val status: String = "waiting", // waiting | drafting | completed | cancelled
