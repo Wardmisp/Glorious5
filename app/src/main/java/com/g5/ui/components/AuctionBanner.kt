@@ -21,10 +21,12 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.g5.R
 
 @Composable
 fun AuctionBanner(
@@ -70,7 +72,7 @@ fun AuctionBanner(
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Text(
-                text = if (done) "Adjugé" else "Enchère actuelle",
+                text = stringResource(if (done) R.string.auction_banner_awarded else R.string.auction_banner_current_bid_label),
                 fontSize = 10.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = FontFamily.SansSerif,
@@ -78,7 +80,7 @@ fun AuctionBanner(
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
             Text(
-                text = if (currentBid == 0) "Aucune mise" else "$$currentBid",
+                text = if (currentBid == 0) stringResource(R.string.auction_banner_no_bid) else "$$currentBid",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = FontFamily.SansSerif,
@@ -87,7 +89,7 @@ fun AuctionBanner(
 
             if (!done && currentBid > 0) {
                 Text(
-                    text = "Adjugé dans ${timer}s",
+                    text = stringResource(R.string.auction_banner_awarded_in, timer),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.SansSerif,
@@ -107,7 +109,7 @@ fun AuctionBanner(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "L'ordi réfléchit",
+                        text = stringResource(R.string.auction_banner_computer_thinking),
                         fontSize = 12.sp,
                         fontFamily = FontFamily.SansSerif,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -139,7 +141,7 @@ fun AuctionBanner(
                 }
             } else if (leaderName != null && !thinking) {
                 Text(
-                    text = if (done) "Gagnant" else "Meneur",
+                    text = stringResource(if (done) R.string.auction_banner_winner else R.string.auction_banner_leader),
                     fontSize = 10.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = FontFamily.SansSerif,
@@ -155,7 +157,7 @@ fun AuctionBanner(
                 )
             } else if (!leaderName.isNullOrEmpty() == false && !thinking) {
                 Text(
-                    text = "Lancez l'enchère !",
+                    text = stringResource(R.string.auction_banner_start_bidding),
                     fontSize = 12.sp,
                     fontFamily = FontFamily.SansSerif,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)

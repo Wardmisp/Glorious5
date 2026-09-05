@@ -11,6 +11,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -83,19 +84,19 @@ fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) 
     }
 
     val tutorialSteps = listOf(
-        TutorialStep("Bienvenue !", "Découvrez comment bâtir votre équipe de légende dans Glorious 5.", "home_tutorial"),
-        TutorialStep("Le Marché", "Le but est de recruter 5 joueurs. Mais attention, votre budget est limité à 50$ !"),
-        TutorialStep("Commencer", "Commençons par lancer une partie contre l'ordinateur.", "home_ia"),
-        TutorialStep("La Carte Joueur", "Voici le joueur mis en vente. Ses statistiques sont cachées au début et se révèlent au fil des enchères.", "game_card"),
-        TutorialStep("Le Chronomètre", "Chaque tour dure 15 secondes. Si personne ne mise avant la fin, le dernier enchéreur emporte le joueur.", "game_timer"),
-        TutorialStep("Miser", "Utilisez ces boutons pour augmenter l'enchère. Soyez stratégique pour ne pas vider votre budget trop vite !", "game_bid"),
-        TutorialStep("Passer", "Si le prix est trop élevé ou si le joueur ne vous intéresse pas, vous pouvez passer.", "game_pass"),
-        TutorialStep("Votre Équipe", "Consultez l'état de votre effectif et votre argent restant à tout moment ici.", "game_teams"),
-        TutorialStep("Analyse d'avant-match", "Une fois l'équipe bâtie, le Scouting Report analyse vos chances de victoire."),
-        TutorialStep("Probabilités", "Découvrez vos chances de succès basées sur l'équilibre et le talent de votre effectif.", "scouting_win"),
-        TutorialStep("Forces & Faiblesses", "Comparez les secteurs de jeu : Attaque, Défense, Playmaking...", "scouting_stats"),
-        TutorialStep("Duels Clés", "Voyez qui domine à chaque poste. Les noms en gras indiquent un avantage statistique.", "scouting_matchups"),
-        TutorialStep("C'est parti !", "Vous savez tout ! Bonne chance pour monter la meilleure équipe possible.")
+        TutorialStep(stringResource(R.string.tutorial_step1_title), stringResource(R.string.tutorial_step1_body), "home_tutorial"),
+        TutorialStep(stringResource(R.string.tutorial_step2_title), stringResource(R.string.tutorial_step2_body)),
+        TutorialStep(stringResource(R.string.tutorial_step3_title), stringResource(R.string.tutorial_step3_body), "home_ia"),
+        TutorialStep(stringResource(R.string.tutorial_step4_title), stringResource(R.string.tutorial_step4_body), "game_card"),
+        TutorialStep(stringResource(R.string.tutorial_step5_title), stringResource(R.string.tutorial_step5_body), "game_timer"),
+        TutorialStep(stringResource(R.string.tutorial_step6_title), stringResource(R.string.tutorial_step6_body), "game_bid"),
+        TutorialStep(stringResource(R.string.tutorial_step7_title), stringResource(R.string.tutorial_step7_body), "game_pass"),
+        TutorialStep(stringResource(R.string.tutorial_step8_title), stringResource(R.string.tutorial_step8_body), "game_teams"),
+        TutorialStep(stringResource(R.string.tutorial_step9_title), stringResource(R.string.tutorial_step9_body)),
+        TutorialStep(stringResource(R.string.tutorial_step10_title), stringResource(R.string.tutorial_step10_body), "scouting_win"),
+        TutorialStep(stringResource(R.string.tutorial_step11_title), stringResource(R.string.tutorial_step11_body), "scouting_stats"),
+        TutorialStep(stringResource(R.string.tutorial_step12_title), stringResource(R.string.tutorial_step12_body), "scouting_matchups"),
+        TutorialStep(stringResource(R.string.tutorial_step13_title), stringResource(R.string.tutorial_step13_body))
     )
 
     Box(
@@ -218,8 +219,8 @@ fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) 
                         gameState = uiState.gameState,
                         onStartSimulation = { navController.navigate(Routes.Simulation) },
                         tutorialPositions = tutorialPositions,
-                        labelA = if (isVsHuman) "JOUEUR 1" else "VOUS",
-                        labelB = if (isVsHuman) "JOUEUR 2" else "IA"
+                        labelA = if (isVsHuman) stringResource(R.string.common_player_number_upper, 1) else stringResource(R.string.scouting_default_label_you),
+                        labelB = if (isVsHuman) stringResource(R.string.common_player_number_upper, 2) else stringResource(R.string.scouting_default_label_ai)
                     )
                 }
             }

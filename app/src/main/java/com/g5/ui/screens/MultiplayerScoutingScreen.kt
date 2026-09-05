@@ -2,6 +2,8 @@ package com.g5.ui.screens
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import com.g5.R
 import com.g5.domain.model.GameState
 import com.g5.ui.viewmodel.MatchUiState
 
@@ -21,7 +23,7 @@ fun MultiplayerScoutingScreen(
         gameState = GameState(analytics = analytics),
         onStartSimulation = onStartSimulation,
         modifier = modifier,
-        labelA = "TOI",
-        labelB = "ADVERSAIRE"
+        labelA = stringResource(R.string.scouting_multiplayer_label_you),
+        labelB = stringResource(R.string.scouting_multiplayer_label_opponent)
     )
 }

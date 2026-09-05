@@ -27,10 +27,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.g5.R
 import com.g5.domain.model.TeamEntry
 import com.g5.domain.model.TOTAL
 
@@ -73,7 +75,7 @@ fun TeamsPanel(
             )
 
             Text(
-                text = "Équipes",
+                text = stringResource(R.string.teams_panel_title),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.SansSerif,
@@ -82,7 +84,7 @@ fun TeamsPanel(
             )
 
             Text(
-                text = "(${teams.first.size + teams.second.size}/$TOTAL)",
+                text = stringResource(R.string.teams_panel_count, teams.first.size + teams.second.size, TOTAL),
                 fontSize = 12.sp,
                 fontFamily = FontFamily.SansSerif,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -234,7 +236,7 @@ private fun TeamColumn(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "— libre",
+                        text = stringResource(R.string.teams_panel_empty_slot),
                         fontSize = 10.sp,
                         fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)

@@ -19,7 +19,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import com.g5.R
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -109,14 +111,14 @@ fun TutorialOverlay(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     TextButton(onClick = onSkip, modifier = Modifier.weight(1f)) {
-                        Text("PASSER", color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.tutorial_skip), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), fontWeight = FontWeight.Bold)
                     }
                     Button(
                         onClick = onNext,
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF4722B))
                     ) {
-                        Text("SUIVANT", color = Color.White, fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.tutorial_next), color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 }
             }
