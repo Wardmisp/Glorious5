@@ -1,8 +1,8 @@
 package com.g5
 
-import com.g5.domain.model.Auction
-import com.g5.domain.model.Match
-import com.g5.domain.model.MatchTeam
+import com.g5.data.remote.dto.Auction
+import com.g5.data.remote.dto.Match
+import com.g5.data.remote.dto.MatchTeam
 import com.g5.domain.model.NBAPlayer
 import com.g5.ui.viewmodel.MatchUiState
 import org.junit.Assert.*
