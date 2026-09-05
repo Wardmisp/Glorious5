@@ -35,11 +35,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.g5.R
 import com.g5.domain.model.TeamEntry
 import com.g5.ui.components.BidControl
 import com.g5.ui.components.PlayerRevealCard
@@ -79,14 +81,14 @@ fun MultiplayerMatchScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Retour",
+                    contentDescription = stringResource(R.string.common_back),
                     tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(16.dp)
                 )
             }
 
             Text(
-                text = "MATCH EN LIGNE",
+                text = stringResource(R.string.mp_match_title),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = FontFamily.SansSerif,
@@ -97,7 +99,7 @@ fun MultiplayerMatchScreen(
             if (!state.isRealtimeConnected) {
                 Icon(
                     imageVector = Icons.Default.CloudOff,
-                    contentDescription = "Reconnexion...",
+                    contentDescription = stringResource(R.string.mp_match_reconnecting),
                     tint = Color(0xFFE03A3E),
                     modifier = Modifier.size(16.dp)
                 )
@@ -203,13 +205,13 @@ private fun AuctionResultBuffer(result: CompletedAuctionInfo, onContinue: () -> 
                     modifier = Modifier.size(16.dp)
                 )
                 val who = if (result.isAutoAssigned) {
-                    if (result.winnerIsMe) "Tu récupères automatiquement" else "L'adversaire récupère automatiquement"
+                    stringResource(if (result.winnerIsMe) R.string.mp_match_you_auto_win else R.string.mp_match_opponent_auto_win)
                 } else {
-                    if (result.winnerIsMe) "Tu remportes" else "L'adversaire remporte"
+                    stringResource(if (result.winnerIsMe) R.string.mp_match_you_win else R.string.mp_match_opponent_win)
                 }
-                val price = if (result.pricePaid == 0) "gratuitement" else "pour $${result.pricePaid}"
+                val price = if (result.pricePaid == 0) stringResource(R.string.mp_match_for_free) else stringResource(R.string.mp_match_for_price, result.pricePaid)
                 Text(
-                    text = "$who ${result.player.displayLastName} $price !",
+                    text = stringResource(R.string.mp_match_won_announcement, who, result.player.displayLastName, price),
                     fontSize = 14.sp,
                     fontFamily = FontFamily.SansSerif,
                     color = MaterialTheme.colorScheme.onBackground,
@@ -223,7 +225,7 @@ private fun AuctionResultBuffer(result: CompletedAuctionInfo, onContinue: () -> 
             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
         ) {
             Text(
-                text = if (result.isLastPick) "VOIR LES RÉSULTATS →" else "JOUEUR SUIVANT →",
+                text = stringResource(if (result.isLastPick) R.string.mp_match_see_results else R.string.mp_match_next_player),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = FontFamily.SansSerif,
@@ -248,7 +250,7 @@ private fun WaitingForOpponent(matchId: String) {
         CircularProgressIndicator(color = Color(0xFFF4722B))
 
         Text(
-            text = "EN ATTENTE D'UN ADVERSAIRE",
+            text = stringResource(R.string.mp_match_waiting_for_opponent_title),
             fontSize = 14.sp,
             fontWeight = FontWeight.ExtraBold,
             fontFamily = FontFamily.SansSerif,
@@ -257,7 +259,7 @@ private fun WaitingForOpponent(matchId: String) {
         )
 
         Text(
-            text = "Partage ce code à un ami pour qu'il te rejoigne, ou attends qu'un joueur le trouve dans le lobby.",
+            text = stringResource(R.string.mp_match_share_code_hint),
             fontSize = 12.sp,
             fontFamily = FontFamily.SansSerif,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -280,7 +282,7 @@ private fun WaitingForOpponent(matchId: String) {
         ) {
             Icon(imageVector = Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(14.dp))
             Text(
-                text = "  COPIER LE CODE",
+                text = stringResource(R.string.mp_match_copy_code),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = FontFamily.SansSerif,
@@ -351,7 +353,7 @@ private fun DraftingContent(
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 BidControl(
-                    name = "Toi",
+                    name = stringResource(R.string.common_you),
                     budget = myBudget,
                     value = state.bidInput,
                     onChange = onBidInputChange,
@@ -372,7 +374,7 @@ private fun DraftingContent(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Adversaire",
+                        text = stringResource(R.string.common_opponent),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.SansSerif,
@@ -386,7 +388,7 @@ private fun DraftingContent(
                         color = Color(0xFFF4722B)
                     )
                     Text(
-                        text = if (state.isMyTurn) "En attente de ta mise" else "Réfléchit...",
+                        text = stringResource(if (state.isMyTurn) R.string.mp_match_waiting_your_bid else R.string.mp_match_opponent_thinking),
                         fontSize = 10.sp,
                         fontFamily = FontFamily.SansSerif,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
@@ -400,7 +402,7 @@ private fun DraftingContent(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = if (state.isAutoPassing) "PASSE AUTOMATIQUE..." else "PASSER",
+                    text = stringResource(if (state.isAutoPassing) R.string.mp_match_auto_passing else R.string.mp_match_pass_button),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = FontFamily.SansSerif,
@@ -423,13 +425,15 @@ private fun TurnBanner(state: MatchUiState, secondsLeft: Int?) {
     val auction = state.currentAuction ?: return
     val isOpening = auction.currentBidderId == null
     val isAutoPassing = state.isAutoPassing || (state.isMyTurn && state.cannotAffordNextBid)
-    val turnLabel = when {
-        isAutoPassing -> "BUDGET INSUFFISANT (PASSE AUTO...)"
-        state.isMyTurn && isOpening -> "TU OUVRES L'ENCHÈRE"
-        state.isMyTurn -> "À TOI DE MISER"
-        isOpening -> "L'ADVERSAIRE OUVRE L'ENCHÈRE"
-        else -> "AU TOUR DE L'ADVERSAIRE"
-    }
+    val turnLabel = stringResource(
+        when {
+            isAutoPassing -> R.string.mp_match_insufficient_budget
+            state.isMyTurn && isOpening -> R.string.mp_match_you_open
+            state.isMyTurn -> R.string.mp_match_your_turn
+            isOpening -> R.string.mp_match_opponent_opens
+            else -> R.string.mp_match_opponent_turn
+        }
+    )
 
     val bannerColor = when {
         isAutoPassing -> Color(0xFFE03A3E)
@@ -466,7 +470,7 @@ private fun TurnBanner(state: MatchUiState, secondsLeft: Int?) {
                 color = bannerColor ?: MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = if (!isOpening) "Mise actuelle : $${auction.currentBid}" else "Aucune mise",
+                text = if (!isOpening) stringResource(R.string.mp_match_current_bid, auction.currentBid) else stringResource(R.string.auction_banner_no_bid),
                 fontSize = 12.sp,
                 fontFamily = FontFamily.SansSerif,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -512,15 +516,15 @@ private fun RosterSummary(myRoster: List<TeamEntry>, opponentRoster: List<TeamEn
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = "Équipes (${myRoster.size + opponentRoster.size}/${teamSize * 2})",
+            text = stringResource(R.string.mp_match_roster_summary, myRoster.size + opponentRoster.size, teamSize * 2),
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = FontFamily.SansSerif,
             color = MaterialTheme.colorScheme.onSurface
         )
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            RosterColumn(name = "Toi", entries = myRoster, modifier = Modifier.weight(1f))
-            RosterColumn(name = "Adversaire", entries = opponentRoster, modifier = Modifier.weight(1f))
+            RosterColumn(name = stringResource(R.string.common_you), entries = myRoster, modifier = Modifier.weight(1f))
+            RosterColumn(name = stringResource(R.string.common_opponent), entries = opponentRoster, modifier = Modifier.weight(1f))
         }
     }
 }

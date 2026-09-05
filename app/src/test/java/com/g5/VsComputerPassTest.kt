@@ -1,4 +1,4 @@
-package com.g5
+﻿package com.g5
 
 import com.g5.domain.model.NBAPlayer
 import com.g5.domain.model.TeamEntry
@@ -12,7 +12,7 @@ class VsComputerPassTest {
         id = 1,
         firstName = "Stephen",
         lastName = "Curry",
-        position = "Meneur",
+        position = "PG",
         team = "GSW",
         teamColor = "#1D428A",
         season = "2015-16",

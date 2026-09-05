@@ -1,6 +1,8 @@
-package com.g5.domain.usecase
+﻿package com.g5.domain.usecase
 
 import com.g5.domain.model.NBAPlayer
+import com.g5.domain.provider.CommentaryKey
+import com.g5.domain.provider.StringProvider
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -8,12 +10,19 @@ import org.junit.Test
 
 class BuildTutorialDemoUseCaseTest {
 
+    /** Le contenu exact du commentaire n'intéresse aucun test ici — seule la structure du résultat
+     * (nombre de quarts-temps, etc.) est vérifiée. */
+    private class FakeStringProvider : StringProvider {
+        override fun commentary(key: CommentaryKey, actorName: String, opponentName: String): String =
+            "$key|$actorName|$opponentName"
+    }
+
     private lateinit var useCase: BuildTutorialDemoUseCase
 
     private fun players(count: Int): List<NBAPlayer> = (0 until count).map { i ->
         NBAPlayer(
             id = i,
-            position = "Pivot",
+            position = "C",
             team = "GSW",
             season = "2023-24",
             pts = 10.0 + i,
@@ -26,7 +35,7 @@ class BuildTutorialDemoUseCaseTest {
     fun setUp() {
         useCase = BuildTutorialDemoUseCase(
             calculateWinProbabilityUseCase = CalculateWinProbabilityUseCase(),
-            generateMatchSimulationUseCase = GenerateMatchSimulationUseCase()
+            generateMatchSimulationUseCase = GenerateMatchSimulationUseCase(FakeStringProvider())
         )
     }
 

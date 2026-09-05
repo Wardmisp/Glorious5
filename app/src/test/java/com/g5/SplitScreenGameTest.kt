@@ -1,4 +1,4 @@
-package com.g5
+﻿package com.g5
 
 import com.g5.domain.model.NBAPlayer
 import com.g5.domain.model.TeamEntry
@@ -13,7 +13,7 @@ class SplitScreenGameTest {
             id = id,
             firstName = name,
             lastName = "Player",
-            position = "Meneur",
+            position = "PG",
             team = "LAL",
             teamColor = "#552583",
             season = "2023-24",
@@ -72,7 +72,7 @@ class SplitScreenGameTest {
         assertEquals(2, state.activePlayerTurn)
         assertEquals(6, state.p2Input)
 
-        // Joueur 2 surenchérit à $8
+        // Joueur 2 surenchÃ©rit Ã  $8
         state = state.copy(
             bid = 8,
             bidder = 2,

@@ -1,4 +1,4 @@
-package com.g5.domain.usecase
+﻿package com.g5.domain.usecase
 
 import com.g5.data.remote.dto.Auction
 import com.g5.domain.model.CompletedAuctionInfo
@@ -18,7 +18,7 @@ class ResolveCompletedAuctionUseCaseTest {
 
     private val winningPlayer = NBAPlayer(
         id = 42,
-        position = "Meneur",
+        position = "PG",
         team = "GSW",
         season = "2015-16",
         pts = 30.1,
@@ -130,7 +130,7 @@ class ResolveCompletedAuctionUseCaseTest {
             previousPendingResult = null,
             lastDismissedAuctionId = null,
             myId = myId,
-            players = emptyMap(), // le joueur référencé par l'enchère n'a pas été chargé
+            players = emptyMap(), // le joueur rÃ©fÃ©rencÃ© par l'enchÃ¨re n'a pas Ã©tÃ© chargÃ©
             myRosterSize = 1,
             opponentRosterSize = 1,
             teamSize = 5

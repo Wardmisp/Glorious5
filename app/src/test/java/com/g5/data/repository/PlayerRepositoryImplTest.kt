@@ -204,7 +204,7 @@ class PlayerRepositoryImplTest {
         assertEquals(1, players.size)
         val player = players.single()
         assertEquals(101, player.id)
-        assertEquals("Meneur", player.position) // "PG" formaté côté domaine
+        assertEquals("PG", player.position) // déjà un code stable, formatPosition ne fait que normaliser
         assertEquals("#1D428A", player.teamColor) // GSW mappé par getTeamColor
     }
 
