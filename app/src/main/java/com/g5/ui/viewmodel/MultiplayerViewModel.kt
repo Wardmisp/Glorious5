@@ -2,10 +2,11 @@ package com.g5.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.g5.data.repository.MultiplayerRepository
 import com.g5.domain.model.TeamEntry
+import com.g5.domain.repository.MultiplayerRepository
 import com.g5.domain.usecase.CalculateWinProbabilityUseCase
 import com.g5.domain.usecase.GenerateMatchSimulationUseCase
+import com.g5.domain.usecase.ResolveCompletedAuctionUseCase
 import io.github.jan.supabase.realtime.RealtimeChannel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -32,8 +33,12 @@ private fun parseInstantMillis(iso: String): Long? =
  * Séparé de [GameViewModel] : le modèle server-authoritative, tour par tour,
  * sans timer, n'a pas d'équivalent dans l'état du mode local (IA / hotseat).
  */
-class MultiplayerViewModel : ViewModel() {
-    private val repository = MultiplayerRepository()
+class MultiplayerViewModel(
+    private val repository: MultiplayerRepository,
+    private val calculateWinProbabilityUseCase: CalculateWinProbabilityUseCase,
+    private val generateMatchSimulationUseCase: GenerateMatchSimulationUseCase,
+    private val resolveCompletedAuctionUseCase: ResolveCompletedAuctionUseCase
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MultiplayerUiState())
     val uiState: StateFlow<MultiplayerUiState> = _uiState.asStateFlow()
@@ -208,13 +213,10 @@ class MultiplayerViewModel : ViewModel() {
      * Recharge l'état complet depuis Supabase (source de vérité). Retourne les ids d'équipe du
      * match.
      *
-     * L'enchère la plus récente du match (quel que soit son type) pilote l'affichage :
-     * - 'active' → c'est l'enchère en cours, affichée normalement.
-     * - 'completed' et pas encore vue → tampon "joueur remporté" (mise conclue, passe, timeout,
-     *   OU attribution automatique — les deux cas sont traités pareil, unifiés ici) tant que
-     *   l'utilisateur ne l'a pas fermé (dismissPendingResult).
-     * Le prochain joueur n'est présenté (par le créateur du match uniquement, cf. plan) qu'une
-     * fois qu'il n'y a plus ni enchère active ni tampon à acquitter — jamais en cascade silencieuse.
+     * L'enchère la plus récente du match (quel que soit son type) pilote l'affichage — voir
+     * [ResolveCompletedAuctionUseCase] pour la logique du tampon "joueur remporté". Le prochain
+     * joueur n'est présenté (par le créateur du match uniquement, cf. plan) qu'une fois qu'il n'y
+     * a plus ni enchère active ni tampon à acquitter — jamais en cascade silencieuse.
      */
     private suspend fun reloadMatchState(matchId: String): List<String> {
         val myId = repository.currentUserId() ?: return emptyList()
@@ -244,26 +246,16 @@ class MultiplayerViewModel : ViewModel() {
             val isMyTurn = activeAuction?.turnUserId == myId
 
             val previousState = _uiState.value.match
-            val pendingResult: CompletedAuctionInfo? = when {
-                // Déjà affiché : on ne le remplace pas tant que l'utilisateur ne l'a pas fermé.
-                previousState.pendingResult != null -> previousState.pendingResult
-                latestAuction != null && latestAuction.status == "completed" &&
-                    latestAuction.id != previousState.lastDismissedAuctionId -> {
-                    val winnerId = latestAuction.winnerId
-                    val player = players[latestAuction.nbaPlayerId]
-                    if (winnerId != null && player != null) {
-                        CompletedAuctionInfo(
-                            auctionId = latestAuction.id,
-                            player = player,
-                            winnerIsMe = winnerId == myId,
-                            pricePaid = latestAuction.finalPrice ?: 0,
-                            isAutoAssigned = latestAuction.auctionType == "auto_assign",
-                            isLastPick = myRoster.size >= match.teamSize && opponentRoster.size >= match.teamSize
-                        )
-                    } else null
-                }
-                else -> null
-            }
+            val pendingResult = resolveCompletedAuctionUseCase.execute(
+                latestAuction = latestAuction,
+                previousPendingResult = previousState.pendingResult,
+                lastDismissedAuctionId = previousState.lastDismissedAuctionId,
+                myId = myId,
+                players = players,
+                myRosterSize = myRoster.size,
+                opponentRosterSize = opponentRoster.size,
+                teamSize = match.teamSize
+            )
 
             _uiState.update {
                 val minValidBid = maxOf(1, (activeAuction?.currentBid ?: 0) + 1)
@@ -297,8 +289,9 @@ class MultiplayerViewModel : ViewModel() {
                 )
             }
 
-            val cannotAffordNextBid = isMyTurn && activeAuction != null && activeAuction.currentBidderId != null &&
-                (myTeam?.budgetRemaining ?: 0) < ((activeAuction.currentBid) + 1)
+            // Recalculée sur l'état qu'on vient de publier plutôt que dupliquée ici : c'est
+            // exactement la règle déjà exposée (et testée) par MatchUiState.cannotAffordNextBid.
+            val cannotAffordNextBid = _uiState.value.match.cannotAffordNextBid
 
             if (match.status == "completed") {
                 cancelAutoPass()
@@ -330,7 +323,7 @@ class MultiplayerViewModel : ViewModel() {
                     // prochain rechargement (temps réel ou polling), sans action de sa part.
                     startTurnClockOnce(matchId, activeAuction.id)
                 } else if (cannotAffordNextBid && pendingResult == null) {
-                    scheduleAutoPass(matchId, activeAuction.id)
+                    scheduleAutoPass(matchId, activeAuction!!.id)
                 } else {
                     cancelAutoPass()
                 }
@@ -373,12 +366,12 @@ class MultiplayerViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val allPlayers = repository.getAllNbaPlayers()
-                val analytics = CalculateWinProbabilityUseCase().execute(
+                val analytics = calculateWinProbabilityUseCase.execute(
                     teamA = myRoster.map { it.player },
                     teamB = opponentRoster.map { it.player },
                     allSeasons = allPlayers
                 )
-                val simulation = GenerateMatchSimulationUseCase().execute(
+                val simulation = generateMatchSimulationUseCase.execute(
                     teamA = myRoster.map { it.player },
                     teamB = opponentRoster.map { it.player },
                     winProbA = analytics.first.winProbability

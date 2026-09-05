@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.g5.data.local.NBA_PLAYERS
-import com.g5.data.local.TOTAL
+import com.g5.domain.model.TOTAL
 import com.g5.domain.model.TeamEntry
 import com.g5.ui.components.PlayerRevealCard
 import com.g5.ui.viewmodel.GameViewModel
@@ -90,10 +90,7 @@ fun SplitScreenGameScreen(
             luckyWinner = gameState.luckyWinner,
             p1Name = "Joueur 1",
             p2Name = "Joueur 2",
-            onBack = {
-                viewModel.goBack()
-                onBack()
-            },
+            onBack = onBack,
             modifier = modifier
         )
         return
@@ -159,7 +156,10 @@ fun SplitScreenGameScreen(
                                 color = MaterialTheme.colorScheme.surface,
                                 shape = RoundedCornerShape(8.dp)
                             )
-                            .clickable { onBack() },
+                            .clickable {
+                                viewModel.onExitGameScreen()
+                                onBack()
+                            },
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(

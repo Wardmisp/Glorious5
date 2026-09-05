@@ -1,8 +1,9 @@
-package com.g5.domain.model
+package com.g5.data.remote.dto
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
+/** Reflet 1:1 de la table `match_teams` côté Supabase. */
 @Serializable
 data class MatchTeam(
     val id: String,

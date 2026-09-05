@@ -33,7 +33,7 @@ import com.g5.domain.model.PlayerScore
 import com.g5.domain.model.TeamAnalytics
 import com.g5.ui.components.MenuButton
 import com.g5.ui.components.MenuButtonVariant
-import com.g5.ui.viewmodel.GameState
+import com.g5.domain.model.GameState
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.roundToInt

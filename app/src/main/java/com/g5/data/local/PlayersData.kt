@@ -144,6 +144,3 @@ val NBA_PLAYERS = listOf(
         blk = 1.0
     ),
 )
-
-const val BUDGET = 50
-const val TOTAL = 10

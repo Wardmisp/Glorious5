@@ -12,8 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import org.koin.androidx.compose.koinViewModel
 import com.google.firebase.analytics.FirebaseAnalytics
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -25,6 +27,8 @@ import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import com.g5.ui.components.TutorialOverlay
 import com.g5.ui.components.TutorialStep
+import com.g5.ui.navigation.NavCommand
+import com.g5.ui.navigation.Routes
 import com.g5.ui.screens.GameScreen
 import com.g5.ui.screens.HomeScreen
 import com.g5.ui.screens.MultiplayerLobbyScreen
@@ -40,14 +44,6 @@ import com.g5.ui.theme.AndroidIdeaTheme
 import com.g5.ui.viewmodel.GameViewModel
 import com.g5.ui.viewmodel.MultiplayerScreen
 import com.g5.ui.viewmodel.MultiplayerViewModel
-import com.g5.ui.viewmodel.Screen
-import com.g5.core.network.SupabaseClient
-import com.g5.domain.model.NBAPlayer
-import com.g5.core.utils.TeamColors
-import io.github.jan.supabase.postgrest.postgrest
-import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.launch
-import android.util.Log
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,32 +53,8 @@ class MainActivity : ComponentActivity() {
         // Log app launch event
         FirebaseAnalytics.getInstance(this).logEvent("app_launch", null)
 
-        // Supabase Test Request
-        lifecycleScope.launch {
-            Log.d("SupabaseTest", "Starting request...")
-            try {
-                val player = SupabaseClient.client.postgrest["NbaBest1000"]
-                    .select {
-                        filter {
-                            eq("id", 1)
-                        }
-                    }
-                    .decodeSingle<NBAPlayer>()
-                
-                // Augment with local team color
-                val playerWithColor = player.copy(
-                    teamColor = TeamColors.getHexColor(player.team)
-                )
-                
-                Log.d("SupabaseTest", "Player fetched and augmented: $playerWithColor")
-                Log.d("SupabaseTest", "Display Name: ${playerWithColor.displayFirstName} ${playerWithColor.displayLastName}")
-            } catch (e: Exception) {
-                Log.e("SupabaseTest", "Error fetching data", e)
-            }
-        }
-
         setContent {
-            val viewModel: GameViewModel = viewModel()
+            val viewModel: GameViewModel = koinViewModel()
             val uiState = viewModel.uiState.value
 
             AndroidIdeaTheme (darkTheme = uiState.isDarkTheme) {
@@ -96,6 +68,19 @@ class MainActivity : ComponentActivity() {
 fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) {
     val uiState = viewModel.uiState.value
     val tutorialPositions = remember { mutableStateMapOf<String, Rect>() }
+    val navController = rememberNavController()
+
+    // Navigations décidées côté ViewModel (fin de tutoriel, de manche, de simulation) — la
+    // navigation purement mécanique (boutons retour/menu) est câblée directement sur le
+    // NavController ci-dessous, sans passer par ce canal. Voir NavCommand.
+    LaunchedEffect(viewModel) {
+        viewModel.navCommands.collect { command ->
+            when (command) {
+                is NavCommand.NavigateTo -> navController.navigate(command.route) { launchSingleTop = true }
+                is NavCommand.PopTo -> navController.popBackStack(command.route, command.inclusive)
+            }
+        }
+    }
 
     val tutorialSteps = listOf(
         TutorialStep("Bienvenue !", "Découvrez comment bâtir votre équipe de légende dans Glorious 5.", "home_tutorial"),
@@ -131,52 +116,52 @@ fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) 
                 ),
             contentAlignment = Alignment.Center
         ) {
-            when (uiState.currentScreen) {
-                is Screen.Home -> {
+            NavHost(navController = navController, startDestination = Routes.Home) {
+                composable(Routes.Home) {
                     HomeScreen(
-                        onNavigate = { screen ->
-                            viewModel.navigateToScreen(screen, reset = true)
+                        onNavigate = { route ->
+                            when (route) {
+                                Routes.VsComputer -> viewModel.startGame(vsHuman = false)
+                                Routes.VsHuman -> viewModel.startGame(vsHuman = true)
+                                else -> navController.navigate(route)
+                            }
                         },
                         onStartTutorial = { viewModel.startTutorial() },
                         tutorialPositions = tutorialPositions
                     )
                 }
-                is Screen.VsComputer -> {
+                composable(Routes.VsComputer) {
                     GameScreen(
                         vsComputer = true,
                         viewModel = viewModel,
-                        onBack = {
-                            viewModel.navigateToScreen(Screen.Home)
-                        },
+                        onBack = { navController.popBackStack(Routes.Home, false) },
                         tutorialPositions = tutorialPositions
                     )
                 }
-                is Screen.VsHuman -> {
+                composable(Routes.VsHuman) {
                     SplitScreenGameScreen(
                         viewModel = viewModel,
-                        onBack = {
-                            viewModel.navigateToScreen(Screen.Home)
-                        }
+                        onBack = { navController.popBackStack(Routes.Home, false) }
                     )
                 }
-                is Screen.VsOnline -> {
-                    val multiplayerViewModel: MultiplayerViewModel = viewModel()
+                composable(Routes.VsOnline) {
+                    val multiplayerViewModel: MultiplayerViewModel = koinViewModel()
                     val mpState by multiplayerViewModel.uiState.collectAsState()
 
                     LaunchedEffect(Unit) {
                         multiplayerViewModel.enterLobby()
                     }
 
-                    val onLeave = {
+                    val onLeave: () -> Unit = {
                         multiplayerViewModel.leaveMatch()
-                        viewModel.navigateToScreen(Screen.Home)
+                        navController.popBackStack(Routes.Home, false)
                     }
 
                     when (mpState.screen) {
                         is MultiplayerScreen.Lobby -> {
                             MultiplayerLobbyScreen(
                                 state = mpState.lobby,
-                                onBack = { viewModel.navigateToScreen(Screen.Home) },
+                                onBack = { navController.popBackStack(Routes.Home, false) },
                                 onRefresh = { multiplayerViewModel.refreshOpenMatches() },
                                 onCreateMatch = { multiplayerViewModel.createMatch() },
                                 onJoinMatch = { matchId -> multiplayerViewModel.joinMatch(matchId) },
@@ -216,26 +201,22 @@ fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) 
                         }
                     }
                 }
-                is Screen.Options -> {
+                composable(Routes.Options) {
                     OptionsScreen(
                         viewModel = viewModel,
-                        onBack = {
-                            viewModel.navigateToScreen(Screen.Home)
-                        }
+                        onBack = { navController.popBackStack() }
                     )
                 }
-                is Screen.Simulation -> {
+                composable(Routes.Simulation) {
                     SimulationScreen(
                         viewModel = viewModel
                     )
                 }
-                is Screen.ScoutingReport -> {
+                composable(Routes.ScoutingReport) {
                     val isVsHuman = uiState.gameState.isVsHuman
                     ScoutingReportScreen(
                         gameState = uiState.gameState,
-                        onStartSimulation = {
-                            viewModel.navigateToScreen(Screen.Simulation)
-                        },
+                        onStartSimulation = { navController.navigate(Routes.Simulation) },
                         tutorialPositions = tutorialPositions,
                         labelA = if (isVsHuman) "JOUEUR 1" else "VOUS",
                         labelB = if (isVsHuman) "JOUEUR 2" else "IA"
@@ -254,14 +235,5 @@ fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) 
                 onSkip = { viewModel.skipTutorial() }
             )
         }
-    }
-}
-
-@Preview(showBackground = true, widthDp = 390, heightDp = 844)
-@Composable
-fun BasketballDraftAppPreview() {
-    AndroidIdeaTheme {
-        val viewModel: GameViewModel = viewModel()
-        BasketballDraftApp(viewModel = viewModel)
     }
 }

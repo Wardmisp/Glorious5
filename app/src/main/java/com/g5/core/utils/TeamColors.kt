@@ -1,6 +1,7 @@
 package com.g5.core.utils
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 
 object TeamColors {
     private val colors = mapOf(
@@ -42,6 +43,9 @@ object TeamColors {
 
     fun getHexColor(team: String): String {
         val color = getColor(team)
-        return String.format("#%06X", 0xFFFFFF and color.value.toInt())
+        // Color.value est un ULong encodant potentiellement un espace colorimétrique large gamut ;
+        // les octets ARGB "classiques" ne sont pas dans ses 32 bits de poids faible. toArgb() fait
+        // la conversion correctement (avant, cette fonction retournait quasi toujours "#000000").
+        return String.format("#%06X", 0xFFFFFF and color.toArgb())
     }
 }

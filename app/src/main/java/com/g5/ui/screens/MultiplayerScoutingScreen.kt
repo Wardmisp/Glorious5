@@ -2,7 +2,7 @@ package com.g5.ui.screens
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.g5.ui.viewmodel.GameState
+import com.g5.domain.model.GameState
 import com.g5.ui.viewmodel.MatchUiState
 
 /**

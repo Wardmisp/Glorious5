@@ -39,7 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.g5.data.local.NBA_PLAYERS
-import com.g5.data.local.TOTAL
+import com.g5.domain.model.TOTAL
 import com.g5.ui.components.AuctionBanner
 import com.g5.ui.components.BidControl
 import com.g5.ui.components.ComputerPanel
@@ -103,10 +103,7 @@ fun GameScreen(
             luckyWinner = gameState.luckyWinner,
             p1Name = p1Name,
             p2Name = p2Name,
-            onBack = {
-                viewModel.goBack()
-                onBack()
-            },
+            onBack = onBack,
             modifier = modifier
         )
     } else {
@@ -136,7 +133,10 @@ fun GameScreen(
                             color = MaterialTheme.colorScheme.surface,
                             shape = RoundedCornerShape(8.dp)
                         )
-                        .clickable { onBack() },
+                        .clickable {
+                            viewModel.onExitGameScreen()
+                            onBack()
+                        },
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(

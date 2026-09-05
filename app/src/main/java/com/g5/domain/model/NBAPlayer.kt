@@ -1,29 +1,26 @@
 package com.g5.domain.model
 
-import com.g5.core.network.FlexibleDoubleSerializer
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
-
-@Serializable
+/** Modèle domaine pur : ni Room ni Supabase ne le décodent directement (voir [com.g5.data.remote.dto.NbaPlayerDto]
+ * et [com.g5.data.local.PlayerSeason], mappés vers ce type). */
 data class NBAPlayer(
     val id: Int,
-    @SerialName("player") val fullName: String = "",
-    @SerialName("first_name") val firstName: String = "",
-    @SerialName("last_name") val lastName: String = "",
+    val fullName: String = "",
+    val firstName: String = "",
+    val lastName: String = "",
     val position: String,
     val team: String,
-    @SerialName("team_color") val teamColor: String = "#F4722B",
+    val teamColor: String = "#F4722B",
     val season: String,
     val pts: Double,
     val reb: Double,
     val ast: Double,
-    @Serializable(with = FlexibleDoubleSerializer::class) val stl: Double = 0.0,
-    @Serializable(with = FlexibleDoubleSerializer::class) val blk: Double = 0.0,
-    @SerialName("fg_pct") val fgPct: Double = 0.0,
-    @SerialName("fg3_pct") @Serializable(with = FlexibleDoubleSerializer::class) val fg3Pct: Double = 0.0,
-    @SerialName("ft_pct") val ftPct: Double = 0.0,
+    val stl: Double = 0.0,
+    val blk: Double = 0.0,
+    val fgPct: Double = 0.0,
+    val fg3Pct: Double = 0.0,
+    val ftPct: Double = 0.0,
     val per: Double = 0.0,
-    @SerialName("win_shares") val winShares: Double = 0.0,
+    val winShares: Double = 0.0,
     val games: Int = 0
 ) {
     val displayFirstName: String get() = if (firstName.isNotEmpty()) firstName else fullName.split(" ").firstOrNull() ?: ""

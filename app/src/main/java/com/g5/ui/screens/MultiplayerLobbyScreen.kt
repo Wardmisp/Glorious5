@@ -33,7 +33,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.g5.domain.model.Match
+import com.g5.data.remote.dto.Match
 import com.g5.ui.viewmodel.LobbyUiState
 
 @Composable
