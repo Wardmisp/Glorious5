@@ -1,4 +1,4 @@
-package com.g5.domain.usecase
+﻿package com.g5.domain.usecase
 
 import com.g5.domain.model.NBAPlayer
 import org.junit.Assert.assertEquals
@@ -13,7 +13,7 @@ class ComputerBidUseCaseTest {
 
     private fun player(pts: Double, reb: Double, ast: Double, stl: Double = 0.0, blk: Double = 0.0) = NBAPlayer(
         id = 1,
-        position = "Pivot",
+        position = "C",
         team = "GSW",
         season = "2023-24",
         pts = pts,
@@ -29,9 +29,9 @@ class ComputerBidUseCaseTest {
     }
 
     // --- evaluate ---
-    // La composante "aléatoire" (randomFactor) est en réalité déterministe : elle dérive de
-    // seed.hashCode() où seed = round + aiBudget/10, sans appel à Random. Ça permet de calculer
-    // la valorisation attendue à la main plutôt que de se contenter de bornes.
+    // La composante "alÃ©atoire" (randomFactor) est en rÃ©alitÃ© dÃ©terministe : elle dÃ©rive de
+    // seed.hashCode() oÃ¹ seed = round + aiBudget/10, sans appel Ã  Random. Ã‡a permet de calculer
+    // la valorisation attendue Ã  la main plutÃ´t que de se contenter de bornes.
 
     @Test
     fun evaluate_computesExactValuationForAModerateHand() {
@@ -105,7 +105,7 @@ class ComputerBidUseCaseTest {
         }
     }
 
-    // --- delays (bornées, car tirées au hasard) ---
+    // --- delays (bornÃ©es, car tirÃ©es au hasard) ---
 
     @Test
     fun thinkingDelayMillis_isLongerWhenOpeningTheAuction() {

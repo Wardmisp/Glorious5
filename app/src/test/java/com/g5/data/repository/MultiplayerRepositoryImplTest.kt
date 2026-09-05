@@ -227,14 +227,14 @@ class MultiplayerRepositoryImplTest {
     fun getAllNbaPlayers_decodesAndAppliesDisplayFormatting() = runTest {
         // NbaBest1000 n'expose que le nom complet : firstName/lastName doivent être dérivés, et la
         // position/couleur d'équipe formatées pour l'affichage (voir applyDisplayFields).
-        val json = """[{"id":1,"player":"Nikola Jokic","position":"C","team":"DEN","season":"2023-24","pts":26.0,"reb":12.0,"ast":9.0}]"""
+        val json = """[{"id":1,"player":"Nikola Jokic","position":"c","team":"DEN","season":"2023-24","pts":26.0,"reb":12.0,"ast":9.0}]"""
         val repo = MultiplayerRepositoryImpl(fakeSupabaseClient { jsonResponse(json) })
 
         val player = repo.getAllNbaPlayers().single()
 
         assertEquals("Nikola", player.firstName)
         assertEquals("Jokic", player.lastName)
-        assertEquals("Pivot", player.position)
+        assertEquals("C", player.position) // formatPosition normalise la casse ("c" -> "C")
     }
 
     @Test

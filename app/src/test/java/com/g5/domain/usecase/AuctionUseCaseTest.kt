@@ -1,4 +1,4 @@
-package com.g5.domain.usecase
+﻿package com.g5.domain.usecase
 
 import com.g5.domain.model.GameState
 import com.g5.domain.model.NBAPlayer
@@ -16,7 +16,7 @@ class AuctionUseCaseTest {
 
     private fun player(id: Int = 1) = NBAPlayer(
         id = id,
-        position = "Pivot",
+        position = "C",
         team = "GSW",
         season = "2023-24",
         pts = 20.0,

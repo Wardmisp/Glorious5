@@ -36,7 +36,7 @@ class ExampleUnitTest {
         assertEquals(42, player.id)
         assertEquals("LeBron", player.firstName)
         assertEquals("James", player.lastName)
-        assertEquals("Ailier", player.position)
+        assertEquals("SF", player.position)
         assertEquals("LAL", player.team)
         assertEquals("#552583", player.teamColor)
         assertEquals("2023-24", player.season)
@@ -49,9 +49,10 @@ class ExampleUnitTest {
 
     @Test
     fun testPositionAndColorFormatting() {
-        assertEquals("Meneur", formatPosition("PG"))
-        assertEquals("Pivot", formatPosition("C"))
-        assertEquals("Ailier Fort", formatPosition("PF"))
+        assertEquals("PG", formatPosition("PG"))
+        assertEquals("C", formatPosition("C"))
+        assertEquals("PF", formatPosition("PF"))
+        assertEquals("SG", formatPosition("G")) // "G" et "SG" partagent le même code normalisé
         assertEquals("#007A33", getTeamColor("BOS"))
         assertEquals("#1D428A", getTeamColor("GSW"))
     }
