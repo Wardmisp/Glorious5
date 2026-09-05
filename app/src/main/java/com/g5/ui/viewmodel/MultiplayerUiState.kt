@@ -1,8 +1,9 @@
 package com.g5.ui.viewmodel
 
-import com.g5.domain.model.Auction
-import com.g5.domain.model.Match
-import com.g5.domain.model.MatchTeam
+import com.g5.data.remote.dto.Auction
+import com.g5.data.remote.dto.Match
+import com.g5.data.remote.dto.MatchTeam
+import com.g5.domain.model.CompletedAuctionInfo
 import com.g5.domain.model.NBAPlayer
 import com.g5.domain.model.QuarterSimulation
 import com.g5.domain.model.TeamAnalytics
@@ -15,19 +16,6 @@ sealed class MultiplayerScreen {
     object Simulation : MultiplayerScreen()
     object Result : MultiplayerScreen()
 }
-
-/**
- * Enchère qui vient de se conclure, affichée en "tampon" (joueur pleinement révélé + qui l'a
- * remporté) avant de passer à la suivante — évite que l'écran change brusquement de joueur.
- */
-data class CompletedAuctionInfo(
-    val auctionId: String,
-    val player: NBAPlayer,
-    val winnerIsMe: Boolean,
-    val pricePaid: Int,
-    val isAutoAssigned: Boolean,
-    val isLastPick: Boolean
-)
 
 data class LobbyUiState(
     val isLoading: Boolean = false,
@@ -49,6 +37,7 @@ data class MatchUiState(
     val bidCount: Int = 0,
     val turnDeadlineAtMillis: Long? = null,
     val isMyTurn: Boolean = false,
+    val isAutoPassing: Boolean = false,
     val bidInput: Int = 1,
     val isSubmittingBid: Boolean = false,
     val isRealtimeConnected: Boolean = true,
@@ -60,6 +49,12 @@ data class MatchUiState(
     val error: String? = null
 ) {
     val canPass: Boolean get() = currentAuction?.currentBidderId != null
+    val cannotAffordNextBid: Boolean get() {
+        val auction = currentAuction ?: return false
+        val budget = myTeam?.budgetRemaining ?: 0
+        val minValidBid = auction.currentBid + 1
+        return isMyTurn && canPass && budget < minValidBid
+    }
 }
 
 data class MultiplayerUiState(

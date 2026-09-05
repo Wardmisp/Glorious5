@@ -2,10 +2,11 @@ package com.g5.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.g5.data.repository.MultiplayerRepository
 import com.g5.domain.model.TeamEntry
+import com.g5.domain.repository.MultiplayerRepository
 import com.g5.domain.usecase.CalculateWinProbabilityUseCase
 import com.g5.domain.usecase.GenerateMatchSimulationUseCase
+import com.g5.domain.usecase.ResolveCompletedAuctionUseCase
 import io.github.jan.supabase.realtime.RealtimeChannel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -32,8 +33,12 @@ private fun parseInstantMillis(iso: String): Long? =
  * Séparé de [GameViewModel] : le modèle server-authoritative, tour par tour,
  * sans timer, n'a pas d'équivalent dans l'état du mode local (IA / hotseat).
  */
-class MultiplayerViewModel : ViewModel() {
-    private val repository = MultiplayerRepository()
+class MultiplayerViewModel(
+    private val repository: MultiplayerRepository,
+    private val calculateWinProbabilityUseCase: CalculateWinProbabilityUseCase,
+    private val generateMatchSimulationUseCase: GenerateMatchSimulationUseCase,
+    private val resolveCompletedAuctionUseCase: ResolveCompletedAuctionUseCase
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(MultiplayerUiState())
     val uiState: StateFlow<MultiplayerUiState> = _uiState.asStateFlow()
@@ -42,6 +47,32 @@ class MultiplayerViewModel : ViewModel() {
     private var matchChannel: RealtimeChannel? = null
     private var realtimeJob: Job? = null
     private var pollingJob: Job? = null
+    private var autoPassJob: Job? = null
+    private var autoPassAuctionId: String? = null
+
+    private fun cancelAutoPass() {
+        autoPassJob?.cancel()
+        autoPassJob = null
+        autoPassAuctionId = null
+        if (_uiState.value.match.isAutoPassing) {
+            updateMatch { it.copy(isAutoPassing = false) }
+        }
+    }
+
+    private fun scheduleAutoPass(matchId: String, auctionId: String) {
+        if (autoPassAuctionId == auctionId && autoPassJob?.isActive == true) return
+        cancelAutoPass()
+        autoPassAuctionId = auctionId
+        autoPassJob = viewModelScope.launch {
+            updateMatch { it.copy(isAutoPassing = true) }
+            delay(1200L)
+            val currentState = _uiState.value.match
+            if (currentState.currentAuction?.id == auctionId && currentState.isMyTurn && !currentState.isSubmittingBid && currentState.canPass) {
+                pass()
+            }
+            updateMatch { it.copy(isAutoPassing = false) }
+        }
+    }
 
     private fun updateLobby(update: (LobbyUiState) -> LobbyUiState) {
         _uiState.update { it.copy(lobby = update(it.lobby)) }
@@ -182,13 +213,10 @@ class MultiplayerViewModel : ViewModel() {
      * Recharge l'état complet depuis Supabase (source de vérité). Retourne les ids d'équipe du
      * match.
      *
-     * L'enchère la plus récente du match (quel que soit son type) pilote l'affichage :
-     * - 'active' → c'est l'enchère en cours, affichée normalement.
-     * - 'completed' et pas encore vue → tampon "joueur remporté" (mise conclue, passe, timeout,
-     *   OU attribution automatique — les deux cas sont traités pareil, unifiés ici) tant que
-     *   l'utilisateur ne l'a pas fermé (dismissPendingResult).
-     * Le prochain joueur n'est présenté (par le créateur du match uniquement, cf. plan) qu'une
-     * fois qu'il n'y a plus ni enchère active ni tampon à acquitter — jamais en cascade silencieuse.
+     * L'enchère la plus récente du match (quel que soit son type) pilote l'affichage — voir
+     * [ResolveCompletedAuctionUseCase] pour la logique du tampon "joueur remporté". Le prochain
+     * joueur n'est présenté (par le créateur du match uniquement, cf. plan) qu'une fois qu'il n'y
+     * a plus ni enchère active ni tampon à acquitter — jamais en cascade silencieuse.
      */
     private suspend fun reloadMatchState(matchId: String): List<String> {
         val myId = repository.currentUserId() ?: return emptyList()
@@ -218,26 +246,16 @@ class MultiplayerViewModel : ViewModel() {
             val isMyTurn = activeAuction?.turnUserId == myId
 
             val previousState = _uiState.value.match
-            val pendingResult: CompletedAuctionInfo? = when {
-                // Déjà affiché : on ne le remplace pas tant que l'utilisateur ne l'a pas fermé.
-                previousState.pendingResult != null -> previousState.pendingResult
-                latestAuction != null && latestAuction.status == "completed" &&
-                    latestAuction.id != previousState.lastDismissedAuctionId -> {
-                    val winnerId = latestAuction.winnerId
-                    val player = players[latestAuction.nbaPlayerId]
-                    if (winnerId != null && player != null) {
-                        CompletedAuctionInfo(
-                            auctionId = latestAuction.id,
-                            player = player,
-                            winnerIsMe = winnerId == myId,
-                            pricePaid = latestAuction.finalPrice ?: 0,
-                            isAutoAssigned = latestAuction.auctionType == "auto_assign",
-                            isLastPick = myRoster.size >= match.teamSize && opponentRoster.size >= match.teamSize
-                        )
-                    } else null
-                }
-                else -> null
-            }
+            val pendingResult = resolveCompletedAuctionUseCase.execute(
+                latestAuction = latestAuction,
+                previousPendingResult = previousState.pendingResult,
+                lastDismissedAuctionId = previousState.lastDismissedAuctionId,
+                myId = myId,
+                players = players,
+                myRosterSize = myRoster.size,
+                opponentRosterSize = opponentRoster.size,
+                teamSize = match.teamSize
+            )
 
             _uiState.update {
                 val minValidBid = maxOf(1, (activeAuction?.currentBid ?: 0) + 1)
@@ -271,7 +289,12 @@ class MultiplayerViewModel : ViewModel() {
                 )
             }
 
+            // Recalculée sur l'état qu'on vient de publier plutôt que dupliquée ici : c'est
+            // exactement la règle déjà exposée (et testée) par MatchUiState.cannotAffordNextBid.
+            val cannotAffordNextBid = _uiState.value.match.cannotAffordNextBid
+
             if (match.status == "completed") {
+                cancelAutoPass()
                 // Le résultat est déjà décidé côté serveur (compute_match_result). Si le dernier
                 // pick est encore affiché en tampon, on attend que l'utilisateur le ferme
                 // (dismissPendingResult) avant de passer au rapport de scouting.
@@ -286,10 +309,12 @@ class MultiplayerViewModel : ViewModel() {
                 // même temps (present_next_player() ne le protège pas lui-même, cf. plan) — et
                 // seulement quand il n'y a plus rien à acquitter, jamais en cascade silencieuse.
                 if (match.status == "drafting" && activeAuction == null && pendingResult == null && match.player1Id == myId) {
+                    cancelAutoPass()
                     presentNextPlayerOnce(matchId)
                 } else if (activeAuction != null && activeAuction.turnDeadline == null &&
                     activeAuction.currentBidderId == null && activeAuction.turnUserId == myId
                 ) {
+                    cancelAutoPass()
                     // Le chrono d'ouverture ne démarre que lorsque le joueur dont c'est le tour
                     // de miser est effectivement présent et prêt (voir start_turn_clock) — pas
                     // dès la création de l'enchère côté serveur, qui peut survenir avant que son
@@ -297,6 +322,10 @@ class MultiplayerViewModel : ViewModel() {
                     // serveur partagé : l'adversaire le voit défiler à l'identique dès son
                     // prochain rechargement (temps réel ou polling), sans action de sa part.
                     startTurnClockOnce(matchId, activeAuction.id)
+                } else if (cannotAffordNextBid && pendingResult == null) {
+                    scheduleAutoPass(matchId, activeAuction!!.id)
+                } else {
+                    cancelAutoPass()
                 }
             }
 
@@ -309,6 +338,7 @@ class MultiplayerViewModel : ViewModel() {
 
     /** Ferme l'écran "tampon" affiché après une enchère résolue ou une attribution automatique. */
     fun dismissPendingResult() {
+        cancelAutoPass()
         val matchId = currentMatchId ?: return
         val dismissedAuctionId = _uiState.value.match.pendingResult?.auctionId
         updateMatch {
@@ -336,12 +366,12 @@ class MultiplayerViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val allPlayers = repository.getAllNbaPlayers()
-                val analytics = CalculateWinProbabilityUseCase().execute(
+                val analytics = calculateWinProbabilityUseCase.execute(
                     teamA = myRoster.map { it.player },
                     teamB = opponentRoster.map { it.player },
                     allSeasons = allPlayers
                 )
-                val simulation = GenerateMatchSimulationUseCase().execute(
+                val simulation = generateMatchSimulationUseCase.execute(
                     teamA = myRoster.map { it.player },
                     teamB = opponentRoster.map { it.player },
                     winProbA = analytics.first.winProbability
@@ -377,6 +407,7 @@ class MultiplayerViewModel : ViewModel() {
     }
 
     private fun stopObserving() {
+        cancelAutoPass()
         realtimeJob?.cancel()
         realtimeJob = null
         pollingJob?.cancel()
@@ -418,6 +449,7 @@ class MultiplayerViewModel : ViewModel() {
             updateMatch { it.copy(error = "Mise invalide") }
             return
         }
+        cancelAutoPass()
         viewModelScope.launch {
             updateMatch { it.copy(isSubmittingBid = true, error = null) }
             try {
@@ -435,6 +467,7 @@ class MultiplayerViewModel : ViewModel() {
         val state = _uiState.value.match
         val auction = state.currentAuction ?: return
         if (!state.isMyTurn || state.isSubmittingBid || !state.canPass) return
+        cancelAutoPass()
         viewModelScope.launch {
             updateMatch { it.copy(isSubmittingBid = true, error = null) }
             try {

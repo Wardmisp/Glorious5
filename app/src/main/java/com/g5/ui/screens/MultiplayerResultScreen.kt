@@ -22,10 +22,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.g5.R
 import com.g5.domain.model.TeamEntry
 import com.g5.ui.viewmodel.MatchUiState
 
@@ -66,18 +68,20 @@ fun MultiplayerResultScreen(
                     modifier = Modifier.size(48.dp)
                 )
                 Text(
-                    text = "MATCH TERMINÉ",
+                    text = stringResource(R.string.mp_result_title),
                     fontSize = 32.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = FontFamily.SansSerif,
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
-                    text = when {
-                        isDraw -> "Match sans vainqueur désigné"
-                        iWon -> "Tu remportes le match !"
-                        else -> "L'adversaire remporte le match"
-                    },
+                    text = stringResource(
+                        when {
+                            isDraw -> R.string.mp_result_draw
+                            iWon -> R.string.mp_result_you_won
+                            else -> R.string.mp_result_opponent_won
+                        }
+                    ),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.SansSerif,
@@ -87,7 +91,7 @@ fun MultiplayerResultScreen(
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 ResultColumn(
-                    name = "Toi",
+                    name = stringResource(R.string.common_you),
                     entries = state.myRoster,
                     score = state.myTeam?.totalScore,
                     budgetLeft = state.myTeam?.budgetRemaining ?: 0,
@@ -95,7 +99,7 @@ fun MultiplayerResultScreen(
                     modifier = Modifier.weight(1f)
                 )
                 ResultColumn(
-                    name = "Adversaire",
+                    name = stringResource(R.string.common_opponent),
                     entries = state.opponentRoster,
                     score = state.opponentTeam?.totalScore,
                     budgetLeft = state.opponentTeam?.budgetRemaining ?: 0,
@@ -110,7 +114,7 @@ fun MultiplayerResultScreen(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
             Text(
-                text = "RETOUR AU MENU",
+                text = stringResource(R.string.common_back_to_menu),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = FontFamily.SansSerif,
@@ -149,7 +153,7 @@ private fun ResultColumn(
         )
 
         Text(
-            text = if (isWinner) "GAGNANT" else "PERDANT",
+            text = stringResource(if (isWinner) R.string.common_winner else R.string.common_loser),
             fontSize = 22.sp,
             fontWeight = FontWeight.ExtraBold,
             fontFamily = FontFamily.SansSerif,
@@ -159,7 +163,7 @@ private fun ResultColumn(
 
         if (score != null) {
             Text(
-                text = "Score : %.1f".format(score),
+                text = stringResource(R.string.mp_result_score, "%.1f".format(score)),
                 fontSize = 11.sp,
                 fontFamily = FontFamily.SansSerif,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -196,7 +200,7 @@ private fun ResultColumn(
         }
 
         Text(
-            text = "$${budgetLeft} restant",
+            text = stringResource(R.string.game_over_budget_left, budgetLeft),
             fontSize = 12.sp,
             fontFamily = FontFamily.SansSerif,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),

@@ -12,4 +12,7 @@
 /captures
 .externalNativeBuild
 .cxx
+
+# Firebase config (contains API key, must never be committed)
+/app/google-services.json
 local.properties

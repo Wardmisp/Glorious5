@@ -68,16 +68,17 @@ class CalculateWinProbabilityUseCase {
     private fun calculateTeamScore(players: List<PlayerScore>): Double {
         if (players.isEmpty()) return 0.0
         
-        // Positional weights: PG: 0.22, SG: 0.20, SF: 0.20, PF: 0.20, C: 0.18
+        // Positional weights, keyed by code (voir normalizePositionCode côté data — cette
+        // logique est indépendante de la langue d'affichage) : PG 0.22, SG 0.20, SF 0.20,
+        // PF 0.20, C 0.18, GF 0.20, FC 0.19 ; tout le reste (poste inconnu) retombe sur 0.20.
         val posWeights = mapOf(
-            "Meneur" to 0.22,
-            "Arrière" to 0.20,
-            "Ailier" to 0.20,
-            "Ailier Fort" to 0.20,
-            "Pivot" to 0.18,
-            "Arrière-Ailier" to 0.20,
-            "Intérieur" to 0.19,
-            "Polyvalent" to 0.20
+            "PG" to 0.22,
+            "SG" to 0.20,
+            "SF" to 0.20,
+            "PF" to 0.20,
+            "C" to 0.18,
+            "GF" to 0.20,
+            "FC" to 0.19
         )
 
         var totalWeight = 0.0

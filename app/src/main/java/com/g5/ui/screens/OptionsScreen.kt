@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -34,6 +35,7 @@ import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import com.g5.R
 import com.g5.ui.viewmodel.Difficulty
 import com.g5.ui.viewmodel.GameViewModel
 
@@ -69,14 +71,14 @@ fun OptionsScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Retour",
+                    contentDescription = stringResource(R.string.common_back),
                     tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(20.dp)
                 )
             }
 
             Text(
-                text = "OPTIONS",
+                text = stringResource(R.string.common_options),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = FontFamily.SansSerif,
@@ -93,8 +95,8 @@ fun OptionsScreen(
         ) {
             // Theme Toggle
             OptionSwitchItem(
-                title = "Mode Sombre",
-                subtitle = if (uiState.isDarkTheme) "Activé" else "Désactivé",
+                title = stringResource(R.string.options_dark_mode),
+                subtitle = stringResource(if (uiState.isDarkTheme) R.string.options_dark_mode_on else R.string.options_dark_mode_off),
                 icon = if (uiState.isDarkTheme) Icons.Default.DarkMode else Icons.Default.LightMode,
                 iconColor = if (uiState.isDarkTheme) Color(0xFFBB86FC) else Color(0xFFF4722B),
                 checked = uiState.isDarkTheme,
@@ -103,8 +105,8 @@ fun OptionsScreen(
 
             // Sound Toggle
             OptionSwitchItem(
-                title = "Effets Sonores",
-                subtitle = if (uiState.isSoundEnabled) "Activés" else "Muet",
+                title = stringResource(R.string.options_sound),
+                subtitle = stringResource(if (uiState.isSoundEnabled) R.string.options_sound_on else R.string.options_sound_off),
                 icon = if (uiState.isSoundEnabled) Icons.AutoMirrored.Filled.VolumeUp else Icons.AutoMirrored.Filled.VolumeOff,
                 iconColor = Color(0xFF03DAC5),
                 checked = uiState.isSoundEnabled,
@@ -147,17 +149,19 @@ fun OptionsScreen(
                     
                     Column {
                         Text(
-                            text = "Niveau de l'IA",
+                            text = stringResource(R.string.options_ai_level),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
                             fontFamily = FontFamily.SansSerif,
                             color = MaterialTheme.colorScheme.onSurface
                         )
-                        val difficultyLabel = when (uiState.difficulty) {
-                            Difficulty.BEGINNER -> "Débutant (+10$ pour vous)"
-                            Difficulty.NORMAL -> "Normal (Équitable)"
-                            Difficulty.DIFFICULT -> "Difficile (+10$ pour l'IA)"
-                        }
+                        val difficultyLabel = stringResource(
+                            when (uiState.difficulty) {
+                                Difficulty.BEGINNER -> R.string.options_difficulty_beginner
+                                Difficulty.NORMAL -> R.string.options_difficulty_normal
+                                Difficulty.DIFFICULT -> R.string.options_difficulty_hard
+                            }
+                        )
                         Text(
                             text = difficultyLabel,
                             fontSize = 12.sp,

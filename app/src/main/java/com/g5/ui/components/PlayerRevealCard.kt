@@ -21,11 +21,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.g5.R
 import com.g5.domain.model.NBAPlayer
+import com.g5.ui.util.positionLabel
 
 @Composable
 fun PlayerRevealCard(
@@ -54,11 +57,11 @@ fun PlayerRevealCard(
     }
 
     val stats = listOf(
-        Stat("PTS", player.pts, isRevealed(idxPts)),
-        Stat("REB", player.reb, isRevealed(idxReb)),
-        Stat("PD", player.ast, isRevealed(idxAst)),
-        Stat("INT", player.stl, isRevealed(idxStl)),
-        Stat("CTR", player.blk, isRevealed(idxBlk))
+        Stat(stringResource(R.string.stat_pts), player.pts, isRevealed(idxPts)),
+        Stat(stringResource(R.string.stat_reb), player.reb, isRevealed(idxReb)),
+        Stat(stringResource(R.string.stat_ast), player.ast, isRevealed(idxAst)),
+        Stat(stringResource(R.string.stat_stl), player.stl, isRevealed(idxStl)),
+        Stat(stringResource(R.string.stat_blk), player.blk, isRevealed(idxBlk))
     )
 
     val teamColorInt = try {
@@ -95,7 +98,7 @@ fun PlayerRevealCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if (isRevealed(idxTeam)) player.team else "ÉQUIPE MYSTÈRE",
+                    text = if (isRevealed(idxTeam)) player.team else stringResource(R.string.common_mystery_team),
                     fontSize = 10.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = FontFamily.SansSerif,
@@ -130,7 +133,7 @@ fun PlayerRevealCard(
                     .padding(horizontal = 10.dp, vertical = 4.dp)
             ) {
                 Text(
-                    text = if (isRevealed(idxPosition)) player.position else "??",
+                    text = if (isRevealed(idxPosition)) positionLabel(player.position) else "??",
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.SansSerif,
