@@ -25,15 +25,18 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.g5.R
 import com.g5.domain.model.PlayerScore
 import com.g5.domain.model.TeamAnalytics
 import com.g5.ui.components.MenuButton
 import com.g5.ui.components.MenuButtonVariant
 import com.g5.domain.model.GameState
+import com.g5.ui.util.positionAbbreviation
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.roundToInt
@@ -49,8 +52,8 @@ fun ScoutingReportScreen(
     onStartSimulation: () -> Unit,
     tutorialPositions: MutableMap<String, Rect> = mutableMapOf(),
     modifier: Modifier = Modifier,
-    labelA: String = "VOUS",
-    labelB: String = "IA"
+    labelA: String = stringResource(R.string.scouting_default_label_you),
+    labelB: String = stringResource(R.string.scouting_default_label_ai)
 ) {
     val analytics = gameState.analytics ?: return
     var viewMode by remember { mutableStateOf(0) } // 0: Bars, 1: Radar
@@ -71,14 +74,14 @@ fun ScoutingReportScreen(
             // Header
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                 Text(
-                    text = "RAPPORT DE SCOUTING",
+                    text = stringResource(R.string.scouting_header_kicker),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 2.sp,
                     color = Color(0xFFF4722B)
                 )
                 Text(
-                    text = "ANALYSE D'AVANT-MATCH",
+                    text = stringResource(R.string.scouting_header_title),
                     fontSize = 24.sp,
                     fontWeight = FontWeight.ExtraBold,
                     color = Color.White,
@@ -106,7 +109,7 @@ fun ScoutingReportScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "COMPARAISON DES ÉQUIPES",
+                    text = stringResource(R.string.scouting_team_comparison),
                     fontSize = 10.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
@@ -183,8 +186,8 @@ fun ScoutingReportScreen(
         ) {
             MenuButton(
                 icon = Icons.Default.PlayArrow,
-                label = "LANCER LA SIMULATION",
-                sublabel = "Début du coup d'envoi",
+                label = stringResource(R.string.scouting_launch_simulation),
+                sublabel = stringResource(R.string.scouting_launch_simulation_sublabel),
                 onClick = onStartSimulation,
                 variant = MenuButtonVariant.Primary
             )
@@ -192,15 +195,17 @@ fun ScoutingReportScreen(
     }
 }
 
+/** Le classement se fait sur le code stable (voir formatPosition côté data), pas sur le libellé
+ * affiché : il doit rester le même quelle que soit la langue. */
 private fun getPositionRank(position: String): Int {
     return when (position) {
-        "Meneur" -> 1
-        "Arrière" -> 2
-        "Arrière-Ailier" -> 3
-        "Ailier" -> 4
-        "Ailier Fort" -> 5
-        "Intérieur" -> 6
-        "Pivot" -> 7
+        "PG" -> 1
+        "SG" -> 2
+        "GF" -> 3
+        "SF" -> 4
+        "PF" -> 5
+        "FC" -> 6
+        "C" -> 7
         else -> 8
     }
 }
@@ -210,8 +215,8 @@ fun WinProbabilityCard(
     teamA: TeamAnalytics,
     teamB: TeamAnalytics,
     modifier: Modifier = Modifier,
-    labelA: String = "VOUS",
-    labelB: String = "IA"
+    labelA: String = stringResource(R.string.scouting_default_label_you),
+    labelB: String = stringResource(R.string.scouting_default_label_ai)
 ) {
     val probA = (teamA.winProbability * 100).roundToInt()
     val probB = (teamB.winProbability * 100).roundToInt()
@@ -225,7 +230,7 @@ fun WinProbabilityCard(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "PROBABILITÉ DE VICTOIRE",
+            text = stringResource(R.string.scouting_win_probability),
             fontSize = 10.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
@@ -295,10 +300,10 @@ fun TeamComparisonStats(teamA: TeamAnalytics, teamB: TeamAnalytics) {
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        ComparisonRow("Attaque (Shoot)", statsA.shooting, statsB.shooting)
-        ComparisonRow("Défense (Paint)", statsA.defense, statsB.defense)
-        ComparisonRow("Playmaking", statsA.playmaking, statsB.playmaking)
-        ComparisonRow("Dominance (Impact)", statsA.dominance, statsB.dominance)
+        ComparisonRow(stringResource(R.string.scouting_stat_shooting), statsA.shooting, statsB.shooting)
+        ComparisonRow(stringResource(R.string.scouting_stat_defense), statsA.defense, statsB.defense)
+        ComparisonRow(stringResource(R.string.scouting_stat_playmaking), statsA.playmaking, statsB.playmaking)
+        ComparisonRow(stringResource(R.string.scouting_stat_dominance), statsA.dominance, statsB.dominance)
     }
 }
 
@@ -307,7 +312,12 @@ fun TeamRadarComparison(teamA: TeamAnalytics, teamB: TeamAnalytics) {
     val statsA = calculateTeamStats(teamA.scoredPlayers)
     val statsB = calculateTeamStats(teamB.scoredPlayers)
 
-    val labels = listOf("Attaque", "Défense", "Playmaking", "Dominance")
+    val labels = listOf(
+        stringResource(R.string.scouting_radar_shooting),
+        stringResource(R.string.scouting_radar_defense),
+        stringResource(R.string.scouting_radar_playmaking),
+        stringResource(R.string.scouting_radar_dominance)
+    )
     val valuesA = listOf(statsA.shooting, statsA.defense, statsA.playmaking, statsA.dominance)
     val valuesB = listOf(statsB.shooting, statsB.defense, statsB.playmaking, statsB.dominance)
 
@@ -493,7 +503,7 @@ fun MatchupAdvantages(playersA: List<PlayerScore>, playersB: List<PlayerScore>, 
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "AVANTAGES PAR POSITION",
+            text = stringResource(R.string.scouting_matchup_advantages),
             fontSize = 10.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
@@ -540,19 +550,19 @@ fun MatchupAdvantages(playersA: List<PlayerScore>, playersB: List<PlayerScore>, 
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = scoreA.player.position.take(3).uppercase(),
+                            text = positionAbbreviation(scoreA.player.position),
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Black,
                             color = Color(0xFFF4722B)
                         )
                         Text(
-                            text = "VS",
+                            text = stringResource(R.string.scouting_vs),
                             fontSize = 8.sp,
                             fontWeight = FontWeight.Bold,
                             color = Color.White.copy(alpha = 0.3f)
                         )
                         Text(
-                            text = scoreB.player.position.take(3).uppercase(),
+                            text = positionAbbreviation(scoreB.player.position),
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Black,
                             color = Color(0xFFF4722B)
@@ -612,13 +622,13 @@ fun PlayerImpactRow(score: PlayerScore, alignment: Alignment.Horizontal) {
         horizontalArrangement = if (alignment == Alignment.Start) Arrangement.Start else Arrangement.End,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        ImpactGauge("ATT", attackScore)
+        ImpactGauge(stringResource(R.string.stat_impact_offense), attackScore)
         Spacer(Modifier.width(6.dp))
-        ImpactGauge("DEF", defenseScore)
+        ImpactGauge(stringResource(R.string.stat_impact_defense), defenseScore)
         Spacer(Modifier.width(6.dp))
-        ImpactGauge("ORG", playmakingScore)
+        ImpactGauge(stringResource(R.string.stat_impact_playmaking), playmakingScore)
         Spacer(Modifier.width(6.dp))
-        ImpactGauge("IMP", dominanceScore)
+        ImpactGauge(stringResource(R.string.stat_impact_dominance), dominanceScore)
     }
 }
 
@@ -662,22 +672,29 @@ fun XFactors(teamA: TeamAnalytics, teamB: TeamAnalytics) {
     val statsB = calculateTeamStats(teamB.scoredPlayers)
     
     val factors = mutableListOf<String>()
-    
+
+    val defenseUs = stringResource(R.string.scouting_x_factor_defense_us)
+    val defenseThem = stringResource(R.string.scouting_x_factor_defense_them)
+    val shootingUs = stringResource(R.string.scouting_x_factor_shooting_us)
+    val shootingThem = stringResource(R.string.scouting_x_factor_shooting_them)
+    val balanced1 = stringResource(R.string.scouting_x_factor_balanced_1)
+    val balanced2 = stringResource(R.string.scouting_x_factor_balanced_2)
+
     if (statsA.defense > statsB.defense + 0.1) {
-        factors.add("Votre équipe domine la raquette en défense.")
+        factors.add(defenseUs)
     } else if (statsB.defense > statsA.defense + 0.1) {
-        factors.add("L'IA possède un rempart défensif supérieur.")
+        factors.add(defenseThem)
     }
-    
+
     if (statsA.shooting > statsB.shooting + 0.05) {
-        factors.add("Avantage net au tir extérieur pour vous.")
+        factors.add(shootingUs)
     } else if (statsB.shooting > statsA.shooting + 0.05) {
-        factors.add("Attention à la précision chirurgicale de l'adversaire.")
+        factors.add(shootingThem)
     }
-    
+
     if (factors.isEmpty()) {
-        factors.add("Match très équilibré en perspective.")
-        factors.add("Le banc pourrait faire la différence.")
+        factors.add(balanced1)
+        factors.add(balanced2)
     }
 
     Column(
@@ -685,7 +702,7 @@ fun XFactors(teamA: TeamAnalytics, teamB: TeamAnalytics) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(
-            text = "FACTEURS X",
+            text = stringResource(R.string.scouting_x_factors),
             fontSize = 10.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
