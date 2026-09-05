@@ -74,18 +74,25 @@ class PlayerRepositoryImpl(
     }
 }
 
+/**
+ * Normalise le poste brut (venant de Room ou de Supabase) vers un code stable indépendant de la
+ * langue — PG/SG/SF/PF/C/GF/FC, ou la valeur d'origine si elle est déjà inconnue. Le libellé
+ * affiché (et son abréviation) se résout uniquement à l'affichage, via
+ * `com.g5.ui.util.positionLabel`/`positionAbbreviation` — jamais ici : ce code est aussi ce sur
+ * quoi s'appuient CalculateWinProbabilityUseCase (poids par poste) et
+ * GenerateMatchSimulationUseCase (choix des commentaires), qui doivent rester indépendants de la
+ * langue d'affichage.
+ */
 fun formatPosition(pos: String?): String {
-    if (pos.isNullOrBlank()) return "Polyvalent"
+    if (pos.isNullOrBlank()) return ""
     return when (pos.uppercase().trim()) {
-        "PG" -> "Meneur"
-        "SG" -> "Arrière"
-        "SF" -> "Ailier"
-        "PF" -> "Ailier Fort"
-        "C" -> "Pivot"
-        "G" -> "Arrière"
-        "F" -> "Ailier"
-        "GF", "G-F", "F-G" -> "Arrière-Ailier"
-        "FC", "F-C", "C-F" -> "Intérieur"
+        "PG" -> "PG"
+        "SG", "G" -> "SG"
+        "SF", "F" -> "SF"
+        "PF" -> "PF"
+        "C" -> "C"
+        "GF", "G-F", "F-G" -> "GF"
+        "FC", "F-C", "C-F" -> "FC"
         else -> pos
     }
 }

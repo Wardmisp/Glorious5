@@ -12,7 +12,7 @@ val useCaseModule = module {
     factory { AuctionUseCase() }
     factory { ComputerBidUseCase() }
     factory { CalculateWinProbabilityUseCase() }
-    factory { GenerateMatchSimulationUseCase() }
+    factory { GenerateMatchSimulationUseCase(stringProvider = get()) }
     factory { ResolveCompletedAuctionUseCase() }
     factory { BuildTutorialDemoUseCase(calculateWinProbabilityUseCase = get(), generateMatchSimulationUseCase = get()) }
 }
