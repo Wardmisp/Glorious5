@@ -1,0 +1,271 @@
+<resources>
+    <string name="app_name">Glorious 5</string>
+
+    <!-- Shared across screens -->
+    <string name="common_back">Back</string>
+    <string name="common_teams">Teams</string>
+    <string name="common_winner">WINNER</string>
+    <string name="common_loser">LOSER</string>
+    <string name="common_back_to_menu">BACK TO MENU</string>
+    <string name="common_join">JOIN</string>
+    <string name="common_match_in_progress">MATCH IN PROGRESS</string>
+    <string name="common_you">You</string>
+    <string name="common_opponent">Opponent</string>
+    <string name="common_decrease">Decrease</string>
+    <string name="common_increase">Increase</string>
+    <string name="common_ordi">CPU</string>
+    <string name="common_player_number">Player %1$d</string>
+    <string name="common_player_number_upper">PLAYER %1$d</string>
+    <string name="common_free">Free</string>
+    <string name="common_options">OPTIONS</string>
+    <string name="common_mystery_team">MYSTERY TEAM</string>
+
+    <!-- Positions -->
+    <string name="position_pg">Point Guard</string>
+    <string name="position_sg">Shooting Guard</string>
+    <string name="position_sf">Small Forward</string>
+    <string name="position_pf">Power Forward</string>
+    <string name="position_c">Center</string>
+    <string name="position_gf">Guard-Forward</string>
+    <string name="position_fc">Forward-Center</string>
+    <string name="position_unknown">Utility</string>
+    <string name="position_abbr_pg">PG</string>
+    <string name="position_abbr_sg">SG</string>
+    <string name="position_abbr_sf">SF</string>
+    <string name="position_abbr_pf">PF</string>
+    <string name="position_abbr_c">C</string>
+    <string name="position_abbr_gf">G-F</string>
+    <string name="position_abbr_fc">F-C</string>
+    <string name="position_abbr_unknown">UTL</string>
+
+    <!-- Abbreviated stats -->
+    <string name="stat_pts">PTS</string>
+    <string name="stat_reb">REB</string>
+    <string name="stat_ast">AST</string>
+    <string name="stat_stl">STL</string>
+    <string name="stat_blk">BLK</string>
+    <string name="stat_impact_offense">OFF</string>
+    <string name="stat_impact_defense">DEF</string>
+    <string name="stat_impact_playmaking">PLM</string>
+    <string name="stat_impact_dominance">IMP</string>
+
+    <!-- Tutorial -->
+    <string name="tutorial_skip">SKIP</string>
+    <string name="tutorial_next">NEXT</string>
+    <string name="tutorial_step1_title">Welcome!</string>
+    <string name="tutorial_step1_body">Discover how to build your dream team in Glorious 5.</string>
+    <string name="tutorial_step2_title">The Market</string>
+    <string name="tutorial_step2_body">The goal is to recruit 5 players. But careful, your budget is capped at $50!</string>
+    <string name="tutorial_step3_title">Let\'s Go</string>
+    <string name="tutorial_step3_body">Let\'s start with a game against the computer.</string>
+    <string name="tutorial_step4_title">The Player Card</string>
+    <string name="tutorial_step4_body">Here\'s the player up for auction. Their stats are hidden at first and get revealed as bidding goes on.</string>
+    <string name="tutorial_step5_title">The Timer</string>
+    <string name="tutorial_step5_body">Each turn lasts 15 seconds. If no one bids before it runs out, the last bidder wins the player.</string>
+    <string name="tutorial_step6_title">Bidding</string>
+    <string name="tutorial_step6_body">Use these buttons to raise the bid. Be strategic so you don\'t burn through your budget too fast!</string>
+    <string name="tutorial_step7_title">Passing</string>
+    <string name="tutorial_step7_body">If the price is too high or the player doesn\'t interest you, you can pass.</string>
+    <string name="tutorial_step8_title">Your Team</string>
+    <string name="tutorial_step8_body">Check your roster and remaining budget at any time here.</string>
+    <string name="tutorial_step9_title">Pre-Match Analysis</string>
+    <string name="tutorial_step9_body">Once your team is built, the Scouting Report analyzes your chances of winning.</string>
+    <string name="tutorial_step10_title">Win Probability</string>
+    <string name="tutorial_step10_body">See your odds of success based on your roster\'s balance and talent.</string>
+    <string name="tutorial_step11_title">Strengths &amp; Weaknesses</string>
+    <string name="tutorial_step11_body">Compare the areas of play: Offense, Defense, Playmaking...</string>
+    <string name="tutorial_step12_title">Key Matchups</string>
+    <string name="tutorial_step12_body">See who dominates at each position. Bold names indicate a statistical edge.</string>
+    <string name="tutorial_step13_title">Let\'s play!</string>
+    <string name="tutorial_step13_body">You know it all! Good luck building the best possible team.</string>
+
+    <!-- Home -->
+    <string name="home_title">GLORIOUS 5</string>
+    <string name="home_tagline">BUILD YOUR TEAM</string>
+    <string name="home_vs_computer_label">PLAY VS AI</string>
+    <string name="home_vs_computer_sublabel">Take on the computer</string>
+    <string name="home_split_screen_label">SPLIT SCREEN</string>
+    <string name="home_split_screen_sublabel">2 players on 1 screen</string>
+    <string name="home_online_label">PLAY ONLINE</string>
+    <string name="home_online_sublabel">Challenge a friend remotely</string>
+    <string name="home_tutorial_label">WALKTHROUGH</string>
+    <string name="home_tutorial_sublabel">Learn the rules</string>
+    <string name="home_options_sublabel">Settings and preferences</string>
+    <string name="home_version_footer">v%1$s · Season 2025–26</string>
+
+    <!-- Options -->
+    <string name="options_dark_mode">Dark Mode</string>
+    <string name="options_dark_mode_on">On</string>
+    <string name="options_dark_mode_off">Off</string>
+    <string name="options_sound">Sound Effects</string>
+    <string name="options_sound_on">On</string>
+    <string name="options_sound_off">Muted</string>
+    <string name="options_ai_level">AI Level</string>
+    <string name="options_difficulty_beginner">Beginner (+$10 for you)</string>
+    <string name="options_difficulty_normal">Normal (Fair)</string>
+    <string name="options_difficulty_hard">Hard (+$10 for the AI)</string>
+
+    <!-- Local auction (GameScreen) -->
+    <string name="game_header_title">NBA AUCTION</string>
+    <string name="game_round_progress">Player %1$d / %2$d</string>
+    <string name="game_reclaim_player">RECLAIM PLAYER (%1$s)</string>
+    <string name="game_pass_to_opponent">PASS (leave to %1$s for %2$s)</string>
+    <string name="game_player_won">%1$s wins %2$s for $%3$d!</string>
+    <string name="game_see_results">SEE RESULTS →</string>
+    <string name="game_next_player">NEXT PLAYER →</string>
+    <string name="game_you">You</string>
+
+    <!-- Game over -->
+    <string name="game_over_title">DRAFT COMPLETE</string>
+    <string name="game_over_winner_announcement">%1$s wins the draft!</string>
+    <string name="game_over_no_winner">Nobody</string>
+    <string name="game_over_budget_left">$%1$d left</string>
+
+    <!-- Split screen (hotseat) -->
+    <string name="split_header_title">SPLIT SCREEN · PLAYER %1$d/%2$d</string>
+    <string name="split_current_bid">Bid: $%1$d (%2$s)</string>
+    <string name="split_no_bid">No bid placed yet</string>
+    <string name="split_next_min_bid">Next bid: $%1$d</string>
+    <string name="split_player_won">%1$s wins %2$s for $%3$d!</string>
+    <string name="split_see_scouting">SEE SCOUTING REPORT →</string>
+    <string name="split_next_player">NEXT PLAYER →</string>
+    <string name="split_team_button">Team (%1$d/5)</string>
+    <string name="split_status_round_over">Round over</string>
+    <string name="split_status_full">Roster full (5/5)</string>
+    <string name="split_status_your_turn">🎯 YOUR TURN!</string>
+    <string name="split_status_waiting_for">⏳ PLAYER %1$d\'S TURN</string>
+    <string name="split_pass_button">PASS</string>
+    <string name="split_bid_button">BID</string>
+    <string name="split_dialog_title">ROSTER · %1$s</string>
+    <string name="split_dialog_subtitle">Budget left: $%1$d | %2$d/5 players</string>
+    <string name="split_dialog_empty">No players recruited yet</string>
+    <string name="split_dialog_close">CLOSE</string>
+    <string name="split_dialog_player_line">%1$s · %2$s (%3$s)</string>
+
+    <!-- Scouting report -->
+    <string name="scouting_header_kicker">SCOUTING REPORT</string>
+    <string name="scouting_header_title">PRE-MATCH ANALYSIS</string>
+    <string name="scouting_win_probability">WIN PROBABILITY</string>
+    <string name="scouting_default_label_you">YOU</string>
+    <string name="scouting_default_label_ai">AI</string>
+    <string name="scouting_team_comparison">TEAM COMPARISON</string>
+    <string name="scouting_stat_shooting">Offense (Shooting)</string>
+    <string name="scouting_stat_defense">Defense (Paint)</string>
+    <string name="scouting_stat_playmaking">Playmaking</string>
+    <string name="scouting_stat_dominance">Dominance (Impact)</string>
+    <string name="scouting_radar_shooting">Offense</string>
+    <string name="scouting_radar_defense">Defense</string>
+    <string name="scouting_radar_playmaking">Playmaking</string>
+    <string name="scouting_radar_dominance">Dominance</string>
+    <string name="scouting_matchup_advantages">MATCHUPS BY POSITION</string>
+    <string name="scouting_vs">VS</string>
+    <string name="scouting_x_factors">X-FACTORS</string>
+    <string name="scouting_x_factor_defense_us">Your team dominates the paint on defense.</string>
+    <string name="scouting_x_factor_defense_them">The AI has a superior defensive wall.</string>
+    <string name="scouting_x_factor_shooting_us">Clear outside shooting advantage for you.</string>
+    <string name="scouting_x_factor_shooting_them">Watch out for the opponent\'s surgical shooting.</string>
+    <string name="scouting_x_factor_balanced_1">A very balanced matchup ahead.</string>
+    <string name="scouting_x_factor_balanced_2">The bench could make the difference.</string>
+    <string name="scouting_launch_simulation">START THE SIMULATION</string>
+    <string name="scouting_launch_simulation_sublabel">Opening tip-off</string>
+    <string name="scouting_multiplayer_label_you">YOU</string>
+    <string name="scouting_multiplayer_label_opponent">OPPONENT</string>
+
+    <!-- Match simulation -->
+    <string name="simulation_quarter_title">%1$dST QUARTER</string>
+    <string name="simulation_quarter_loading">Simulating quarter %1$d...</string>
+
+    <!-- Teams panel (GameScreen) -->
+    <string name="teams_panel_title">Teams</string>
+    <string name="teams_panel_count">(%1$d/%2$d)</string>
+    <string name="teams_panel_empty_slot">— empty</string>
+
+    <!-- ComputerPanel -->
+    <string name="computer_panel_leading">🏆 Leading</string>
+    <string name="computer_panel_waiting">Waiting…</string>
+
+    <!-- BidControl -->
+    <string name="bid_control_bid_button">Bid</string>
+
+    <!-- AuctionBanner -->
+    <string name="auction_banner_awarded">Awarded</string>
+    <string name="auction_banner_current_bid_label">Current bid</string>
+    <string name="auction_banner_no_bid">No bid yet</string>
+    <string name="auction_banner_awarded_in">Awarded in %1$ds</string>
+    <string name="auction_banner_computer_thinking">The CPU is thinking</string>
+    <string name="auction_banner_leader">Leading</string>
+    <string name="auction_banner_winner">Winner</string>
+    <string name="auction_banner_start_bidding">Start the bidding!</string>
+
+    <!-- Multiplayer: lobby -->
+    <string name="mp_lobby_title">PLAY ONLINE</string>
+    <string name="mp_lobby_refresh">Refresh</string>
+    <string name="mp_lobby_create_section">CREATE A MATCH</string>
+    <string name="mp_lobby_budget_label">Budget</string>
+    <string name="mp_lobby_create_button">CREATE A MATCH</string>
+    <string name="mp_lobby_join_section">JOIN WITH A CODE</string>
+    <string name="mp_lobby_join_code_placeholder">Code from a friend</string>
+    <string name="mp_lobby_open_matches">OPEN MATCHES</string>
+    <string name="mp_lobby_no_open_matches">No open matches right now. Create your own!</string>
+    <string name="mp_lobby_match_summary">Budget $%1$d · %2$d players</string>
+    <string name="mp_lobby_waiting_for_opponent">Waiting for an opponent</string>
+
+    <!-- Multiplayer: match -->
+    <string name="mp_match_title">ONLINE MATCH</string>
+    <string name="mp_match_reconnecting">Reconnecting...</string>
+    <string name="mp_match_you_auto_win">You automatically get</string>
+    <string name="mp_match_opponent_auto_win">The opponent automatically gets</string>
+    <string name="mp_match_you_win">You win</string>
+    <string name="mp_match_opponent_win">The opponent wins</string>
+    <string name="mp_match_for_free">for free</string>
+    <string name="mp_match_for_price">for $%1$d</string>
+    <string name="mp_match_won_announcement">%1$s %2$s %3$s!</string>
+    <string name="mp_match_see_results">SEE RESULTS →</string>
+    <string name="mp_match_next_player">NEXT PLAYER →</string>
+    <string name="mp_match_waiting_for_opponent_title">WAITING FOR AN OPPONENT</string>
+    <string name="mp_match_share_code_hint">Share this code with a friend so they can join you, or wait for someone to find it in the lobby.</string>
+    <string name="mp_match_copy_code">  COPY CODE</string>
+    <string name="mp_match_insufficient_budget">INSUFFICIENT BUDGET (AUTO-PASSING...)</string>
+    <string name="mp_match_you_open">YOU OPEN THE AUCTION</string>
+    <string name="mp_match_your_turn">YOUR TURN TO BID</string>
+    <string name="mp_match_opponent_opens">OPPONENT OPENS THE AUCTION</string>
+    <string name="mp_match_opponent_turn">OPPONENT\'S TURN</string>
+    <string name="mp_match_current_bid">Current bid: $%1$d</string>
+    <string name="mp_match_waiting_your_bid">Waiting for your bid</string>
+    <string name="mp_match_opponent_thinking">Thinking...</string>
+    <string name="mp_match_auto_passing">AUTO-PASSING...</string>
+    <string name="mp_match_pass_button">PASS</string>
+    <string name="mp_match_roster_summary">Teams (%1$d/%2$d)</string>
+
+    <!-- Multiplayer: result -->
+    <string name="mp_result_title">MATCH OVER</string>
+    <string name="mp_result_draw">Match with no declared winner</string>
+    <string name="mp_result_you_won">You win the match!</string>
+    <string name="mp_result_opponent_won">The opponent wins the match</string>
+    <string name="mp_result_score">Score: %1$s</string>
+
+    <!-- Match simulation commentary (GenerateMatchSimulationUseCase, via StringProvider:
+         %1$s = player making the play, %2$s = the opponent directly involved). -->
+    <string name="commentary_common_block">Incredible block by %1$s, denying %2$s\'s dunk attempt!</string>
+    <string name="commentary_common_steal">%1$s picks %2$s\'s pocket and takes off alone on the break!</string>
+    <string name="commentary_common_rebound_duel">Intense physical battle: %1$s wins the rebounding duel against %2$s.</string>
+    <string name="commentary_common_foul_drawn">%1$s draws the foul as %2$s bulldozes through — what a commitment!</string>
+    <string name="commentary_common_steel_defense">Lockdown defense: %1$s gives %2$s no room at all and forces the turnover.</string>
+    <string name="commentary_common_read">Perfect read: %1$s anticipates %2$s\'s pass and pushes the break.</string>
+    <string name="commentary_common_cold_blooded">Ice in his veins! %1$s pump-fakes and gets %2$s to fly by before scoring.</string>
+    <string name="commentary_backcourt_three_pointer">%1$s drills a spectacular three right over %2$s\'s head!</string>
+    <string name="commentary_backcourt_blind_pass">A surgical no-look pass from %1$s leaves %2$s frozen in place.</string>
+    <string name="commentary_backcourt_stepback">%1$s buries a deep step-back despite %2$s\'s defense!</string>
+    <string name="commentary_backcourt_floater">Silky touch: %1$s finishes with an elegant floater over %2$s.</string>
+    <string name="commentary_backcourt_ankle_breaker">%1$s strings together the dribbles and leaves %2$s on the floor with a nasty ankle-breaker!</string>
+    <string name="commentary_backcourt_crossover">High-flying sequence: %1$s erases %2$s with a devastating crossover.</string>
+    <string name="commentary_frontcourt_posterize">%1$s posterizes %2$s with a violent dunk!</string>
+    <string name="commentary_frontcourt_alley_oop">%1$s soars for a monster alley-oop, all %2$s can do is watch.</string>
+    <string name="commentary_frontcourt_illegal_block">Goaltending? No! %1$s cleanly pins the ball against the backboard right in front of %2$s.</string>
+    <string name="commentary_frontcourt_and_one">%1$s powers through the rim for a spectacular and-one over %2$s.</string>
+    <string name="commentary_frontcourt_offensive_rebound">%1$s dominates the paint and rips down a crucial offensive rebound over %2$s.</string>
+    <string name="commentary_frontcourt_post_move">Pure power: %1$s backs %2$s down in the post and finishes with a textbook move.</string>
+    <string name="commentary_wing_full_court">%1$s goes coast to coast and finishes a layup despite %2$s\'s foul.</string>
+    <string name="commentary_wing_assist">A gorgeous assist from %1$s as %2$s was late on the rotation.</string>
+    <string name="commentary_wing_midrange">%1$s pulls up for a silky mid-range jumper over %2$s\'s outstretched arms.</string>
+</resources>
