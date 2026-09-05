@@ -34,7 +34,7 @@ import com.g5.ui.components.BasketballVisual
 import com.g5.ui.components.CourtLines
 import com.g5.ui.components.MenuButton
 import com.g5.ui.components.MenuButtonVariant
-import com.g5.ui.viewmodel.Screen
+import com.g5.ui.navigation.Routes
 
 import androidx.compose.ui.tooling.preview.Preview
 import com.g5.ui.theme.AndroidIdeaTheme
@@ -44,7 +44,7 @@ import androidx.compose.ui.layout.boundsInRoot
 
 @Composable
 fun HomeScreen(
-    onNavigate: (Screen) -> Unit,
+    onNavigate: (String) -> Unit,
     onStartTutorial: () -> Unit,
     tutorialPositions: MutableMap<String, Rect> = mutableMapOf(),
     modifier: Modifier = Modifier
@@ -122,7 +122,7 @@ fun HomeScreen(
                 icon = Icons.Default.Devices,
                 label = "JOUER CONTRE L'IA",
                 sublabel = "Affronte l'ordinateur",
-                onClick = { onNavigate(Screen.VsComputer) },
+                onClick = { onNavigate(Routes.VsComputer) },
                 variant = MenuButtonVariant.Primary,
                 modifier = Modifier.onGloballyPositioned { coords ->
                     tutorialPositions["home_ia"] = coords.boundsInRoot()
@@ -133,7 +133,7 @@ fun HomeScreen(
                 icon = Icons.Default.Group,
                 label = "SPLIT SCREEN",
                 sublabel = "2 joueurs sur 1 écran",
-                onClick = { onNavigate(Screen.VsHuman) },
+                onClick = { onNavigate(Routes.VsHuman) },
                 variant = MenuButtonVariant.Secondary,
                 enabled = true
             )
@@ -142,7 +142,7 @@ fun HomeScreen(
                 icon = Icons.Default.Public,
                 label = "JOUER EN LIGNE",
                 sublabel = "Défie un ami à distance",
-                onClick = { onNavigate(Screen.VsOnline) },
+                onClick = { onNavigate(Routes.VsOnline) },
                 variant = MenuButtonVariant.Secondary
             )
 
@@ -161,7 +161,7 @@ fun HomeScreen(
                 icon = Icons.Default.Settings,
                 label = "OPTIONS",
                 sublabel = "Réglages et préférences",
-                onClick = { onNavigate(Screen.Options) },
+                onClick = { onNavigate(Routes.Options) },
                 variant = MenuButtonVariant.Default
             )
         }
