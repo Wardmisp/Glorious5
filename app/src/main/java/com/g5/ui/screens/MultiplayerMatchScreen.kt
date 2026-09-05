@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.sp
 import com.g5.domain.model.TeamEntry
 import com.g5.ui.components.BidControl
 import com.g5.ui.components.PlayerRevealCard
-import com.g5.ui.viewmodel.CompletedAuctionInfo
+import com.g5.domain.model.CompletedAuctionInfo
 import com.g5.ui.viewmodel.MatchUiState
 import kotlinx.coroutines.delay
 

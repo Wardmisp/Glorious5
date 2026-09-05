@@ -32,7 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.g5.domain.model.TeamEntry
-import com.g5.data.local.TOTAL
+import com.g5.domain.model.TOTAL
 
 @Composable
 fun TeamsPanel(

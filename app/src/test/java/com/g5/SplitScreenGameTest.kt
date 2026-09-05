@@ -2,7 +2,7 @@ package com.g5
 
 import com.g5.domain.model.NBAPlayer
 import com.g5.domain.model.TeamEntry
-import com.g5.ui.viewmodel.GameState
+import com.g5.domain.model.GameState
 import org.junit.Assert.*
 import org.junit.Test
 
