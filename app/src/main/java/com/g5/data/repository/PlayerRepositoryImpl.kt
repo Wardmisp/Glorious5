@@ -1,27 +1,27 @@
 package com.g5.data.repository
 
-import android.content.Context
-import com.g5.data.local.AppDatabase
+import com.g5.data.local.NBA_PLAYERS
 import com.g5.data.local.PlayerSeason
 import com.g5.data.local.PlayerSeasonDao
-import com.g5.data.local.NBA_PLAYERS
+import com.g5.data.remote.dto.NbaPlayerDto
 import com.g5.domain.model.NBAPlayer
-import com.g5.core.network.SupabaseClient
+import com.g5.domain.repository.PlayerRepository
 import com.g5.core.utils.TeamColors
+import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlin.random.Random
 
-class PlayerRepository(private val dao: PlayerSeasonDao) {
+class PlayerRepositoryImpl(
+    private val dao: PlayerSeasonDao,
+    private val supabaseClient: SupabaseClient
+) : PlayerRepository {
 
-    constructor(context: Context) : this(AppDatabase.getInstance(context).playerSeasonDao())
-
-    fun getAllPlayersFlow(): Flow<List<NBAPlayer>> {
+    override fun getAllPlayersFlow(): Flow<List<NBAPlayer>> {
         return dao.getAll().map { list -> list.map { it.toNBAPlayer() } }
     }
 
-    suspend fun getAllPlayers(): List<NBAPlayer> {
+    override suspend fun getAllPlayers(): List<NBAPlayer> {
         val list = dao.getAllList()
         return if (list.isNotEmpty()) {
             list.map { it.toNBAPlayer() }
@@ -30,7 +30,7 @@ class PlayerRepository(private val dao: PlayerSeasonDao) {
         }
     }
 
-    suspend fun getAuctionPlayers(limit: Int = 10): List<NBAPlayer> {
+    override suspend fun getAuctionPlayers(limit: Int): List<NBAPlayer> {
         val list = dao.getRandomPlayers(limit)
         return if (list.isNotEmpty()) {
             list.map { it.toNBAPlayer() }
@@ -39,30 +39,32 @@ class PlayerRepository(private val dao: PlayerSeasonDao) {
         }
     }
 
-    suspend fun getPlayerById(id: Int): NBAPlayer? {
+    override suspend fun getPlayerById(id: Int): NBAPlayer? {
         val season = dao.getById(id)
         return season?.toNBAPlayer() ?: NBA_PLAYERS.find { it.id == id }
     }
 
-    suspend fun getAllSeasons(): List<NBAPlayer> {
+    override suspend fun getAllSeasons(): List<NBAPlayer> {
         return dao.getAllList().map { it.toNBAPlayer() }
     }
 
-    suspend fun getSupabaseAuctionPlayers(limit: Int = 10): List<NBAPlayer> {
+    override suspend fun getSupabaseAuctionPlayers(limit: Int): List<NBAPlayer> {
         return try {
-            // Pour avoir du "random" sur Supabase sans extension pgcrypto, 
-            // on peut soit utiliser une fonction RPC, soit tirer des IDs aléatoires, 
+            // Pour avoir du "random" sur Supabase sans extension pgcrypto,
+            // on peut soit utiliser une fonction RPC, soit tirer des IDs aléatoires,
             // soit prendre un batch et mélanger localement.
             // Ici on va prendre les 100 premiers (ou un range) et en choisir 10.
-            val players = SupabaseClient.client.postgrest["NbaBest1000"]
+            val players = supabaseClient.postgrest["NbaBest1000"]
                 .select()
-                .decodeList<NBAPlayer>()
-            
-            players.shuffled().take(limit).map { player ->
-                player.copy(
-                    position = formatPosition(player.position),
-                    teamColor = TeamColors.getHexColor(player.team)
-                )
+                .decodeList<NbaPlayerDto>()
+
+            players.shuffled().take(limit).map { dto ->
+                dto.toDomain().let { player ->
+                    player.copy(
+                        position = formatPosition(player.position),
+                        teamColor = TeamColors.getHexColor(player.team)
+                    )
+                }
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -138,7 +140,7 @@ fun PlayerSeason.toNBAPlayer(): NBAPlayer {
         .replace("Ž", "Z")
         .replace("đ", "d")
         .replace("Đ", "D")
-    
+
     val nameParts = cleanName.split(" ", limit = 2)
     val firstName = nameParts.getOrNull(0) ?: cleanName
     val lastName = nameParts.getOrNull(1) ?: ""

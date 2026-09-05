@@ -1,13 +1,15 @@
 package com.g5.data.repository
 
-import com.g5.core.network.SupabaseClient
-import com.g5.domain.model.Auction
-import com.g5.domain.model.Bid
-import com.g5.domain.model.BidInsertRequest
-import com.g5.domain.model.Match
-import com.g5.domain.model.MatchTeam
-import com.g5.domain.model.MatchTeamPlayer
+import com.g5.data.remote.dto.Auction
+import com.g5.data.remote.dto.Bid
+import com.g5.data.remote.dto.BidInsertRequest
+import com.g5.data.remote.dto.Match
+import com.g5.data.remote.dto.MatchTeam
+import com.g5.data.remote.dto.MatchTeamPlayer
+import com.g5.data.remote.dto.NbaPlayerDto
 import com.g5.domain.model.NBAPlayer
+import com.g5.domain.repository.MultiplayerRepository
+import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Order
@@ -29,13 +31,9 @@ import java.time.format.DateTimeFormatter
 /** Doit rester en phase avec la même limite appliquée côté SQL dans join_match(). */
 private const val LOBBY_MATCH_TTL_SECONDS = 10L * 60L
 
-/**
- * Toutes les interactions Supabase pour le mode multijoueur en ligne
- * (glorious5_multiplayer_schema.sql). Ne touche jamais au pool NbaBest1000
- * ni au mode hotseat local, gérés par [PlayerRepository].
- */
-class MultiplayerRepository {
-    private val client get() = SupabaseClient.client
+class MultiplayerRepositoryImpl(
+    private val client: SupabaseClient
+) : MultiplayerRepository {
 
     /**
      * Décalage entre l'horloge de cet appareil et celle du serveur (estimé une fois via l'en-tête
@@ -46,8 +44,7 @@ class MultiplayerRepository {
     @Volatile
     private var clockOffsetMillis: Long = 0L
 
-    /** À appeler une fois avant d'afficher un chrono basé sur une deadline serveur. */
-    suspend fun syncClock() {
+    override suspend fun syncClock() {
         try {
             val localBefore = System.currentTimeMillis()
             val result = client.postgrest["matches"].select { limit(1) }
@@ -61,16 +58,11 @@ class MultiplayerRepository {
         }
     }
 
-    /** Convertit un timestamp serveur (déjà en millis) en une valeur comparable à System.currentTimeMillis() sur cet appareil. */
-    fun toLocalMillis(serverMillis: Long): Long = serverMillis - clockOffsetMillis
+    override fun toLocalMillis(serverMillis: Long): Long = serverMillis - clockOffsetMillis
 
     // --- Auth (anonyme) ---
 
-    /**
-     * Restaure ou crée une session Supabase anonyme. Idempotent : ne recrée
-     * pas d'utilisateur si une session est déjà persistée sur l'appareil.
-     */
-    suspend fun ensureSignedIn(): String {
+    override suspend fun ensureSignedIn(): String {
         client.auth.awaitInitialization()
         if (client.auth.currentUserOrNull() == null) {
             client.auth.signInAnonymously()
@@ -79,7 +71,7 @@ class MultiplayerRepository {
             ?: error("Impossible de créer une session Supabase")
     }
 
-    fun currentUserId(): String? = client.auth.currentUserOrNull()?.id
+    override fun currentUserId(): String? = client.auth.currentUserOrNull()?.id
 
     // --- RPC ---
 
@@ -90,78 +82,62 @@ class MultiplayerRepository {
         @SerialName("p_team_size") val teamSize: Int = 5
     )
 
-    suspend fun createMatch(opponentId: String? = null, budget: Int = 50, teamSize: Int = 5): String =
+    override suspend fun createMatch(opponentId: String?, budget: Int, teamSize: Int): String =
         client.postgrest.rpc("create_match", CreateMatchParams(opponentId, budget, teamSize)).decodeAs<String>()
 
     @Serializable
     private data class MatchIdParam(@SerialName("p_match_id") val matchId: String)
 
-    suspend fun joinMatch(matchId: String) {
+    override suspend fun joinMatch(matchId: String) {
         client.postgrest.rpc("join_match", MatchIdParam(matchId))
     }
 
-    /** Retourne l'id de l'enchère créée, ou null si le match est terminé. */
-    suspend fun presentNextPlayer(matchId: String): String? =
+    override suspend fun presentNextPlayer(matchId: String): String? =
         client.postgrest.rpc("present_next_player", MatchIdParam(matchId)).decodeAs<String?>()
 
     @Serializable
     private data class AuctionIdParam(@SerialName("p_auction_id") val auctionId: String)
 
-    /**
-     * Force la résolution d'une enchère dont le délai de 15s est dépassé (mise/passe "au nom" du
-     * joueur en retard). Sans danger à appeler spéculativement : no-op côté serveur si l'enchère
-     * n'est plus active ou si le délai n'est pas encore dépassé.
-     */
-    suspend fun expireTurnIfOverdue(auctionId: String) {
+    override suspend fun expireTurnIfOverdue(auctionId: String) {
         client.postgrest.rpc("expire_turn_if_overdue", AuctionIdParam(auctionId))
     }
 
-    /**
-     * Démarre le chrono d'ouverture d'une enchère — à appeler par le joueur qui doit ouvrir,
-     * une fois qu'il voit effectivement cette enchère (turn_deadline encore null) à l'écran.
-     * Sans effet si le chrono est déjà lancé ou si ce n'est pas à lui d'ouvrir.
-     */
-    suspend fun startTurnClock(auctionId: String) {
+    override suspend fun startTurnClock(auctionId: String) {
         client.postgrest.rpc("start_turn_clock", AuctionIdParam(auctionId))
     }
 
     // --- Mises ---
 
-    suspend fun placeBid(auctionId: String, userId: String, amount: Int) {
+    override suspend fun placeBid(auctionId: String, userId: String, amount: Int) {
         client.postgrest["bids"].insert(BidInsertRequest(auctionId, userId, amount))
     }
 
-    suspend fun passBid(auctionId: String, userId: String) {
+    override suspend fun passBid(auctionId: String, userId: String) {
         client.postgrest["bids"].insert(BidInsertRequest(auctionId, userId, amount = null))
     }
 
     // --- Hydratation (toujours appelée avant d'ouvrir le realtime) ---
 
-    suspend fun getMatch(matchId: String): Match =
+    override suspend fun getMatch(matchId: String): Match =
         client.postgrest["matches"].select { filter { eq("id", matchId) } }.decodeSingle()
 
-    suspend fun getMatchTeams(matchId: String): List<MatchTeam> =
+    override suspend fun getMatchTeams(matchId: String): List<MatchTeam> =
         client.postgrest["match_teams"].select { filter { eq("match_id", matchId) } }.decodeList()
 
-    suspend fun getRosters(teamIds: List<String>): List<MatchTeamPlayer> {
+    override suspend fun getRosters(teamIds: List<String>): List<MatchTeamPlayer> {
         if (teamIds.isEmpty()) return emptyList()
         return client.postgrest["match_team_players"].select {
             filter { filter("match_team_id", FilterOperator.IN, teamIds) }
         }.decodeList()
     }
 
-    suspend fun getAuctionById(auctionId: String): Auction? =
+    override suspend fun getAuctionById(auctionId: String): Auction? =
         client.postgrest["auctions"].select { filter { eq("id", auctionId) } }.decodeList<Auction>().firstOrNull()
 
-    /** Historique des mises d'une enchère — sert au compteur de reveal progressif et au chrono
-     * (basé sur l'horodatage de la dernière mise, ou de la création de l'enchère si aucune). */
-    suspend fun getBids(auctionId: String): List<Bid> =
+    override suspend fun getBids(auctionId: String): List<Bid> =
         client.postgrest["bids"].select { filter { eq("auction_id", auctionId) } }.decodeList()
 
-    /** La toute dernière enchère du match, quel que soit son statut/type — sert à savoir si
-     * c'est une enchère en cours à afficher (active) ou une déjà résolue à faire acquitter
-     * (bid conclu, passe, timeout, ou attribution automatique) avant de passer à la suite. */
-    suspend fun getLatestAuction(matchId: String): Auction? =
+    override suspend fun getLatestAuction(matchId: String): Auction? =
         client.postgrest["auctions"].select {
             filter {
                 eq("match_id", matchId)
@@ -170,16 +146,14 @@ class MultiplayerRepository {
             limit(1)
         }.decodeList<Auction>().firstOrNull()
 
-    /** Pool complet, utilisé comme distribution de référence pour les percentiles du rapport de scouting. */
-    suspend fun getAllNbaPlayers(): List<NBAPlayer> =
-        client.postgrest["NbaBest1000"].select().decodeList<NBAPlayer>().map { applyDisplayFields(it) }
+    override suspend fun getAllNbaPlayers(): List<NBAPlayer> =
+        client.postgrest["NbaBest1000"].select().decodeList<NbaPlayerDto>().map { applyDisplayFields(it.toDomain()) }
 
-    /** Va chercher les joueurs NBA (table NbaBest1000) référencés par une enchère ou un roster. */
-    suspend fun getNbaPlayers(ids: List<Int>): List<NBAPlayer> {
+    override suspend fun getNbaPlayers(ids: List<Int>): List<NBAPlayer> {
         if (ids.isEmpty()) return emptyList()
         return client.postgrest["NbaBest1000"].select {
             filter { filter("id", FilterOperator.IN, ids) }
-        }.decodeList<NBAPlayer>().map { applyDisplayFields(it) }
+        }.decodeList<NbaPlayerDto>().map { applyDisplayFields(it.toDomain()) }
     }
 
     /**
@@ -208,10 +182,7 @@ class MultiplayerRepository {
         )
     }
 
-    /** Une partie en attente disparaît du lobby après ce délai sans adversaire (voir aussi
-     * join_match côté SQL, qui applique la même limite pour empêcher de la rejoindre via un
-     * code une fois qu'elle a expiré). */
-    suspend fun listOpenMatches(): List<Match> {
+    override suspend fun listOpenMatches(): List<Match> {
         val cutoffIso = Instant.now().minusSeconds(LOBBY_MATCH_TTL_SECONDS).toString()
         return client.postgrest["matches"].select {
             filter {
@@ -225,32 +196,32 @@ class MultiplayerRepository {
 
     // --- Realtime : un channel par match, plusieurs flows dessus ---
 
-    fun openMatchChannel(matchId: String): RealtimeChannel =
+    override fun openMatchChannel(matchId: String): RealtimeChannel =
         client.realtime.channel("match-$matchId")
 
-    fun matchChanges(channel: RealtimeChannel, matchId: String): Flow<PostgresAction> =
+    override fun matchChanges(channel: RealtimeChannel, matchId: String): Flow<PostgresAction> =
         channel.postgresChangeFlow(schema = "public") {
             table = "matches"
             filter("id", FilterOperator.EQ, matchId)
         }
 
-    fun auctionChanges(channel: RealtimeChannel, matchId: String): Flow<PostgresAction> =
+    override fun auctionChanges(channel: RealtimeChannel, matchId: String): Flow<PostgresAction> =
         channel.postgresChangeFlow(schema = "public") {
             table = "auctions"
             filter("match_id", FilterOperator.EQ, matchId)
         }
 
-    fun rosterChanges(channel: RealtimeChannel, teamIds: List<String>): Flow<PostgresAction> =
+    override fun rosterChanges(channel: RealtimeChannel, teamIds: List<String>): Flow<PostgresAction> =
         channel.postgresChangeFlow(schema = "public") {
             table = "match_team_players"
             filter("match_team_id", FilterOperator.IN, teamIds)
         }
 
-    suspend fun subscribeChannel(channel: RealtimeChannel) {
+    override suspend fun subscribeChannel(channel: RealtimeChannel) {
         channel.subscribe()
     }
 
-    suspend fun closeChannel(channel: RealtimeChannel) {
+    override suspend fun closeChannel(channel: RealtimeChannel) {
         channel.unsubscribe()
         client.realtime.removeChannel(channel)
     }
