@@ -22,6 +22,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "AndroidIdea"
+rootProject.name = "Glorious5"
 include(":app")
  

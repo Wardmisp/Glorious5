@@ -23,10 +23,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.g5.R
 
 @Composable
 fun BidControl(
@@ -111,7 +113,7 @@ fun BidControl(
             ) {
                 Icon(
                     imageVector = Icons.Default.Remove,
-                    contentDescription = "Diminuer",
+                    contentDescription = stringResource(R.string.common_decrease),
                     tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(12.dp)
                 )
@@ -138,7 +140,7 @@ fun BidControl(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Augmenter",
+                    contentDescription = stringResource(R.string.common_increase),
                     tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(12.dp)
                 )
@@ -153,7 +155,7 @@ fun BidControl(
                 .height(36.dp)
         ) {
             Text(
-                text = "Enchérir",
+                text = stringResource(R.string.bid_control_bid_button),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = FontFamily.SansSerif,

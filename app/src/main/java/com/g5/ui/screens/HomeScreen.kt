@@ -13,6 +13,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Devices
 import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Divider
@@ -23,17 +24,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.remember
+import com.g5.R
 import com.g5.ui.components.BasketballVisual
 import com.g5.ui.components.CourtLines
 import com.g5.ui.components.MenuButton
 import com.g5.ui.components.MenuButtonVariant
-import com.g5.ui.viewmodel.Screen
+import com.g5.ui.navigation.Routes
 
 import androidx.compose.ui.tooling.preview.Preview
 import com.g5.ui.theme.AndroidIdeaTheme
@@ -43,7 +46,7 @@ import androidx.compose.ui.layout.boundsInRoot
 
 @Composable
 fun HomeScreen(
-    onNavigate: (Screen) -> Unit,
+    onNavigate: (String) -> Unit,
     onStartTutorial: () -> Unit,
     tutorialPositions: MutableMap<String, Rect> = mutableMapOf(),
     modifier: Modifier = Modifier
@@ -81,7 +84,7 @@ fun HomeScreen(
                 BasketballVisual(size = 100.dp)
 
                 Text(
-                    text = "GLORIOUS 5",
+                    text = stringResource(R.string.home_title),
                     fontSize = 42.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = FontFamily.SansSerif,
@@ -92,7 +95,7 @@ fun HomeScreen(
                 )
 
                 Text(
-                    text = "CONSTRUISEZ VOTRE ÉQUIPE",
+                    text = stringResource(R.string.home_tagline),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                     fontFamily = FontFamily.SansSerif,
@@ -119,9 +122,9 @@ fun HomeScreen(
         ) {
             MenuButton(
                 icon = Icons.Default.Devices,
-                label = "JOUER CONTRE L'IA",
-                sublabel = "Affronte l'ordinateur",
-                onClick = { onNavigate(Screen.VsComputer) },
+                label = stringResource(R.string.home_vs_computer_label),
+                sublabel = stringResource(R.string.home_vs_computer_sublabel),
+                onClick = { onNavigate(Routes.VsComputer) },
                 variant = MenuButtonVariant.Primary,
                 modifier = Modifier.onGloballyPositioned { coords ->
                     tutorialPositions["home_ia"] = coords.boundsInRoot()
@@ -130,17 +133,25 @@ fun HomeScreen(
 
             MenuButton(
                 icon = Icons.Default.Group,
-                label = "JOUER À DEUX",
-                sublabel = "Bientôt disponible",
-                onClick = { onNavigate(Screen.VsHuman) },
+                label = stringResource(R.string.home_split_screen_label),
+                sublabel = stringResource(R.string.home_split_screen_sublabel),
+                onClick = { onNavigate(Routes.VsHuman) },
                 variant = MenuButtonVariant.Secondary,
-                enabled = false
+                enabled = true
+            )
+
+            MenuButton(
+                icon = Icons.Default.Public,
+                label = stringResource(R.string.home_online_label),
+                sublabel = stringResource(R.string.home_online_sublabel),
+                onClick = { onNavigate(Routes.VsOnline) },
+                variant = MenuButtonVariant.Secondary
             )
 
             MenuButton(
                 icon = Icons.Default.School,
-                label = "PRÉSENTATION",
-                sublabel = "Apprendre les règles",
+                label = stringResource(R.string.home_tutorial_label),
+                sublabel = stringResource(R.string.home_tutorial_sublabel),
                 onClick = onStartTutorial,
                 variant = MenuButtonVariant.Secondary,
                 modifier = Modifier.onGloballyPositioned { coords ->
@@ -150,15 +161,15 @@ fun HomeScreen(
 
             MenuButton(
                 icon = Icons.Default.Settings,
-                label = "OPTIONS",
-                sublabel = "Réglages et préférences",
-                onClick = { onNavigate(Screen.Options) },
+                label = stringResource(R.string.common_options),
+                sublabel = stringResource(R.string.home_options_sublabel),
+                onClick = { onNavigate(Routes.Options) },
                 variant = MenuButtonVariant.Default
             )
         }
 
         Text(
-            text = "v$versionName · Saison 2025–26",
+            text = stringResource(R.string.home_version_footer, versionName ?: "0.0.1"),
             fontSize = 12.sp,
             fontFamily = FontFamily.SansSerif,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
