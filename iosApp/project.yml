@@ -43,5 +43,8 @@ targets:
     deploymentTarget: "16.0"
     sources:
       - path: iosAppTests
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: "YES"
     dependencies:
       - target: iosApp
