@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.compose.multiplatform)
+    alias(libs.plugins.kotlin.compose)
 }
 
 kotlin {
@@ -34,6 +36,12 @@ kotlin {
             implementation(libs.supabase.auth)
             implementation(libs.kotlinx.datetime)
             api(libs.androidx.room.runtime)
+
+            api(compose.runtime)
+            api(compose.foundation)
+            api(compose.material3)
+            api(compose.materialIconsExtended)
+            api(compose.ui)
         }
     }
 }

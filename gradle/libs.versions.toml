@@ -11,7 +11,8 @@ espressoCore = "3.7.0"
 lifecycleRuntimeKtx = "2.11.0"
 lifecycleViewmodelCompose = "2.8.4"
 activityCompose = "1.13.0"
-composeBom = "2024.09.00"
+composeBom = "2026.08.00" # aligné avec Compose Multiplatform (voir shared/build.gradle.kts) pour éviter un conflit de version androidx.compose
+composeMultiplatform = "1.12.0"
 googleServices = "4.5.0"
 firebaseBom = "34.18.0"
 firebaseCrashlyticsPlugin = "3.0.8"
@@ -67,6 +68,7 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+compose-multiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
 legacy-kapt = { id = "com.android.legacy-kapt", version.ref = "agp" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }
