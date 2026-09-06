@@ -23,43 +23,49 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.runtime.remember
-import com.g5.R
 import com.g5.ui.components.BasketballVisual
 import com.g5.ui.components.CourtLines
 import com.g5.ui.components.MenuButton
 import com.g5.ui.components.MenuButtonVariant
 import com.g5.ui.navigation.Routes
 
-import androidx.compose.ui.tooling.preview.Preview
-import com.g5.ui.theme.AndroidIdeaTheme
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInRoot
 
+/** Libellés affichés par [HomeScreen], résolus par l'appelant (ressources Android côté `app`,
+ * chaînes en dur côté iOS) — l'écran de menu vit dans `shared` et ne peut pas dépendre de
+ * `Context`/`R.string`, qui n'existent que sur Android. */
+data class HomeScreenStrings(
+    val title: String,
+    val tagline: String,
+    val vsComputerLabel: String,
+    val vsComputerSublabel: String,
+    val splitScreenLabel: String,
+    val splitScreenSublabel: String,
+    val onlineLabel: String,
+    val onlineSublabel: String,
+    val tutorialLabel: String,
+    val tutorialSublabel: String,
+    val optionsLabel: String,
+    val optionsSublabel: String,
+    /** Texte de pied de page déjà formaté avec le numéro de version (ex. "v0.0.5 · Saison 2025–26"). */
+    val versionFooter: String
+)
+
 @Composable
 fun HomeScreen(
+    strings: HomeScreenStrings,
     onNavigate: (String) -> Unit,
     onStartTutorial: () -> Unit,
     tutorialPositions: MutableMap<String, Rect> = mutableMapOf(),
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
-    val versionName = remember {
-        try {
-            context.packageManager.getPackageInfo(context.packageName, 0).versionName
-        } catch (_: Exception) {
-            "0.0.1"
-        }
-    }
-
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -84,7 +90,7 @@ fun HomeScreen(
                 BasketballVisual(size = 100.dp)
 
                 Text(
-                    text = stringResource(R.string.home_title),
+                    text = strings.title,
                     fontSize = 42.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = FontFamily.SansSerif,
@@ -95,7 +101,7 @@ fun HomeScreen(
                 )
 
                 Text(
-                    text = stringResource(R.string.home_tagline),
+                    text = strings.tagline,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                     fontFamily = FontFamily.SansSerif,
@@ -122,8 +128,8 @@ fun HomeScreen(
         ) {
             MenuButton(
                 icon = Icons.Default.Devices,
-                label = stringResource(R.string.home_vs_computer_label),
-                sublabel = stringResource(R.string.home_vs_computer_sublabel),
+                label = strings.vsComputerLabel,
+                sublabel = strings.vsComputerSublabel,
                 onClick = { onNavigate(Routes.VsComputer) },
                 variant = MenuButtonVariant.Primary,
                 modifier = Modifier.onGloballyPositioned { coords ->
@@ -133,8 +139,8 @@ fun HomeScreen(
 
             MenuButton(
                 icon = Icons.Default.Group,
-                label = stringResource(R.string.home_split_screen_label),
-                sublabel = stringResource(R.string.home_split_screen_sublabel),
+                label = strings.splitScreenLabel,
+                sublabel = strings.splitScreenSublabel,
                 onClick = { onNavigate(Routes.VsHuman) },
                 variant = MenuButtonVariant.Secondary,
                 enabled = true
@@ -142,16 +148,16 @@ fun HomeScreen(
 
             MenuButton(
                 icon = Icons.Default.Public,
-                label = stringResource(R.string.home_online_label),
-                sublabel = stringResource(R.string.home_online_sublabel),
+                label = strings.onlineLabel,
+                sublabel = strings.onlineSublabel,
                 onClick = { onNavigate(Routes.VsOnline) },
                 variant = MenuButtonVariant.Secondary
             )
 
             MenuButton(
                 icon = Icons.Default.School,
-                label = stringResource(R.string.home_tutorial_label),
-                sublabel = stringResource(R.string.home_tutorial_sublabel),
+                label = strings.tutorialLabel,
+                sublabel = strings.tutorialSublabel,
                 onClick = onStartTutorial,
                 variant = MenuButtonVariant.Secondary,
                 modifier = Modifier.onGloballyPositioned { coords ->
@@ -161,32 +167,21 @@ fun HomeScreen(
 
             MenuButton(
                 icon = Icons.Default.Settings,
-                label = stringResource(R.string.common_options),
-                sublabel = stringResource(R.string.home_options_sublabel),
+                label = strings.optionsLabel,
+                sublabel = strings.optionsSublabel,
                 onClick = { onNavigate(Routes.Options) },
                 variant = MenuButtonVariant.Default
             )
         }
 
         Text(
-            text = stringResource(R.string.home_version_footer, versionName ?: "0.0.1"),
+            text = strings.versionFooter,
             fontSize = 12.sp,
             fontFamily = FontFamily.SansSerif,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(bottom = 24.dp)
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun HomeScreenPreview() {
-    AndroidIdeaTheme {
-        HomeScreen(
-            onNavigate = {},
-            onStartTutorial = {}
         )
     }
 }
