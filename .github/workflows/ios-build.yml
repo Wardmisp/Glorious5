@@ -57,8 +57,30 @@ jobs:
         # native arm64 slice only -- the generic one requests x86_64 too, which :shared doesn't
         # declare a Kotlin/Native target for.
         # `test` (not `build`) actually boots the simulator and runs iosAppTests, which calls
-        # into Kotlin from Swift (PlatformKt.platformName()) -- not just that the framework links.
+        # into Kotlin from Swift (Platform_iosKt.platformName()) -- not just that the framework
+        # links. -derivedDataPath pins where the built .app ends up so the screenshot step below
+        # can find it without a second, redundant build.
         run: |
           xcodebuild -project iosApp.xcodeproj -scheme iosApp \
             -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.2' \
+            -derivedDataPath build \
             test
+
+      - name: Boot simulator, launch the app, capture a screenshot
+        env:
+          DEVELOPER_DIR: /Applications/Xcode_16.1.app/Contents/Developer
+        run: |
+          UDID=$(xcrun simctl list devices available -j | jq -r '.devices["com.apple.CoreSimulator.SimRuntime.iOS-18-2"][] | select(.name=="iPhone 16") | .udid')
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID"
+          xcrun simctl install "$UDID" iosApp/build/Build/Products/Debug-iphonesimulator/iosApp.app
+          xcrun simctl launch "$UDID" com.g5.iosApp
+          sleep 3
+          xcrun simctl io "$UDID" screenshot ios-screenshot.png
+          xcrun simctl shutdown "$UDID" || true
+
+      - name: Upload screenshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-screenshot
+          path: ios-screenshot.png
