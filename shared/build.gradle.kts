@@ -47,6 +47,7 @@ kotlin {
             api(libs.koin.core)
             api(libs.koin.core.viewmodel)
             api(libs.androidx.lifecycle.viewmodel)
+            implementation(libs.androidx.sqlite.bundled)
         }
         androidMain.dependencies {
             implementation(libs.koin.android)
@@ -60,4 +61,6 @@ compose.resources {
 
 dependencies {
     add("kspAndroid", libs.androidx.room.compiler)
+    add("kspIosSimulatorArm64", libs.androidx.room.compiler)
+    add("kspIosArm64", libs.androidx.room.compiler)
 }
