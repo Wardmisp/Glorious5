@@ -40,6 +40,9 @@ jobs:
           DEVELOPER_DIR: /Applications/Xcode_16.1.app/Contents/Developer
         run: ./gradlew --configure-on-demand :shared:linkDebugFrameworkIosSimulatorArm64
 
+      - name: Dump shared.h
+        run: find . -name "shared.h" -exec cat {} \;
+
       - name: Install XcodeGen
         run: brew install xcodegen
 
