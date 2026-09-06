@@ -37,30 +37,25 @@ import com.g5.ui.navigation.Routes
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInRoot
-
-/** Libellés affichés par [HomeScreen], résolus par l'appelant (ressources Android côté `app`,
- * chaînes en dur côté iOS) — l'écran de menu vit dans `shared` et ne peut pas dépendre de
- * `Context`/`R.string`, qui n'existent que sur Android. */
-data class HomeScreenStrings(
-    val title: String,
-    val tagline: String,
-    val vsComputerLabel: String,
-    val vsComputerSublabel: String,
-    val splitScreenLabel: String,
-    val splitScreenSublabel: String,
-    val onlineLabel: String,
-    val onlineSublabel: String,
-    val tutorialLabel: String,
-    val tutorialSublabel: String,
-    val optionsLabel: String,
-    val optionsSublabel: String,
-    /** Texte de pied de page déjà formaté avec le numéro de version (ex. "v0.0.5 · Saison 2025–26"). */
-    val versionFooter: String
-)
+import org.jetbrains.compose.resources.stringResource
+import com.g5.shared.resources.Res
+import com.g5.shared.resources.common_options
+import com.g5.shared.resources.home_options_sublabel
+import com.g5.shared.resources.home_online_label
+import com.g5.shared.resources.home_online_sublabel
+import com.g5.shared.resources.home_split_screen_label
+import com.g5.shared.resources.home_split_screen_sublabel
+import com.g5.shared.resources.home_tagline
+import com.g5.shared.resources.home_title
+import com.g5.shared.resources.home_tutorial_label
+import com.g5.shared.resources.home_tutorial_sublabel
+import com.g5.shared.resources.home_version_footer
+import com.g5.shared.resources.home_vs_computer_label
+import com.g5.shared.resources.home_vs_computer_sublabel
 
 @Composable
 fun HomeScreen(
-    strings: HomeScreenStrings,
+    versionName: String,
     onNavigate: (String) -> Unit,
     onStartTutorial: () -> Unit,
     tutorialPositions: MutableMap<String, Rect> = mutableMapOf(),
@@ -90,7 +85,7 @@ fun HomeScreen(
                 BasketballVisual(size = 100.dp)
 
                 Text(
-                    text = strings.title,
+                    text = stringResource(Res.string.home_title),
                     fontSize = 42.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = FontFamily.SansSerif,
@@ -101,7 +96,7 @@ fun HomeScreen(
                 )
 
                 Text(
-                    text = strings.tagline,
+                    text = stringResource(Res.string.home_tagline),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Medium,
                     fontFamily = FontFamily.SansSerif,
@@ -128,8 +123,8 @@ fun HomeScreen(
         ) {
             MenuButton(
                 icon = Icons.Default.Devices,
-                label = strings.vsComputerLabel,
-                sublabel = strings.vsComputerSublabel,
+                label = stringResource(Res.string.home_vs_computer_label),
+                sublabel = stringResource(Res.string.home_vs_computer_sublabel),
                 onClick = { onNavigate(Routes.VsComputer) },
                 variant = MenuButtonVariant.Primary,
                 modifier = Modifier.onGloballyPositioned { coords ->
@@ -139,8 +134,8 @@ fun HomeScreen(
 
             MenuButton(
                 icon = Icons.Default.Group,
-                label = strings.splitScreenLabel,
-                sublabel = strings.splitScreenSublabel,
+                label = stringResource(Res.string.home_split_screen_label),
+                sublabel = stringResource(Res.string.home_split_screen_sublabel),
                 onClick = { onNavigate(Routes.VsHuman) },
                 variant = MenuButtonVariant.Secondary,
                 enabled = true
@@ -148,16 +143,16 @@ fun HomeScreen(
 
             MenuButton(
                 icon = Icons.Default.Public,
-                label = strings.onlineLabel,
-                sublabel = strings.onlineSublabel,
+                label = stringResource(Res.string.home_online_label),
+                sublabel = stringResource(Res.string.home_online_sublabel),
                 onClick = { onNavigate(Routes.VsOnline) },
                 variant = MenuButtonVariant.Secondary
             )
 
             MenuButton(
                 icon = Icons.Default.School,
-                label = strings.tutorialLabel,
-                sublabel = strings.tutorialSublabel,
+                label = stringResource(Res.string.home_tutorial_label),
+                sublabel = stringResource(Res.string.home_tutorial_sublabel),
                 onClick = onStartTutorial,
                 variant = MenuButtonVariant.Secondary,
                 modifier = Modifier.onGloballyPositioned { coords ->
@@ -167,15 +162,15 @@ fun HomeScreen(
 
             MenuButton(
                 icon = Icons.Default.Settings,
-                label = strings.optionsLabel,
-                sublabel = strings.optionsSublabel,
+                label = stringResource(Res.string.common_options),
+                sublabel = stringResource(Res.string.home_options_sublabel),
                 onClick = { onNavigate(Routes.Options) },
                 variant = MenuButtonVariant.Default
             )
         }
 
         Text(
-            text = strings.versionFooter,
+            text = stringResource(Res.string.home_version_footer, versionName),
             fontSize = 12.sp,
             fontFamily = FontFamily.SansSerif,
             color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),

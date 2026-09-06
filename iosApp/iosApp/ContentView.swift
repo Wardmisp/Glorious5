@@ -3,31 +3,17 @@ import UIKit
 import shared
 
 /// Héberge l'écran de menu Compose Multiplatform (`HomeScreenViewController`, côté Kotlin) dans
-/// la hiérarchie SwiftUI. Les libellés sont fournis en dur ici en attendant une vraie
-/// localisation multiplateforme (voir shared/src/commonMain/.../HomeScreen.kt).
+/// la hiérarchie SwiftUI. Les textes viennent des ressources Compose Multiplatform partagées
+/// (shared/src/commonMain/composeResources) ; seul le numéro de version est fourni par la
+/// plateforme.
 struct HomeScreenView: UIViewControllerRepresentable {
     let onNavigate: (String) -> Void
     let onStartTutorial: () -> Void
 
     func makeUIViewController(context: Context) -> UIViewController {
         let versionName = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.1"
-        let strings = HomeScreenStrings(
-            title: "GLORIOUS 5",
-            tagline: "CONSTRUISEZ VOTRE ÉQUIPE",
-            vsComputerLabel: "JOUER CONTRE L'IA",
-            vsComputerSublabel: "Affronte l'ordinateur",
-            splitScreenLabel: "SPLIT SCREEN",
-            splitScreenSublabel: "2 joueurs sur 1 écran",
-            onlineLabel: "JOUER EN LIGNE",
-            onlineSublabel: "Défie un ami à distance",
-            tutorialLabel: "PRÉSENTATION",
-            tutorialSublabel: "Apprendre les règles",
-            optionsLabel: "OPTIONS",
-            optionsSublabel: "Réglages et préférences",
-            versionFooter: "v\(versionName) · Saison 2025–26"
-        )
         return HomeScreenViewControllerKt.HomeScreenViewController(
-            strings: strings,
+            versionName: versionName,
             onNavigate: onNavigate,
             onStartTutorial: onStartTutorial
         )

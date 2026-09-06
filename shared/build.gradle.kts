@@ -42,8 +42,13 @@ kotlin {
             api(compose.material3)
             api(compose.materialIconsExtended)
             api(compose.ui)
+            implementation(compose.components.resources)
         }
     }
+}
+
+compose.resources {
+    packageOfResClass = "com.g5.shared.resources"
 }
 
 dependencies {

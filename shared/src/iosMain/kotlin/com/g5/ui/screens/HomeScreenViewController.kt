@@ -7,13 +7,13 @@ import platform.UIKit.UIViewController
 /** Point d'entrée appelé depuis Swift (voir `iosApp/iosApp/ContentView.swift`) pour héberger
  * l'écran de menu Compose Multiplatform dans un `UIViewController` classique. */
 fun HomeScreenViewController(
-    strings: HomeScreenStrings,
+    versionName: String,
     onNavigate: (String) -> Unit,
     onStartTutorial: () -> Unit
 ): UIViewController = ComposeUIViewController {
     AndroidIdeaTheme {
         HomeScreen(
-            strings = strings,
+            versionName = versionName,
             onNavigate = onNavigate,
             onStartTutorial = onStartTutorial
         )
