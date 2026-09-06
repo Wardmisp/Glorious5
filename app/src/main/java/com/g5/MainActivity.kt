@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.viewmodel.koinViewModel
 import com.google.firebase.analytics.FirebaseAnalytics
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState

@@ -43,6 +43,13 @@ kotlin {
             api(compose.materialIconsExtended)
             api(compose.ui)
             implementation(compose.components.resources)
+
+            api(libs.koin.core)
+            api(libs.koin.core.viewmodel)
+            api(libs.androidx.lifecycle.viewmodel)
+        }
+        androidMain.dependencies {
+            implementation(libs.koin.android)
         }
     }
 }

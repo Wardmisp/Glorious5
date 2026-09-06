@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import java.time.OffsetDateTime
+import kotlin.time.Instant
 
 /** Le temps réel nécessite que les tables soient ajoutées à la publication supabase_realtime
  * côté Supabase ; ce polling est un filet de sécurité qui fait avancer le match même si ce
@@ -26,7 +26,7 @@ import java.time.OffsetDateTime
 private const val FALLBACK_POLL_INTERVAL_MS = 4000L
 
 private fun parseInstantMillis(iso: String): Long? =
-    runCatching { OffsetDateTime.parse(iso).toInstant().toEpochMilli() }.getOrNull()
+    runCatching { Instant.parse(iso).toEpochMilliseconds() }.getOrNull()
 
 /**
  * Pilote le mode multijoueur en ligne (glorious5_multiplayer_schema.sql).
