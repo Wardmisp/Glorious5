@@ -6,6 +6,9 @@ name: iOS build check
 # elsewhere; only linking needs a real Mac.
 on:
   push:
+    branches:
+      - develop
+      - master
   pull_request:
     branches:
       - develop
