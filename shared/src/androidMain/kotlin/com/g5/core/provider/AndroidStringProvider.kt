@@ -1,9 +1,9 @@
 package com.g5.core.provider
 
 import android.content.Context
-import com.g5.R
 import com.g5.domain.provider.CommentaryKey
 import com.g5.domain.provider.StringProvider
+import com.g5.shared.R
 
 /** Seule implémentation de [StringProvider] — fait le pont entre le domaine (qui ignore Android)
  * et les ressources `R.string`. */

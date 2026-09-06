@@ -10,6 +10,9 @@ kotlin {
         namespace = "com.g5.shared"
         compileSdk = 37
         minSdk = 28
+        androidResources {
+            enable = true
+        }
     }
 
     sourceSets {

@@ -244,29 +244,4 @@
     <string name="mp_result_you_won">Tu remportes le match !</string>
     <string name="mp_result_opponent_won">L\'adversaire remporte le match</string>
     <string name="mp_result_score">Score : %1$s</string>
-
-    <!-- Commentaires de simulation de match (GenerateMatchSimulationUseCase, via StringProvider :
-         %1$s = joueur qui fait l\'action, %2$s = adversaire directement concerné). -->
-    <string name="commentary_common_block">Incroyable contre de %1$s qui repousse la tentative de dunk de %2$s.</string>
-    <string name="commentary_common_steal">%1$s intercepte le ballon dans les mains de %2$s et s\'en va finir seul en contre-attaque !</string>
-    <string name="commentary_common_rebound_duel">Duel physique intense : %1$s gagne son duel au rebond face à %2$s.</string>
-    <string name="commentary_common_foul_drawn">%1$s provoque le passage en force de %2$s, quel engagement !</string>
-    <string name="commentary_common_steel_defense">Défense d\'acier : %1$s ne laisse aucun espace à %2$s et force la perte de balle.</string>
-    <string name="commentary_common_read">Lecture de jeu parfaite : %1$s anticipe la passe de %2$s et lance la transition.</string>
-    <string name="commentary_common_cold_blooded">Quel sang-froid ! %1$s feinte le tir et oblige %2$s à sauter dans le vide avant de marquer.</string>
-    <string name="commentary_backcourt_three_pointer">%1$s marque un 3 points spectaculaire sur la tête de %2$s !</string>
-    <string name="commentary_backcourt_blind_pass">Passe aveugle chirurgicale de %1$s qui laisse %2$s totalement immobile.</string>
-    <string name="commentary_backcourt_stepback">%1$s plante un step-back longue distance malgré la défense de %2$s !</string>
-    <string name="commentary_backcourt_floater">Touché de velours : %1$s termine avec un floater élégant au-dessus de %2$s.</string>
-    <string name="commentary_backcourt_ankle_breaker">%1$s enchaîne les dribbles et fait mordre la poussière à %2$s sur un cassage de chevilles !</string>
-    <string name="commentary_backcourt_crossover">Séquence de haute volée : %1$s efface %2$s d\'un crossover dévastateur.</string>
-    <string name="commentary_frontcourt_posterize">%1$s postérise violemment %2$s avec un dunk dévastateur !</string>
-    <string name="commentary_frontcourt_alley_oop">%1$s s\'envole pour un alley-oop monumental, %2$s ne peut que regarder.</string>
-    <string name="commentary_frontcourt_illegal_block">Contre illégal ? Non ! %1$s scotche proprement le ballon contre la planche devant %2$s.</string>
-    <string name="commentary_frontcourt_and_one">%1$s finit en force au cercle avec un \'and-one\' spectaculaire face à %2$s.</string>
-    <string name="commentary_frontcourt_offensive_rebound">%1$s domine la raquette et arrache un rebond offensif crucial devant %2$s.</string>
-    <string name="commentary_frontcourt_post_move">Puissance pure : %1$s enfonce %2$s au poste bas et finit avec un move d\'école.</string>
-    <string name="commentary_wing_full_court">%1$s traverse tout le terrain et finit par un lay-up malgré la faute de %2$s.</string>
-    <string name="commentary_wing_assist">Magnifique passe décisive de %1$s alors que %2$s était en retard sur la rotation.</string>
-    <string name="commentary_wing_midrange">%1$s déclenche un tir à mi-distance soyeux au-dessus des bras de %2$s.</string>
 </resources>

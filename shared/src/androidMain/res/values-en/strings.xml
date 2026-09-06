@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="commentary_common_block">Incredible block by %1$s, denying %2$s\'s dunk attempt!</string>
+    <string name="commentary_common_steal">%1$s picks %2$s\'s pocket and takes off alone on the break!</string>
+    <string name="commentary_common_rebound_duel">Intense physical battle: %1$s wins the rebounding duel against %2$s.</string>
+    <string name="commentary_common_foul_drawn">%1$s draws the foul as %2$s bulldozes through — what a commitment!</string>
+    <string name="commentary_common_steel_defense">Lockdown defense: %1$s gives %2$s no room at all and forces the turnover.</string>
+    <string name="commentary_common_read">Perfect read: %1$s anticipates %2$s\'s pass and pushes the break.</string>
+    <string name="commentary_common_cold_blooded">Ice in his veins! %1$s pump-fakes and gets %2$s to fly by before scoring.</string>
+    <string name="commentary_backcourt_three_pointer">%1$s drills a spectacular three right over %2$s\'s head!</string>
+    <string name="commentary_backcourt_blind_pass">A surgical no-look pass from %1$s leaves %2$s frozen in place.</string>
+    <string name="commentary_backcourt_stepback">%1$s buries a deep step-back despite %2$s\'s defense!</string>
+    <string name="commentary_backcourt_floater">Silky touch: %1$s finishes with an elegant floater over %2$s.</string>
+    <string name="commentary_backcourt_ankle_breaker">%1$s strings together the dribbles and leaves %2$s on the floor with a nasty ankle-breaker!</string>
+    <string name="commentary_backcourt_crossover">High-flying sequence: %1$s erases %2$s with a devastating crossover.</string>
+    <string name="commentary_frontcourt_posterize">%1$s posterizes %2$s with a violent dunk!</string>
+    <string name="commentary_frontcourt_alley_oop">%1$s soars for a monster alley-oop, all %2$s can do is watch.</string>
+    <string name="commentary_frontcourt_illegal_block">Goaltending? No! %1$s cleanly pins the ball against the backboard right in front of %2$s.</string>
+    <string name="commentary_frontcourt_and_one">%1$s powers through the rim for a spectacular and-one over %2$s.</string>
+    <string name="commentary_frontcourt_offensive_rebound">%1$s dominates the paint and rips down a crucial offensive rebound over %2$s.</string>
+    <string name="commentary_frontcourt_post_move">Pure power: %1$s backs %2$s down in the post and finishes with a textbook move.</string>
+    <string name="commentary_wing_full_court">%1$s goes coast to coast and finishes a layup despite %2$s\'s foul.</string>
+    <string name="commentary_wing_assist">A gorgeous assist from %1$s as %2$s was late on the rotation.</string>
+    <string name="commentary_wing_midrange">%1$s pulls up for a silky mid-range jumper over %2$s\'s outstretched arms.</string>
+</resources>
