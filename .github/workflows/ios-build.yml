@@ -1,0 +1,32 @@
+name: iOS build check
+
+# Validates that :shared actually links into an iOS framework. Apple's toolchain (used for the
+# native link step) only runs on macOS, which is why this needs a macos runner instead of the
+# usual Linux/Windows ones -- see :shared's Kotlin source, which already cross-compiles fine
+# elsewhere; only linking needs a real Mac.
+on:
+  push:
+  pull_request:
+    branches:
+      - develop
+      - master
+  workflow_dispatch:
+
+jobs:
+  build-ios-framework:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Build shared framework for iOS Simulator (arm64)
+        # --configure-on-demand keeps Gradle from configuring :app (and its Google Services
+        # plugin, which needs a google-services.json this runner doesn't have) since this task
+        # only needs :shared.
+        run: ./gradlew --configure-on-demand :shared:linkDebugFrameworkIosSimulatorArm64

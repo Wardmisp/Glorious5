@@ -15,6 +15,9 @@ kotlin {
         }
     }
 
+    iosArm64()
+    iosSimulatorArm64()
+
     sourceSets {
         commonMain.dependencies {
             implementation(libs.kotlinx.coroutines.core)
@@ -25,7 +28,6 @@ kotlin {
             implementation(libs.supabase.auth)
             implementation(libs.kotlinx.datetime)
             api(libs.androidx.room.runtime)
-            api(libs.androidx.room.ktx)
         }
     }
 }
