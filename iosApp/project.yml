@@ -23,6 +23,9 @@ targets:
       properties:
         CFBundleName: iosApp
         UILaunchScreen: {}
+    scheme:
+      testTargets:
+        - iosAppTests
     preBuildScripts:
       - name: Compile Kotlin Framework (:shared)
         basedOnDependencyAnalysis: false
@@ -33,3 +36,12 @@ targets:
           fi
           cd "$SRCROOT/.."
           ./gradlew :shared:embedAndSignAppleFrameworkForXcode
+
+  iosAppTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "16.0"
+    sources:
+      - path: iosAppTests
+    dependencies:
+      - target: iosApp
