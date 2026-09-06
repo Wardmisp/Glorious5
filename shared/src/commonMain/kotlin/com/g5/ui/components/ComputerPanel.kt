@@ -22,12 +22,12 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.g5.R
+import com.g5.shared.resources.*
 
 @Composable
 fun ComputerPanel(
@@ -63,7 +63,7 @@ fun ComputerPanel(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = stringResource(R.string.common_ordi),
+                text = stringResource(Res.string.common_ordi),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.SansSerif,
@@ -116,7 +116,7 @@ fun ComputerPanel(
                 }
             } else {
                 Text(
-                    text = stringResource(if (leading) R.string.computer_panel_leading else R.string.computer_panel_waiting),
+                    text = stringResource(if (leading) Res.string.computer_panel_leading else Res.string.computer_panel_waiting),
                     fontSize = 12.sp,
                     fontFamily = FontFamily.SansSerif,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),

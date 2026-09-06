@@ -17,11 +17,10 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalWindowInfo
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import com.g5.R
+import com.g5.shared.resources.*
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -38,9 +37,7 @@ fun TutorialOverlay(
     onNext: () -> Unit,
     onSkip: () -> Unit
 ) {
-    val configuration = LocalConfiguration.current
-    val density = LocalDensity.current
-    val screenHeightPx = with(density) { configuration.screenHeightDp.dp.toPx() }
+    val screenHeightPx = LocalWindowInfo.current.containerSize.height.toFloat()
 
     Box(
         modifier = Modifier
@@ -111,14 +108,14 @@ fun TutorialOverlay(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     TextButton(onClick = onSkip, modifier = Modifier.weight(1f)) {
-                        Text(stringResource(R.string.tutorial_skip), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), fontWeight = FontWeight.Bold)
+                        Text(stringResource(Res.string.tutorial_skip), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), fontWeight = FontWeight.Bold)
                     }
                     Button(
                         onClick = onNext,
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF4722B))
                     ) {
-                        Text(stringResource(R.string.tutorial_next), color = Color.White, fontWeight = FontWeight.Bold)
+                        Text(stringResource(Res.string.tutorial_next), color = Color.White, fontWeight = FontWeight.Bold)
                     }
                 }
             }

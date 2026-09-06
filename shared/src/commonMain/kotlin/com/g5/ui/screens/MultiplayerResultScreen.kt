@@ -22,12 +22,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.g5.R
+import com.g5.shared.resources.*
+import com.g5.ui.util.formatOneDecimal
 import com.g5.domain.model.TeamEntry
 import com.g5.ui.viewmodel.MatchUiState
 
@@ -68,7 +69,7 @@ fun MultiplayerResultScreen(
                     modifier = Modifier.size(48.dp)
                 )
                 Text(
-                    text = stringResource(R.string.mp_result_title),
+                    text = stringResource(Res.string.mp_result_title),
                     fontSize = 32.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = FontFamily.SansSerif,
@@ -77,9 +78,9 @@ fun MultiplayerResultScreen(
                 Text(
                     text = stringResource(
                         when {
-                            isDraw -> R.string.mp_result_draw
-                            iWon -> R.string.mp_result_you_won
-                            else -> R.string.mp_result_opponent_won
+                            isDraw -> Res.string.mp_result_draw
+                            iWon -> Res.string.mp_result_you_won
+                            else -> Res.string.mp_result_opponent_won
                         }
                     ),
                     fontSize = 20.sp,
@@ -91,7 +92,7 @@ fun MultiplayerResultScreen(
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 ResultColumn(
-                    name = stringResource(R.string.common_you),
+                    name = stringResource(Res.string.common_you),
                     entries = state.myRoster,
                     score = state.myTeam?.totalScore,
                     budgetLeft = state.myTeam?.budgetRemaining ?: 0,
@@ -99,7 +100,7 @@ fun MultiplayerResultScreen(
                     modifier = Modifier.weight(1f)
                 )
                 ResultColumn(
-                    name = stringResource(R.string.common_opponent),
+                    name = stringResource(Res.string.common_opponent),
                     entries = state.opponentRoster,
                     score = state.opponentTeam?.totalScore,
                     budgetLeft = state.opponentTeam?.budgetRemaining ?: 0,
@@ -114,7 +115,7 @@ fun MultiplayerResultScreen(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
             Text(
-                text = stringResource(R.string.common_back_to_menu),
+                text = stringResource(Res.string.common_back_to_menu),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = FontFamily.SansSerif,
@@ -153,7 +154,7 @@ private fun ResultColumn(
         )
 
         Text(
-            text = stringResource(if (isWinner) R.string.common_winner else R.string.common_loser),
+            text = stringResource(if (isWinner) Res.string.common_winner else Res.string.common_loser),
             fontSize = 22.sp,
             fontWeight = FontWeight.ExtraBold,
             fontFamily = FontFamily.SansSerif,
@@ -163,7 +164,7 @@ private fun ResultColumn(
 
         if (score != null) {
             Text(
-                text = stringResource(R.string.mp_result_score, "%.1f".format(score)),
+                text = stringResource(Res.string.mp_result_score, score.formatOneDecimal()),
                 fontSize = 11.sp,
                 fontFamily = FontFamily.SansSerif,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -200,7 +201,7 @@ private fun ResultColumn(
         }
 
         Text(
-            text = stringResource(R.string.game_over_budget_left, budgetLeft),
+            text = stringResource(Res.string.game_over_budget_left, budgetLeft),
             fontSize = 12.sp,
             fontFamily = FontFamily.SansSerif,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),

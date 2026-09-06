@@ -27,12 +27,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.g5.R
+import com.g5.shared.resources.*
 import com.g5.domain.model.GameAction
 import com.g5.ui.components.GymActionTime
 import com.g5.ui.components.GymClock
@@ -85,7 +85,7 @@ fun SimulationScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = stringResource(R.string.common_match_in_progress),
+                text = stringResource(Res.string.common_match_in_progress),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = FontFamily.SansSerif,
@@ -166,7 +166,7 @@ fun QuarterCard(number: Int, actions: List<GameAction>, onAllFinished: () -> Uni
                 )
             }
             Text(
-                text = stringResource(R.string.simulation_quarter_title, number),
+                text = stringResource(Res.string.simulation_quarter_title, number),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = FontFamily.SansSerif,
@@ -253,7 +253,7 @@ fun CurrentQuarterLoading(number: Int) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = stringResource(R.string.simulation_quarter_loading, number),
+            text = stringResource(Res.string.simulation_quarter_loading, number),
             fontSize = 12.sp,
             fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)

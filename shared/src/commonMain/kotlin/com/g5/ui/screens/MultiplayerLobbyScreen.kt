@@ -29,12 +29,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.g5.R
+import com.g5.shared.resources.*
 import com.g5.data.remote.dto.Match
 import com.g5.ui.viewmodel.LobbyUiState
 
@@ -70,14 +70,14 @@ fun MultiplayerLobbyScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = stringResource(R.string.common_back),
+                    contentDescription = stringResource(Res.string.common_back),
                     tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(20.dp)
                 )
             }
 
             Text(
-                text = stringResource(R.string.mp_lobby_title),
+                text = stringResource(Res.string.mp_lobby_title),
                 fontSize = 20.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = FontFamily.SansSerif,
@@ -95,7 +95,7 @@ fun MultiplayerLobbyScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Refresh,
-                    contentDescription = stringResource(R.string.mp_lobby_refresh),
+                    contentDescription = stringResource(Res.string.mp_lobby_refresh),
                     tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(18.dp)
                 )
@@ -126,7 +126,7 @@ fun MultiplayerLobbyScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.mp_lobby_create_section),
+                    text = stringResource(Res.string.mp_lobby_create_section),
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.SansSerif,
@@ -134,7 +134,7 @@ fun MultiplayerLobbyScreen(
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
                 Stepper(
-                    label = stringResource(R.string.mp_lobby_budget_label),
+                    label = stringResource(Res.string.mp_lobby_budget_label),
                     value = "${state.budgetInput}$",
                     onDecrease = { onBudgetChange((state.budgetInput - 10).coerceAtLeast(10)) },
                     onIncrease = { onBudgetChange(state.budgetInput + 10) },
@@ -148,7 +148,7 @@ fun MultiplayerLobbyScreen(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.mp_lobby_create_button),
+                    text = stringResource(Res.string.mp_lobby_create_button),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = FontFamily.SansSerif,
@@ -165,7 +165,7 @@ fun MultiplayerLobbyScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.mp_lobby_join_section),
+                    text = stringResource(Res.string.mp_lobby_join_section),
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.SansSerif,
@@ -175,7 +175,7 @@ fun MultiplayerLobbyScreen(
                 OutlinedTextField(
                     value = state.joinCodeInput,
                     onValueChange = onJoinCodeChange,
-                    placeholder = { Text(stringResource(R.string.mp_lobby_join_code_placeholder)) },
+                    placeholder = { Text(stringResource(Res.string.mp_lobby_join_code_placeholder)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -185,7 +185,7 @@ fun MultiplayerLobbyScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = stringResource(R.string.common_join),
+                        text = stringResource(Res.string.common_join),
                         fontSize = 13.sp,
                         fontWeight = FontWeight.ExtraBold,
                         fontFamily = FontFamily.SansSerif,
@@ -195,7 +195,7 @@ fun MultiplayerLobbyScreen(
             }
 
             Text(
-                text = stringResource(R.string.mp_lobby_open_matches),
+                text = stringResource(Res.string.mp_lobby_open_matches),
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.SansSerif,
@@ -209,7 +209,7 @@ fun MultiplayerLobbyScreen(
                 }
             } else if (state.openMatches.isEmpty()) {
                 Text(
-                    text = stringResource(R.string.mp_lobby_no_open_matches),
+                    text = stringResource(Res.string.mp_lobby_no_open_matches),
                     fontSize = 13.sp,
                     fontFamily = FontFamily.SansSerif,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
@@ -309,14 +309,14 @@ private fun OpenMatchRow(match: Match, onJoin: () -> Unit) {
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = stringResource(R.string.mp_lobby_match_summary, match.budget, match.teamSize),
+                text = stringResource(Res.string.mp_lobby_match_summary, match.budget, match.teamSize),
                 fontSize = 13.sp,
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.SansSerif,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = stringResource(R.string.mp_lobby_waiting_for_opponent),
+                text = stringResource(Res.string.mp_lobby_waiting_for_opponent),
                 fontSize = 11.sp,
                 fontFamily = FontFamily.SansSerif,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
@@ -325,7 +325,7 @@ private fun OpenMatchRow(match: Match, onJoin: () -> Unit) {
 
         Button(onClick = onJoin) {
             Text(
-                text = stringResource(R.string.common_join),
+                text = stringResource(Res.string.common_join),
                 fontSize = 11.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = FontFamily.SansSerif

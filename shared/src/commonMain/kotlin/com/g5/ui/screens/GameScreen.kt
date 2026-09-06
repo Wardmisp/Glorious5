@@ -34,12 +34,12 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.g5.R
+import com.g5.shared.resources.*
 import com.g5.data.local.NBA_PLAYERS
 import com.g5.domain.model.TOTAL
 import com.g5.ui.components.AuctionBanner
@@ -64,8 +64,8 @@ fun GameScreen(
     val totalPlayers = if (gameState.players.isNotEmpty()) gameState.players.size else TOTAL
     val player = gameState.players.getOrNull(gameState.round)
         ?: NBA_PLAYERS[gameState.round.coerceIn(0, NBA_PLAYERS.size - 1)]
-    val p1Name = if (vsComputer) stringResource(R.string.game_you) else stringResource(R.string.common_player_number, 1)
-    val p2Name = if (vsComputer) stringResource(R.string.common_ordi) else stringResource(R.string.common_player_number, 2)
+    val p1Name = if (vsComputer) stringResource(Res.string.game_you) else stringResource(Res.string.common_player_number, 1)
+    val p2Name = if (vsComputer) stringResource(Res.string.common_ordi) else stringResource(Res.string.common_player_number, 2)
     val minBid = gameState.bid + 1
 
     // Logic du Timer - Liée à la composition et reset par round/bid
@@ -143,7 +143,7 @@ fun GameScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
-                        contentDescription = stringResource(R.string.common_back),
+                        contentDescription = stringResource(Res.string.common_back),
                         tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(16.dp)
                     )
@@ -155,7 +155,7 @@ fun GameScreen(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
-                        text = stringResource(R.string.game_header_title),
+                        text = stringResource(Res.string.game_header_title),
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Medium,
                         fontFamily = FontFamily.SansSerif,
@@ -163,7 +163,7 @@ fun GameScreen(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                     Text(
-                        text = stringResource(R.string.game_round_progress, gameState.round + 1, totalPlayers),
+                        text = stringResource(Res.string.game_round_progress, gameState.round + 1, totalPlayers),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.ExtraBold,
                         fontFamily = FontFamily.SansSerif,
@@ -186,7 +186,7 @@ fun GameScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Group,
-                        contentDescription = stringResource(R.string.common_teams),
+                        contentDescription = stringResource(Res.string.common_teams),
                         tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(14.dp)
                     )
@@ -319,11 +319,11 @@ fun GameScreen(
                                     tutorialPositions["game_pass"] = coords.boundsInRoot()
                                 }
                         ) {
-                            val opponentLabel = if (priceToOpponent == 0) stringResource(R.string.common_free) else "$priceToOpponent$"
-                            val meLabel = if (priceToMe == 0) stringResource(R.string.common_free) else "$priceToMe$"
+                            val opponentLabel = if (priceToOpponent == 0) stringResource(Res.string.common_free) else "$priceToOpponent$"
+                            val meLabel = if (priceToMe == 0) stringResource(Res.string.common_free) else "$priceToMe$"
 
                             Text(
-                                text = if (p2Full) stringResource(R.string.game_reclaim_player, meLabel) else stringResource(R.string.game_pass_to_opponent, p2Name, opponentLabel),
+                                text = if (p2Full) stringResource(Res.string.game_reclaim_player, meLabel) else stringResource(Res.string.game_pass_to_opponent, p2Name, opponentLabel),
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontFamily = FontFamily.SansSerif,
@@ -367,7 +367,7 @@ fun GameScreen(
                                         )
                                         Text(
                                             text = stringResource(
-                                                R.string.game_player_won,
+                                                Res.string.game_player_won,
                                                 if (gameState.awardedTo == 1) p1Name else p2Name,
                                                 player.displayLastName,
                                                 gameState.bid
@@ -387,7 +387,7 @@ fun GameScreen(
                                     .height(44.dp)
                             ) {
                                 Text(
-                                    text = stringResource(if (gameState.round + 1 >= totalPlayers) R.string.game_see_results else R.string.game_next_player),
+                                    text = stringResource(if (gameState.round + 1 >= totalPlayers) Res.string.game_see_results else Res.string.game_next_player),
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.ExtraBold,
                                     fontFamily = FontFamily.SansSerif,

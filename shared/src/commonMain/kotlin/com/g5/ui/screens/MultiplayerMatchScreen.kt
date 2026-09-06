@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import kotlin.time.Clock
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CloudOff
@@ -35,13 +36,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.g5.R
+import com.g5.shared.resources.*
 import com.g5.domain.model.TeamEntry
 import com.g5.ui.components.BidControl
 import com.g5.ui.components.PlayerRevealCard
@@ -81,14 +82,14 @@ fun MultiplayerMatchScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
-                    contentDescription = stringResource(R.string.common_back),
+                    contentDescription = stringResource(Res.string.common_back),
                     tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(16.dp)
                 )
             }
 
             Text(
-                text = stringResource(R.string.mp_match_title),
+                text = stringResource(Res.string.mp_match_title),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = FontFamily.SansSerif,
@@ -99,7 +100,7 @@ fun MultiplayerMatchScreen(
             if (!state.isRealtimeConnected) {
                 Icon(
                     imageVector = Icons.Default.CloudOff,
-                    contentDescription = stringResource(R.string.mp_match_reconnecting),
+                    contentDescription = stringResource(Res.string.mp_match_reconnecting),
                     tint = Color(0xFFE03A3E),
                     modifier = Modifier.size(16.dp)
                 )
@@ -206,13 +207,13 @@ private fun AuctionResultBuffer(result: CompletedAuctionInfo, onContinue: () -> 
                     modifier = Modifier.size(16.dp)
                 )
                 val who = if (result.isAutoAssigned) {
-                    stringResource(if (result.winnerIsMe) R.string.mp_match_you_auto_win else R.string.mp_match_opponent_auto_win)
+                    stringResource(if (result.winnerIsMe) Res.string.mp_match_you_auto_win else Res.string.mp_match_opponent_auto_win)
                 } else {
-                    stringResource(if (result.winnerIsMe) R.string.mp_match_you_win else R.string.mp_match_opponent_win)
+                    stringResource(if (result.winnerIsMe) Res.string.mp_match_you_win else Res.string.mp_match_opponent_win)
                 }
-                val price = if (result.pricePaid == 0) stringResource(R.string.mp_match_for_free) else stringResource(R.string.mp_match_for_price, result.pricePaid)
+                val price = if (result.pricePaid == 0) stringResource(Res.string.mp_match_for_free) else stringResource(Res.string.mp_match_for_price, result.pricePaid)
                 Text(
-                    text = stringResource(R.string.mp_match_won_announcement, who, result.player.displayLastName, price),
+                    text = stringResource(Res.string.mp_match_won_announcement, who, result.player.displayLastName, price),
                     fontSize = 14.sp,
                     fontFamily = FontFamily.SansSerif,
                     color = MaterialTheme.colorScheme.onBackground,
@@ -226,7 +227,7 @@ private fun AuctionResultBuffer(result: CompletedAuctionInfo, onContinue: () -> 
             modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
         ) {
             Text(
-                text = stringResource(if (result.isLastPick) R.string.mp_match_see_results else R.string.mp_match_next_player),
+                text = stringResource(if (result.isLastPick) Res.string.mp_match_see_results else Res.string.mp_match_next_player),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = FontFamily.SansSerif,
@@ -251,7 +252,7 @@ private fun WaitingForOpponent(matchId: String) {
         CircularProgressIndicator(color = Color(0xFFF4722B))
 
         Text(
-            text = stringResource(R.string.mp_match_waiting_for_opponent_title),
+            text = stringResource(Res.string.mp_match_waiting_for_opponent_title),
             fontSize = 14.sp,
             fontWeight = FontWeight.ExtraBold,
             fontFamily = FontFamily.SansSerif,
@@ -260,7 +261,7 @@ private fun WaitingForOpponent(matchId: String) {
         )
 
         Text(
-            text = stringResource(R.string.mp_match_share_code_hint),
+            text = stringResource(Res.string.mp_match_share_code_hint),
             fontSize = 12.sp,
             fontFamily = FontFamily.SansSerif,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -283,7 +284,7 @@ private fun WaitingForOpponent(matchId: String) {
         ) {
             Icon(imageVector = Icons.Default.ContentCopy, contentDescription = null, modifier = Modifier.size(14.dp))
             Text(
-                text = stringResource(R.string.mp_match_copy_code),
+                text = stringResource(Res.string.mp_match_copy_code),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = FontFamily.SansSerif,
@@ -295,7 +296,7 @@ private fun WaitingForOpponent(matchId: String) {
 
 private fun secondsRemaining(deadlineMillis: Long?): Int? {
     if (deadlineMillis == null) return null
-    val remainingMs = deadlineMillis - System.currentTimeMillis()
+    val remainingMs = deadlineMillis - Clock.System.now().toEpochMilliseconds()
     return (remainingMs / 1000L).toInt().coerceIn(0, 15)
 }
 
@@ -354,7 +355,7 @@ private fun DraftingContent(
 
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 BidControl(
-                    name = stringResource(R.string.common_you),
+                    name = stringResource(Res.string.common_you),
                     budget = myBudget,
                     value = state.bidInput,
                     onChange = onBidInputChange,
@@ -375,7 +376,7 @@ private fun DraftingContent(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = stringResource(R.string.common_opponent),
+                        text = stringResource(Res.string.common_opponent),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.SansSerif,
@@ -389,7 +390,7 @@ private fun DraftingContent(
                         color = Color(0xFFF4722B)
                     )
                     Text(
-                        text = stringResource(if (state.isMyTurn) R.string.mp_match_waiting_your_bid else R.string.mp_match_opponent_thinking),
+                        text = stringResource(if (state.isMyTurn) Res.string.mp_match_waiting_your_bid else Res.string.mp_match_opponent_thinking),
                         fontSize = 10.sp,
                         fontFamily = FontFamily.SansSerif,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
@@ -403,7 +404,7 @@ private fun DraftingContent(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = stringResource(if (state.isAutoPassing) R.string.mp_match_auto_passing else R.string.mp_match_pass_button),
+                    text = stringResource(if (state.isAutoPassing) Res.string.mp_match_auto_passing else Res.string.mp_match_pass_button),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = FontFamily.SansSerif,
@@ -428,11 +429,11 @@ private fun TurnBanner(state: MatchUiState, secondsLeft: Int?) {
     val isAutoPassing = state.isAutoPassing || (state.isMyTurn && state.cannotAffordNextBid)
     val turnLabel = stringResource(
         when {
-            isAutoPassing -> R.string.mp_match_insufficient_budget
-            state.isMyTurn && isOpening -> R.string.mp_match_you_open
-            state.isMyTurn -> R.string.mp_match_your_turn
-            isOpening -> R.string.mp_match_opponent_opens
-            else -> R.string.mp_match_opponent_turn
+            isAutoPassing -> Res.string.mp_match_insufficient_budget
+            state.isMyTurn && isOpening -> Res.string.mp_match_you_open
+            state.isMyTurn -> Res.string.mp_match_your_turn
+            isOpening -> Res.string.mp_match_opponent_opens
+            else -> Res.string.mp_match_opponent_turn
         }
     )
 
@@ -471,7 +472,7 @@ private fun TurnBanner(state: MatchUiState, secondsLeft: Int?) {
                 color = bannerColor ?: MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = if (!isOpening) stringResource(R.string.mp_match_current_bid, auction.currentBid) else stringResource(R.string.auction_banner_no_bid),
+                text = if (!isOpening) stringResource(Res.string.mp_match_current_bid, auction.currentBid) else stringResource(Res.string.auction_banner_no_bid),
                 fontSize = 12.sp,
                 fontFamily = FontFamily.SansSerif,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -517,15 +518,15 @@ private fun RosterSummary(myRoster: List<TeamEntry>, opponentRoster: List<TeamEn
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = stringResource(R.string.mp_match_roster_summary, myRoster.size + opponentRoster.size, teamSize * 2),
+            text = stringResource(Res.string.mp_match_roster_summary, myRoster.size + opponentRoster.size, teamSize * 2),
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             fontFamily = FontFamily.SansSerif,
             color = MaterialTheme.colorScheme.onSurface
         )
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            RosterColumn(name = stringResource(R.string.common_you), entries = myRoster, modifier = Modifier.weight(1f))
-            RosterColumn(name = stringResource(R.string.common_opponent), entries = opponentRoster, modifier = Modifier.weight(1f))
+            RosterColumn(name = stringResource(Res.string.common_you), entries = myRoster, modifier = Modifier.weight(1f))
+            RosterColumn(name = stringResource(Res.string.common_opponent), entries = opponentRoster, modifier = Modifier.weight(1f))
         }
     }
 }

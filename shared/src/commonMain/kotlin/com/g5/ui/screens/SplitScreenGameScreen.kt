@@ -43,13 +43,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.g5.R
+import com.g5.shared.resources.*
 import com.g5.data.local.NBA_PLAYERS
 import com.g5.domain.model.TOTAL
 import com.g5.domain.model.TeamEntry
@@ -91,8 +91,8 @@ fun SplitScreenGameScreen(
             budgets = gameState.budgets,
             analytics = gameState.analytics,
             luckyWinner = gameState.luckyWinner,
-            p1Name = stringResource(R.string.common_player_number, 1),
-            p2Name = stringResource(R.string.common_player_number, 2),
+            p1Name = stringResource(Res.string.common_player_number, 1),
+            p2Name = stringResource(Res.string.common_player_number, 2),
             onBack = onBack,
             modifier = modifier
         )
@@ -120,7 +120,7 @@ fun SplitScreenGameScreen(
                     .rotate(180f)
             ) {
                 PlayerControlSection(
-                    playerName = stringResource(R.string.common_player_number_upper, 2),
+                    playerName = stringResource(Res.string.common_player_number_upper, 2),
                     playerNumber = 2,
                     budget = p2Budget,
                     teamCount = gameState.teams.second.size,
@@ -167,14 +167,14 @@ fun SplitScreenGameScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.common_back),
+                            contentDescription = stringResource(Res.string.common_back),
                             tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(16.dp)
                         )
                     }
 
                     Text(
-                        text = stringResource(R.string.split_header_title, gameState.round + 1, totalPlayers),
+                        text = stringResource(Res.string.split_header_title, gameState.round + 1, totalPlayers),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.ExtraBold,
                         fontFamily = FontFamily.SansSerif,
@@ -224,10 +224,10 @@ fun SplitScreenGameScreen(
                         ) {
                             Text(
                                 text = if (gameState.bid > 0) {
-                                    val leader = stringResource(R.string.common_player_number, if (gameState.bidder == 1) 1 else 2)
-                                    stringResource(R.string.split_current_bid, gameState.bid, leader)
+                                    val leader = stringResource(Res.string.common_player_number, if (gameState.bidder == 1) 1 else 2)
+                                    stringResource(Res.string.split_current_bid, gameState.bid, leader)
                                 } else {
-                                    stringResource(R.string.split_no_bid)
+                                    stringResource(Res.string.split_no_bid)
                                 },
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold,
@@ -236,7 +236,7 @@ fun SplitScreenGameScreen(
                             )
 
                             Text(
-                                text = stringResource(R.string.split_next_min_bid, minBid),
+                                text = stringResource(Res.string.split_next_min_bid, minBid),
                                 fontSize = 11.sp,
                                 fontFamily = FontFamily.SansSerif,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -245,7 +245,7 @@ fun SplitScreenGameScreen(
                     }
                 } else {
                     // Bannière de résultat de l'enchère
-                    val winnerName = stringResource(R.string.common_player_number, if (gameState.awardedTo == 1) 1 else 2)
+                    val winnerName = stringResource(Res.string.common_player_number, if (gameState.awardedTo == 1) 1 else 2)
                     val isLastRound = gameState.round + 1 >= totalPlayers
                     Column(
                         modifier = Modifier
@@ -274,7 +274,7 @@ fun SplitScreenGameScreen(
                                 modifier = Modifier.size(18.dp)
                             )
                             Text(
-                                text = stringResource(R.string.split_player_won, winnerName, player.displayLastName, gameState.bid),
+                                text = stringResource(Res.string.split_player_won, winnerName, player.displayLastName, gameState.bid),
                                 fontSize = 13.sp,
                                 fontWeight = FontWeight.Bold,
                                 fontFamily = FontFamily.SansSerif,
@@ -290,7 +290,7 @@ fun SplitScreenGameScreen(
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF4722B))
                         ) {
                             Text(
-                                text = stringResource(if (isLastRound) R.string.split_see_scouting else R.string.split_next_player),
+                                text = stringResource(if (isLastRound) Res.string.split_see_scouting else Res.string.split_next_player),
                                 fontSize = 12.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 fontFamily = FontFamily.SansSerif,
@@ -308,7 +308,7 @@ fun SplitScreenGameScreen(
             // ==========================================
             Box(modifier = Modifier.fillMaxWidth()) {
                 PlayerControlSection(
-                    playerName = stringResource(R.string.common_player_number_upper, 1),
+                    playerName = stringResource(Res.string.common_player_number_upper, 1),
                     playerNumber = 1,
                     budget = p1Budget,
                     teamCount = gameState.teams.first.size,
@@ -330,7 +330,7 @@ fun SplitScreenGameScreen(
         // ==========================================
         if (gameState.showP1Team) {
             PlayerTeamDialog(
-                playerName = stringResource(R.string.common_player_number_upper, 1),
+                playerName = stringResource(Res.string.common_player_number_upper, 1),
                 budget = p1Budget,
                 team = gameState.teams.first,
                 onDismiss = { viewModel.toggleP1Team() },
@@ -340,7 +340,7 @@ fun SplitScreenGameScreen(
 
         if (gameState.showP2Team) {
             PlayerTeamDialog(
-                playerName = stringResource(R.string.common_player_number_upper, 2),
+                playerName = stringResource(Res.string.common_player_number_upper, 2),
                 budget = p2Budget,
                 team = gameState.teams.second,
                 onDismiss = { viewModel.toggleP2Team() },
@@ -427,12 +427,12 @@ private fun PlayerControlSection(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Group,
-                        contentDescription = stringResource(R.string.common_teams),
+                        contentDescription = stringResource(Res.string.common_teams),
                         tint = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.size(12.dp)
                     )
                     Text(
-                        text = stringResource(R.string.split_team_button, teamCount),
+                        text = stringResource(Res.string.split_team_button, teamCount),
                         fontSize = 11.sp,
                         fontWeight = FontWeight.Medium,
                         fontFamily = FontFamily.SansSerif,
@@ -444,10 +444,10 @@ private fun PlayerControlSection(
 
         // Badge d'état du tour
         val statusText = when {
-            isDone -> stringResource(R.string.split_status_round_over)
-            isFull -> stringResource(R.string.split_status_full)
-            isActive -> stringResource(R.string.split_status_your_turn)
-            else -> stringResource(R.string.split_status_waiting_for, if (playerNumber == 1) 2 else 1)
+            isDone -> stringResource(Res.string.split_status_round_over)
+            isFull -> stringResource(Res.string.split_status_full)
+            isActive -> stringResource(Res.string.split_status_your_turn)
+            else -> stringResource(Res.string.split_status_waiting_for, if (playerNumber == 1) 2 else 1)
         }
 
         Text(
@@ -474,7 +474,7 @@ private fun PlayerControlSection(
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.split_pass_button),
+                    text = stringResource(Res.string.split_pass_button),
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.SansSerif,
@@ -497,7 +497,7 @@ private fun PlayerControlSection(
             ) {
                 Icon(
                     imageVector = Icons.Default.Remove,
-                    contentDescription = stringResource(R.string.common_decrease),
+                    contentDescription = stringResource(Res.string.common_decrease),
                     tint = if (isActive && !isDone) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
                     modifier = Modifier.size(14.dp)
                 )
@@ -527,7 +527,7 @@ private fun PlayerControlSection(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = stringResource(R.string.common_increase),
+                    contentDescription = stringResource(Res.string.common_increase),
                     tint = if (isActive && !isDone) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
                     modifier = Modifier.size(14.dp)
                 )
@@ -544,7 +544,7 @@ private fun PlayerControlSection(
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF4722B))
             ) {
                 Text(
-                    text = stringResource(R.string.split_bid_button),
+                    text = stringResource(Res.string.split_bid_button),
                     fontSize = 11.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = FontFamily.SansSerif,
@@ -591,14 +591,14 @@ private fun PlayerTeamDialog(
                 ) {
                     Column {
                         Text(
-                            text = stringResource(R.string.split_dialog_title, playerName),
+                            text = stringResource(Res.string.split_dialog_title, playerName),
                             fontSize = 14.sp,
                             fontWeight = FontWeight.ExtraBold,
                             fontFamily = FontFamily.SansSerif,
                             color = Color(0xFFF4722B)
                         )
                         Text(
-                            text = stringResource(R.string.split_dialog_subtitle, budget, team.size),
+                            text = stringResource(Res.string.split_dialog_subtitle, budget, team.size),
                             fontSize = 11.sp,
                             fontFamily = FontFamily.SansSerif,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
@@ -617,7 +617,7 @@ private fun PlayerTeamDialog(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Close,
-                            contentDescription = stringResource(R.string.split_dialog_close),
+                            contentDescription = stringResource(Res.string.split_dialog_close),
                             tint = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier.size(14.dp)
                         )
@@ -635,7 +635,7 @@ private fun PlayerTeamDialog(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = stringResource(R.string.split_dialog_empty),
+                            text = stringResource(Res.string.split_dialog_empty),
                             fontSize = 12.sp,
                             fontFamily = FontFamily.SansSerif,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
@@ -678,7 +678,7 @@ private fun PlayerTeamDialog(
                                             color = MaterialTheme.colorScheme.onSurface
                                         )
                                         Text(
-                                            text = stringResource(R.string.split_dialog_player_line, positionLabel(entry.player.position), entry.player.team, entry.player.season),
+                                            text = stringResource(Res.string.split_dialog_player_line, positionLabel(entry.player.position), entry.player.team, entry.player.season),
                                             fontSize = 10.sp,
                                             fontFamily = FontFamily.SansSerif,
                                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
@@ -703,7 +703,7 @@ private fun PlayerTeamDialog(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = stringResource(R.string.split_dialog_close),
+                        text = stringResource(Res.string.split_dialog_close),
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold,
                         fontFamily = FontFamily.SansSerif
