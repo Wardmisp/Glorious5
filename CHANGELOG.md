@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.5-alpha] - 2026-09-06
+
+### Added
+- **Localization**: The app is now available in French and English, following the device's language setting.
+- **Local Split Screen Mode**: New 2-player local game mode sharing a single device, side by side.
+
+### Fixed
+- **Auto-Pass on Insufficient Budget**: Both the AI and online multiplayer opponents now automatically pass when a bid would exceed their remaining budget, instead of getting stuck or bidding invalid amounts.
+- **Team Colors**: Fixed team colors showing up as black for players fetched from Supabase in solo mode.
+
+### Changed
+- **Architecture**: Migrated screen navigation to Navigation Compose and introduced a repository/use-case layer with Koin dependency injection, decoupling domain logic from the UI and display language.
+
 ## [0.0.4-beta] - 2026-08-29
 
 ### Added
