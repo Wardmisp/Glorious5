@@ -25,6 +25,9 @@ jobs:
           java-version: '21'
           cache: gradle
 
+      - name: List installed Xcode versions
+        run: ls /Applications | grep -i xcode
+
       - name: Build shared framework for iOS Simulator (arm64)
         # --configure-on-demand keeps Gradle from configuring :app (and its Google Services
         # plugin, which needs a google-services.json this runner doesn't have) since this task
