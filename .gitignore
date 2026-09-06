@@ -7,11 +7,16 @@
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+/.idea/.name
+/.idea/deploymentTargetSelector.xml
 .DS_Store
 /build
 /captures
 .externalNativeBuild
 .cxx
+
+# Local build output, not a source artifact
+/app/release/
 
 # Firebase config (contains API key, must never be committed)
 /app/google-services.json
