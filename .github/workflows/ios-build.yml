@@ -53,7 +53,10 @@ jobs:
           DEVELOPER_DIR: /Applications/Xcode_16.1.app/Contents/Developer
         # The project's Run Script build phase calls `./gradlew :shared:embedAndSignAppleFrameworkForXcode`
         # itself, so this alone builds and embeds the Kotlin framework too.
+        # arch=arm64 keeps Xcode from also requesting the x86_64 (Intel) simulator slice, which
+        # :shared doesn't declare a Kotlin/Native target for -- this runner is Apple Silicon
+        # anyway, so arm64-only matches what it can actually run.
         run: |
           xcodebuild -project iosApp.xcodeproj -scheme iosApp \
-            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' \
+            -sdk iphonesimulator -destination 'generic/platform=iOS Simulator,arch=arm64' \
             build
