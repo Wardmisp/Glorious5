@@ -8,4 +8,12 @@ final class PlatformBridgeTests: XCTestCase {
     func testPlatformNameComesFromKotlin() {
         XCTAssertEqual(Platform_iosKt.platformName(), "iOS")
     }
+
+    /// Prouve que la base de joueurs pré-remplie (nba_top300.db, copiée du bundle iOS vers
+    /// Application Support puis ouverte par Room -- voir AppDatabase.ios.kt) répond réellement
+    /// sur le simulateur, pas seulement que le framework compile et se lie.
+    func testPlayerDatabaseLoadsOnIOS() {
+        let firstPlayer = DatabaseSmokeTestKt.debugFirstPlayerName()
+        XCTAssertNotNil(firstPlayer)
+    }
 }

@@ -16,7 +16,7 @@ class G5Application : Application() {
         super.onCreate()
         startKoin {
             androidContext(this@G5Application)
-            modules(coreModule, soundPlayerModule(), networkModule, databaseModule, repositoryModule, useCaseModule, viewModelModule)
+            modules(coreModule, soundPlayerModule(), networkModule, databaseModule(), repositoryModule, useCaseModule, viewModelModule)
         }
     }
 }

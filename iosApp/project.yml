@@ -13,6 +13,11 @@ targets:
     deploymentTarget: "16.0"
     sources:
       - path: iosApp
+      # Base de joueurs NBA pré-remplie, partagée avec Android (voir shared/src/androidMain/assets) --
+      # copiée dans le bundle de l'app plutôt que dupliquée ; voir AppDatabase.ios.kt pour le
+      # contournement qui la recopie vers un répertoire inscriptible au premier lancement.
+      - path: ../shared/src/androidMain/assets/databases/nba_top300.db
+        buildPhase: resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.g5.iosApp
