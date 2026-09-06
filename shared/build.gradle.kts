@@ -25,14 +25,18 @@ kotlin {
         iosSimulatorArm64() to "iphonesimulator"
     )
 
+    println("DEBUG isMacOsX=${org.gradle.internal.os.OperatingSystem.current().isMacOsX}")
     if (org.gradle.internal.os.OperatingSystem.current().isMacOsX) {
         val developerDir = providers.exec {
             commandLine("xcode-select", "-p")
         }.standardOutput.asText.get().trim()
+        println("DEBUG developerDir=$developerDir")
 
         appleTargetPlatforms.forEach { (target, platformDir) ->
+            val opt = "-L$developerDir/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/$platformDir"
+            println("DEBUG target=${target.name} linkerOpt=$opt")
             target.binaries.configureEach {
-                linkerOpts("-L$developerDir/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/$platformDir")
+                linkerOpts(opt)
             }
         }
     }
