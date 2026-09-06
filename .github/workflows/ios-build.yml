@@ -47,7 +47,7 @@ jobs:
         working-directory: iosApp
         run: xcodegen generate
 
-      - name: Build the iOS app shell (Simulator)
+      - name: Build and test the iOS app shell (Simulator)
         working-directory: iosApp
         env:
           DEVELOPER_DIR: /Applications/Xcode_16.1.app/Contents/Developer
@@ -56,7 +56,9 @@ jobs:
         # A concrete simulator (rather than the generic destination) resolves to this runner's
         # native arm64 slice only -- the generic one requests x86_64 too, which :shared doesn't
         # declare a Kotlin/Native target for.
+        # `test` (not `build`) actually boots the simulator and runs iosAppTests, which calls
+        # into Kotlin from Swift (PlatformKt.platformName()) -- not just that the framework links.
         run: |
           xcodebuild -project iosApp.xcodeproj -scheme iosApp \
             -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.2' \
-            build
+            test
