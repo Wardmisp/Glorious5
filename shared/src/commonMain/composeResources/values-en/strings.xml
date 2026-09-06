@@ -56,27 +56,27 @@
     <string name="tutorial_step1_body">Discover how to build your dream team in Glorious 5.</string>
     <string name="tutorial_step2_title">The Market</string>
     <string name="tutorial_step2_body">The goal is to recruit 5 players. But careful, your budget is capped at $50!</string>
-    <string name="tutorial_step3_title">Let\'s Go</string>
-    <string name="tutorial_step3_body">Let\'s start with a game against the computer.</string>
+    <string name="tutorial_step3_title">Let's Go</string>
+    <string name="tutorial_step3_body">Let's start with a game against the computer.</string>
     <string name="tutorial_step4_title">The Player Card</string>
-    <string name="tutorial_step4_body">Here\'s the player up for auction. Their stats are hidden at first and get revealed as bidding goes on.</string>
+    <string name="tutorial_step4_body">Here's the player up for auction. Their stats are hidden at first and get revealed as bidding goes on.</string>
     <string name="tutorial_step5_title">The Timer</string>
     <string name="tutorial_step5_body">Each turn lasts 15 seconds. If no one bids before it runs out, the last bidder wins the player.</string>
     <string name="tutorial_step6_title">Bidding</string>
-    <string name="tutorial_step6_body">Use these buttons to raise the bid. Be strategic so you don\'t burn through your budget too fast!</string>
+    <string name="tutorial_step6_body">Use these buttons to raise the bid. Be strategic so you don't burn through your budget too fast!</string>
     <string name="tutorial_step7_title">Passing</string>
-    <string name="tutorial_step7_body">If the price is too high or the player doesn\'t interest you, you can pass.</string>
+    <string name="tutorial_step7_body">If the price is too high or the player doesn't interest you, you can pass.</string>
     <string name="tutorial_step8_title">Your Team</string>
     <string name="tutorial_step8_body">Check your roster and remaining budget at any time here.</string>
     <string name="tutorial_step9_title">Pre-Match Analysis</string>
     <string name="tutorial_step9_body">Once your team is built, the Scouting Report analyzes your chances of winning.</string>
     <string name="tutorial_step10_title">Win Probability</string>
-    <string name="tutorial_step10_body">See your odds of success based on your roster\'s balance and talent.</string>
+    <string name="tutorial_step10_body">See your odds of success based on your roster's balance and talent.</string>
     <string name="tutorial_step11_title">Strengths &amp; Weaknesses</string>
     <string name="tutorial_step11_body">Compare the areas of play: Offense, Defense, Playmaking...</string>
     <string name="tutorial_step12_title">Key Matchups</string>
     <string name="tutorial_step12_body">See who dominates at each position. Bold names indicate a statistical edge.</string>
-    <string name="tutorial_step13_title">Let\'s play!</string>
+    <string name="tutorial_step13_title">Let's play!</string>
     <string name="tutorial_step13_body">You know it all! Good luck building the best possible team.</string>
 
     <!-- Home -->
@@ -133,7 +133,7 @@
     <string name="split_status_round_over">Round over</string>
     <string name="split_status_full">Roster full (5/5)</string>
     <string name="split_status_your_turn">🎯 YOUR TURN!</string>
-    <string name="split_status_waiting_for">⏳ PLAYER %1$d\'S TURN</string>
+    <string name="split_status_waiting_for">⏳ PLAYER %1$d'S TURN</string>
     <string name="split_pass_button">PASS</string>
     <string name="split_bid_button">BID</string>
     <string name="split_dialog_title">ROSTER · %1$s</string>
@@ -163,7 +163,7 @@
     <string name="scouting_x_factor_defense_us">Your team dominates the paint on defense.</string>
     <string name="scouting_x_factor_defense_them">The AI has a superior defensive wall.</string>
     <string name="scouting_x_factor_shooting_us">Clear outside shooting advantage for you.</string>
-    <string name="scouting_x_factor_shooting_them">Watch out for the opponent\'s surgical shooting.</string>
+    <string name="scouting_x_factor_shooting_them">Watch out for the opponent's surgical shooting.</string>
     <string name="scouting_x_factor_balanced_1">A very balanced matchup ahead.</string>
     <string name="scouting_x_factor_balanced_2">The bench could make the difference.</string>
     <string name="scouting_launch_simulation">START THE SIMULATION</string>
@@ -229,7 +229,7 @@
     <string name="mp_match_you_open">YOU OPEN THE AUCTION</string>
     <string name="mp_match_your_turn">YOUR TURN TO BID</string>
     <string name="mp_match_opponent_opens">OPPONENT OPENS THE AUCTION</string>
-    <string name="mp_match_opponent_turn">OPPONENT\'S TURN</string>
+    <string name="mp_match_opponent_turn">OPPONENT'S TURN</string>
     <string name="mp_match_current_bid">Current bid: $%1$d</string>
     <string name="mp_match_waiting_your_bid">Waiting for your bid</string>
     <string name="mp_match_opponent_thinking">Thinking...</string>

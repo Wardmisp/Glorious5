@@ -21,7 +21,7 @@
     <string name="common_mystery_team">ÉQUIPE MYSTÈRE</string>
 
     <!-- Postes (le code brut — PG/SG/SF/PF/C/GF/FC — vit dans NBAPlayer.position ; ces deux
-         familles de libellés ne s\'utilisent qu\'à l\'affichage, jamais dans la logique métier). -->
+         familles de libellés ne s'utilisent qu'à l'affichage, jamais dans la logique métier). -->
     <string name="position_pg">Meneur</string>
     <string name="position_sg">Arrière</string>
     <string name="position_sf">Ailier</string>
@@ -58,33 +58,33 @@
     <string name="tutorial_step2_title">Le Marché</string>
     <string name="tutorial_step2_body">Le but est de recruter 5 joueurs. Mais attention, votre budget est limité à 50$ !</string>
     <string name="tutorial_step3_title">Commencer</string>
-    <string name="tutorial_step3_body">Commençons par lancer une partie contre l\'ordinateur.</string>
+    <string name="tutorial_step3_body">Commençons par lancer une partie contre l'ordinateur.</string>
     <string name="tutorial_step4_title">La Carte Joueur</string>
     <string name="tutorial_step4_body">Voici le joueur mis en vente. Ses statistiques sont cachées au début et se révèlent au fil des enchères.</string>
     <string name="tutorial_step5_title">Le Chronomètre</string>
     <string name="tutorial_step5_body">Chaque tour dure 15 secondes. Si personne ne mise avant la fin, le dernier enchéreur emporte le joueur.</string>
     <string name="tutorial_step6_title">Miser</string>
-    <string name="tutorial_step6_body">Utilisez ces boutons pour augmenter l\'enchère. Soyez stratégique pour ne pas vider votre budget trop vite !</string>
+    <string name="tutorial_step6_body">Utilisez ces boutons pour augmenter l'enchère. Soyez stratégique pour ne pas vider votre budget trop vite !</string>
     <string name="tutorial_step7_title">Passer</string>
     <string name="tutorial_step7_body">Si le prix est trop élevé ou si le joueur ne vous intéresse pas, vous pouvez passer.</string>
     <string name="tutorial_step8_title">Votre Équipe</string>
-    <string name="tutorial_step8_body">Consultez l\'état de votre effectif et votre argent restant à tout moment ici.</string>
-    <string name="tutorial_step9_title">Analyse d\'avant-match</string>
-    <string name="tutorial_step9_body">Une fois l\'équipe bâtie, le Scouting Report analyse vos chances de victoire.</string>
+    <string name="tutorial_step8_body">Consultez l'état de votre effectif et votre argent restant à tout moment ici.</string>
+    <string name="tutorial_step9_title">Analyse d'avant-match</string>
+    <string name="tutorial_step9_body">Une fois l'équipe bâtie, le Scouting Report analyse vos chances de victoire.</string>
     <string name="tutorial_step10_title">Probabilités</string>
-    <string name="tutorial_step10_body">Découvrez vos chances de succès basées sur l\'équilibre et le talent de votre effectif.</string>
+    <string name="tutorial_step10_body">Découvrez vos chances de succès basées sur l'équilibre et le talent de votre effectif.</string>
     <string name="tutorial_step11_title">Forces &amp; Faiblesses</string>
     <string name="tutorial_step11_body">Comparez les secteurs de jeu : Attaque, Défense, Playmaking...</string>
     <string name="tutorial_step12_title">Duels Clés</string>
     <string name="tutorial_step12_body">Voyez qui domine à chaque poste. Les noms en gras indiquent un avantage statistique.</string>
-    <string name="tutorial_step13_title">C\'est parti !</string>
+    <string name="tutorial_step13_title">C'est parti !</string>
     <string name="tutorial_step13_body">Vous savez tout ! Bonne chance pour monter la meilleure équipe possible.</string>
 
     <!-- Accueil -->
     <string name="home_title">GLORIOUS 5</string>
     <string name="home_tagline">CONSTRUISEZ VOTRE ÉQUIPE</string>
-    <string name="home_vs_computer_label">JOUER CONTRE L\'IA</string>
-    <string name="home_vs_computer_sublabel">Affronte l\'ordinateur</string>
+    <string name="home_vs_computer_label">JOUER CONTRE L'IA</string>
+    <string name="home_vs_computer_sublabel">Affronte l'ordinateur</string>
     <string name="home_split_screen_label">SPLIT SCREEN</string>
     <string name="home_split_screen_sublabel">2 joueurs sur 1 écran</string>
     <string name="home_online_label">JOUER EN LIGNE</string>
@@ -101,10 +101,10 @@
     <string name="options_sound">Effets Sonores</string>
     <string name="options_sound_on">Activés</string>
     <string name="options_sound_off">Muet</string>
-    <string name="options_ai_level">Niveau de l\'IA</string>
+    <string name="options_ai_level">Niveau de l'IA</string>
     <string name="options_difficulty_beginner">Débutant (+10$ pour vous)</string>
     <string name="options_difficulty_normal">Normal (Équitable)</string>
-    <string name="options_difficulty_hard">Difficile (+10$ pour l\'IA)</string>
+    <string name="options_difficulty_hard">Difficile (+10$ pour l'IA)</string>
 
     <!-- Enchère locale (GameScreen) -->
     <string name="game_header_title">ENCHÈRES NBA</string>
@@ -145,7 +145,7 @@
 
     <!-- Rapport de scouting -->
     <string name="scouting_header_kicker">RAPPORT DE SCOUTING</string>
-    <string name="scouting_header_title">ANALYSE D\'AVANT-MATCH</string>
+    <string name="scouting_header_title">ANALYSE D'AVANT-MATCH</string>
     <string name="scouting_win_probability">PROBABILITÉ DE VICTOIRE</string>
     <string name="scouting_default_label_you">VOUS</string>
     <string name="scouting_default_label_ai">IA</string>
@@ -162,13 +162,13 @@
     <string name="scouting_vs">VS</string>
     <string name="scouting_x_factors">FACTEURS X</string>
     <string name="scouting_x_factor_defense_us">Votre équipe domine la raquette en défense.</string>
-    <string name="scouting_x_factor_defense_them">L\'IA possède un rempart défensif supérieur.</string>
+    <string name="scouting_x_factor_defense_them">L'IA possède un rempart défensif supérieur.</string>
     <string name="scouting_x_factor_shooting_us">Avantage net au tir extérieur pour vous.</string>
-    <string name="scouting_x_factor_shooting_them">Attention à la précision chirurgicale de l\'adversaire.</string>
+    <string name="scouting_x_factor_shooting_them">Attention à la précision chirurgicale de l'adversaire.</string>
     <string name="scouting_x_factor_balanced_1">Match très équilibré en perspective.</string>
     <string name="scouting_x_factor_balanced_2">Le banc pourrait faire la différence.</string>
     <string name="scouting_launch_simulation">LANCER LA SIMULATION</string>
-    <string name="scouting_launch_simulation_sublabel">Début du coup d\'envoi</string>
+    <string name="scouting_launch_simulation_sublabel">Début du coup d'envoi</string>
     <string name="scouting_multiplayer_label_you">TOI</string>
     <string name="scouting_multiplayer_label_opponent">ADVERSAIRE</string>
 
@@ -193,10 +193,10 @@
     <string name="auction_banner_current_bid_label">Enchère actuelle</string>
     <string name="auction_banner_no_bid">Aucune mise</string>
     <string name="auction_banner_awarded_in">Adjugé dans %1$ds</string>
-    <string name="auction_banner_computer_thinking">L\'ordi réfléchit</string>
+    <string name="auction_banner_computer_thinking">L'ordi réfléchit</string>
     <string name="auction_banner_leader">Meneur</string>
     <string name="auction_banner_winner">Gagnant</string>
-    <string name="auction_banner_start_bidding">Lancez l\'enchère !</string>
+    <string name="auction_banner_start_bidding">Lancez l'enchère !</string>
 
     <!-- Multijoueur : lobby -->
     <string name="mp_lobby_title">JOUER EN LIGNE</string>
@@ -205,32 +205,32 @@
     <string name="mp_lobby_budget_label">Budget</string>
     <string name="mp_lobby_create_button">CRÉER UNE PARTIE</string>
     <string name="mp_lobby_join_section">REJOINDRE AVEC UN CODE</string>
-    <string name="mp_lobby_join_code_placeholder">Code reçu d\'un ami</string>
+    <string name="mp_lobby_join_code_placeholder">Code reçu d'un ami</string>
     <string name="mp_lobby_open_matches">PARTIES EN ATTENTE</string>
-    <string name="mp_lobby_no_open_matches">Aucune partie en attente pour l\'instant. Crée la tienne !</string>
+    <string name="mp_lobby_no_open_matches">Aucune partie en attente pour l'instant. Crée la tienne !</string>
     <string name="mp_lobby_match_summary">Budget %1$d$ · %2$d joueurs</string>
-    <string name="mp_lobby_waiting_for_opponent">En attente d\'un adversaire</string>
+    <string name="mp_lobby_waiting_for_opponent">En attente d'un adversaire</string>
 
     <!-- Multijoueur : match -->
     <string name="mp_match_title">MATCH EN LIGNE</string>
     <string name="mp_match_reconnecting">Reconnexion...</string>
     <string name="mp_match_you_auto_win">Tu récupères automatiquement</string>
-    <string name="mp_match_opponent_auto_win">L\'adversaire récupère automatiquement</string>
+    <string name="mp_match_opponent_auto_win">L'adversaire récupère automatiquement</string>
     <string name="mp_match_you_win">Tu remportes</string>
-    <string name="mp_match_opponent_win">L\'adversaire remporte</string>
+    <string name="mp_match_opponent_win">L'adversaire remporte</string>
     <string name="mp_match_for_free">gratuitement</string>
     <string name="mp_match_for_price">pour $%1$d</string>
     <string name="mp_match_won_announcement">%1$s %2$s %3$s !</string>
     <string name="mp_match_see_results">VOIR LES RÉSULTATS →</string>
     <string name="mp_match_next_player">JOUEUR SUIVANT →</string>
-    <string name="mp_match_waiting_for_opponent_title">EN ATTENTE D\'UN ADVERSAIRE</string>
-    <string name="mp_match_share_code_hint">Partage ce code à un ami pour qu\'il te rejoigne, ou attends qu\'un joueur le trouve dans le lobby.</string>
+    <string name="mp_match_waiting_for_opponent_title">EN ATTENTE D'UN ADVERSAIRE</string>
+    <string name="mp_match_share_code_hint">Partage ce code à un ami pour qu'il te rejoigne, ou attends qu'un joueur le trouve dans le lobby.</string>
     <string name="mp_match_copy_code">  COPIER LE CODE</string>
     <string name="mp_match_insufficient_budget">BUDGET INSUFFISANT (PASSE AUTO...)</string>
-    <string name="mp_match_you_open">TU OUVRES L\'ENCHÈRE</string>
+    <string name="mp_match_you_open">TU OUVRES L'ENCHÈRE</string>
     <string name="mp_match_your_turn">À TOI DE MISER</string>
-    <string name="mp_match_opponent_opens">L\'ADVERSAIRE OUVRE L\'ENCHÈRE</string>
-    <string name="mp_match_opponent_turn">AU TOUR DE L\'ADVERSAIRE</string>
+    <string name="mp_match_opponent_opens">L'ADVERSAIRE OUVRE L'ENCHÈRE</string>
+    <string name="mp_match_opponent_turn">AU TOUR DE L'ADVERSAIRE</string>
     <string name="mp_match_current_bid">Mise actuelle : $%1$d</string>
     <string name="mp_match_waiting_your_bid">En attente de ta mise</string>
     <string name="mp_match_opponent_thinking">Réfléchit...</string>
@@ -242,6 +242,6 @@
     <string name="mp_result_title">MATCH TERMINÉ</string>
     <string name="mp_result_draw">Match sans vainqueur désigné</string>
     <string name="mp_result_you_won">Tu remportes le match !</string>
-    <string name="mp_result_opponent_won">L\'adversaire remporte le match</string>
+    <string name="mp_result_opponent_won">L'adversaire remporte le match</string>
     <string name="mp_result_score">Score : %1$s</string>
 </resources>
