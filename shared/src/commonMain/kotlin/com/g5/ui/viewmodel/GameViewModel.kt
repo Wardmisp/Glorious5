@@ -4,7 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.State
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.g5.core.utils.SoundManager
+import com.g5.core.utils.SoundPlayer
 import com.g5.data.local.NBA_PLAYERS
 import com.g5.domain.model.BUDGET
 import com.g5.domain.model.GameState
@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 
 class GameViewModel(
     private val playerRepository: PlayerRepository,
-    private val soundManager: SoundManager,
+    private val soundManager: SoundPlayer,
     private val auctionUseCase: AuctionUseCase,
     private val computerBidUseCase: ComputerBidUseCase,
     private val calculateWinProbabilityUseCase: CalculateWinProbabilityUseCase,
@@ -320,7 +320,7 @@ class GameViewModel(
 
                 // Tirage au sort basé sur les pourcentages
                 val p1WinProb = results.first.winProbability
-                val winner = if (Math.random() < p1WinProb) 1 else 2
+                val winner = if (kotlin.random.Random.nextDouble() < p1WinProb) 1 else 2
 
                 val simulation = generateMatchSimulationUseCase.execute(
                     teamA = currentState.teams.first.map { it.player },

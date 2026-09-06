@@ -2,11 +2,11 @@ package com.g5.core.utils
 
 import android.content.Context
 import android.media.MediaPlayer
-import com.g5.R
+import com.g5.shared.R
 
-class SoundManager(private val context: Context) {
+class SoundManager(private val context: Context) : SoundPlayer {
     private var mediaPlayer: MediaPlayer? = null
-    var isEnabled: Boolean = true
+    override var isEnabled: Boolean = true
 
     fun playSound(resId: Int) {
         if (!isEnabled) return
@@ -24,7 +24,7 @@ class SoundManager(private val context: Context) {
         }
     }
 
-    fun stopSound() {
+    override fun stopSound() {
         try {
             mediaPlayer?.stop()
             mediaPlayer?.release()
@@ -34,15 +34,15 @@ class SoundManager(private val context: Context) {
         }
     }
 
-    fun playBeginAuction() = playSound(R.raw.begin_auction)
-    fun playWinAuction() = playSound(R.raw.win_auction)
-    fun playResultScreen(isWinner: Boolean = true) {
+    override fun playBeginAuction() = playSound(R.raw.begin_auction)
+    override fun playWinAuction() = playSound(R.raw.win_auction)
+    override fun playResultScreen(isWinner: Boolean) {
         if (isWinner) playSound(R.raw.result_screen)
         else playSound(R.raw.result_screen_lose)
     }
-    fun playAlarmAuction() = playSound(R.raw.alarm_auction)
-    fun playActionBuzzer() = playSound(R.raw.action_buzzer)
-    fun playActionBegin() = playSound(R.raw.action_begin)
+    override fun playAlarmAuction() = playSound(R.raw.alarm_auction)
+    override fun playActionBuzzer() = playSound(R.raw.action_buzzer)
+    override fun playActionBegin() = playSound(R.raw.action_begin)
 
     fun release() {
         mediaPlayer?.release()

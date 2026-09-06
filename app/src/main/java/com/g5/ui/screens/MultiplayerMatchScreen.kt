@@ -124,6 +124,7 @@ fun MultiplayerMatchScreen(
                 )
             }
 
+            val pendingResult = state.pendingResult
             when {
                 match == null -> Box(
                     modifier = Modifier.fillMaxWidth().padding(48.dp),
@@ -133,8 +134,8 @@ fun MultiplayerMatchScreen(
                 // Prioritaire sur tout le reste : tant que le joueur n'a pas fermé cet écran,
                 // on ne bascule pas vers l'enchère suivante (ou le résultat) même si elle est
                 // déjà prête côté serveur — évite que l'écran change brusquement de joueur.
-                state.pendingResult != null -> AuctionResultBuffer(
-                    result = state.pendingResult,
+                pendingResult != null -> AuctionResultBuffer(
+                    result = pendingResult,
                     onContinue = onDismissPendingResult
                 )
 
