@@ -2,21 +2,13 @@ import SwiftUI
 import UIKit
 import shared
 
-/// Héberge l'écran de menu Compose Multiplatform (`HomeScreenViewController`, côté Kotlin) dans
-/// la hiérarchie SwiftUI. Les textes viennent des ressources Compose Multiplatform partagées
-/// (shared/src/commonMain/composeResources) ; seul le numéro de version est fourni par la
-/// plateforme.
-struct HomeScreenView: UIViewControllerRepresentable {
-    let onNavigate: (String) -> Void
-    let onStartTutorial: () -> Void
-
+/// Héberge l'app complète (`BasketballDraftAppViewController`, côté Kotlin — menu, IA,
+/// split-screen, en ligne, tutoriel...) dans la hiérarchie SwiftUI. La navigation entre écrans
+/// est gérée entièrement côté Kotlin (NavHost partagé, voir shared/.../BasketballDraftApp.kt) ;
+/// ce pont n'a donc plus besoin de connaître les routes.
+struct BasketballDraftAppView: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIViewController {
-        let versionName = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.0.1"
-        return HomeScreenViewControllerKt.HomeScreenViewController(
-            versionName: versionName,
-            onNavigate: onNavigate,
-            onStartTutorial: onStartTutorial
-        )
+        BasketballDraftAppViewControllerKt.BasketballDraftAppViewController()
     }
 
     func updateUIViewController(_ uiViewController: UIViewController, context: Context) {}
@@ -24,11 +16,8 @@ struct HomeScreenView: UIViewControllerRepresentable {
 
 struct ContentView: View {
     var body: some View {
-        HomeScreenView(
-            onNavigate: { route in print("navigate: \(route)") },
-            onStartTutorial: { print("start tutorial") }
-        )
-        .ignoresSafeArea()
+        BasketballDraftAppView()
+            .ignoresSafeArea()
     }
 }
 
