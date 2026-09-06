@@ -1,10 +1,9 @@
-@file:OptIn(org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeCacheApi::class)
-
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.cryptography.kotlin)
 }
 
 kotlin {
@@ -23,14 +22,6 @@ kotlin {
     ).forEach {
         it.binaries.framework {
             baseName = "shared"
-            // Supabase Auth pulls in dev.whyoleg.cryptography's CryptoKit cinterop, whose
-            // klib doesn't link against the compiler's native cache on this toolchain
-            // ("Undefined symbols ... swift_Builtin_float"). Disabling it is the fix the
-            // linker error itself points to (https://kotl.in/disable-native-cache).
-            disableNativeCache(
-                version = org.jetbrains.kotlin.gradle.plugin.mpp.DisableCacheInKotlinVersion.`2_4_10`,
-                reason = "Supabase Auth's CryptoKit cinterop klib fails to link against the native cache (Undefined symbols: swift_Builtin_float)"
-            )
         }
     }
 
@@ -50,4 +41,13 @@ kotlin {
 
 dependencies {
     add("kspAndroid", libs.androidx.room.compiler)
+}
+
+// Supabase Auth pulls in dev.whyoleg.cryptography's CryptoKit provider for iOS, which hardcodes
+// a path to /Applications/Xcode.app when linking against the platform's Swift standard libraries
+// -- missing on CI runners where Xcode is only installed as e.g. Xcode_15.4.app. This plugin
+// resolves the real path via `xcrun` instead. See:
+// https://whyoleg.github.io/cryptography-kotlin/getting-started/troubleshooting/xcode-compatibility/
+cryptography {
+    configureSwiftLinkerOpts = true
 }
