@@ -24,4 +24,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Glorious5"
 include(":app")
+include(":shared")
  
