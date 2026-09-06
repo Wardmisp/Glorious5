@@ -23,6 +23,7 @@ kotlin {
             implementation(libs.supabase.realtime)
             implementation(libs.supabase.postgrest)
             implementation(libs.supabase.auth)
+            implementation(libs.kotlinx.datetime)
         }
         androidMain.dependencies {
             api(libs.androidx.room.runtime)

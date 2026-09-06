@@ -22,14 +22,34 @@ import io.github.jan.supabase.realtime.postgresChangeFlow
 import io.github.jan.supabase.realtime.realtime
 import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import java.time.Instant
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.seconds
 
 /** Doit rester en phase avec la même limite appliquée côté SQL dans join_match(). */
 private const val LOBBY_MATCH_TTL_SECONDS = 10L * 60L
+
+private val RFC1123_MONTHS = listOf("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+/**
+ * Parse l'en-tête HTTP `Date` (RFC 1123, ex. "Sun, 06 Sep 2026 01:23:45 GMT") en epoch millis.
+ * kotlinx-datetime ne sait lire que l'ISO 8601 ; ce format fixe est simple à décoder à la main
+ * plutôt que de dépendre d'un formatter JVM (java.time), indisponible hors Android/JVM.
+ */
+private fun parseRfc1123ToEpochMillis(header: String): Long? = try {
+    val parts = header.trim().split(" ").filter { it.isNotBlank() }
+    val day = parts[1].toInt()
+    val month = RFC1123_MONTHS.indexOf(parts[2]) + 1
+    val year = parts[3].toInt()
+    val (hour, minute, second) = parts[4].split(":").map { it.toInt() }
+    LocalDateTime(year, month, day, hour, minute, second).toInstant(TimeZone.UTC).toEpochMilliseconds()
+} catch (e: Exception) {
+    null
+}
 
 class MultiplayerRepositoryImpl(
     private val client: SupabaseClient
@@ -46,12 +66,11 @@ class MultiplayerRepositoryImpl(
 
     override suspend fun syncClock() {
         try {
-            val localBefore = System.currentTimeMillis()
+            val localBefore = Clock.System.now().toEpochMilliseconds()
             val result = client.postgrest["matches"].select { limit(1) }
-            val localAfter = System.currentTimeMillis()
+            val localAfter = Clock.System.now().toEpochMilliseconds()
             val dateHeader = result.headers[HttpHeaders.Date] ?: return
-            val serverMillis = ZonedDateTime.parse(dateHeader, DateTimeFormatter.RFC_1123_DATE_TIME)
-                .toInstant().toEpochMilli()
+            val serverMillis = parseRfc1123ToEpochMillis(dateHeader) ?: return
             clockOffsetMillis = serverMillis - (localBefore + localAfter) / 2
         } catch (e: Exception) {
             clockOffsetMillis = 0L
@@ -183,7 +202,7 @@ class MultiplayerRepositoryImpl(
     }
 
     override suspend fun listOpenMatches(): List<Match> {
-        val cutoffIso = Instant.now().minusSeconds(LOBBY_MATCH_TTL_SECONDS).toString()
+        val cutoffIso = (Clock.System.now() - LOBBY_MATCH_TTL_SECONDS.seconds).toString()
         return client.postgrest["matches"].select {
             filter {
                 eq("status", "waiting")
