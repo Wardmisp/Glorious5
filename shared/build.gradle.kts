@@ -46,7 +46,9 @@ kotlin {
 
             api(libs.koin.core)
             api(libs.koin.core.viewmodel)
+            api(libs.koin.compose.viewmodel)
             api(libs.androidx.lifecycle.viewmodel)
+            api(libs.androidx.navigation.compose)
             implementation(libs.androidx.sqlite.bundled)
         }
         androidMain.dependencies {

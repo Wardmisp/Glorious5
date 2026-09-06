@@ -21,13 +21,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.g5.R
+import com.g5.shared.resources.*
 import com.g5.domain.model.NBAPlayer
+import com.g5.ui.util.formatOneDecimal
 import com.g5.ui.util.positionLabel
 
 @Composable
@@ -57,17 +58,17 @@ fun PlayerRevealCard(
     }
 
     val stats = listOf(
-        Stat(stringResource(R.string.stat_pts), player.pts, isRevealed(idxPts)),
-        Stat(stringResource(R.string.stat_reb), player.reb, isRevealed(idxReb)),
-        Stat(stringResource(R.string.stat_ast), player.ast, isRevealed(idxAst)),
-        Stat(stringResource(R.string.stat_stl), player.stl, isRevealed(idxStl)),
-        Stat(stringResource(R.string.stat_blk), player.blk, isRevealed(idxBlk))
+        Stat(stringResource(Res.string.stat_pts), player.pts, isRevealed(idxPts)),
+        Stat(stringResource(Res.string.stat_reb), player.reb, isRevealed(idxReb)),
+        Stat(stringResource(Res.string.stat_ast), player.ast, isRevealed(idxAst)),
+        Stat(stringResource(Res.string.stat_stl), player.stl, isRevealed(idxStl)),
+        Stat(stringResource(Res.string.stat_blk), player.blk, isRevealed(idxBlk))
     )
 
     val teamColorInt = try {
-        android.graphics.Color.parseColor(player.teamColor)
+        parseHexColor(player.teamColor)
     } catch (e: Exception) {
-        android.graphics.Color.parseColor("#0E2240")
+        parseHexColor("#0E2240")
     }
     val teamColor = Color(teamColorInt)
 
@@ -98,7 +99,7 @@ fun PlayerRevealCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if (isRevealed(idxTeam)) player.team else stringResource(R.string.common_mystery_team),
+                    text = if (isRevealed(idxTeam)) player.team else stringResource(Res.string.common_mystery_team),
                     fontSize = 10.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = FontFamily.SansSerif,
@@ -257,7 +258,7 @@ private fun StatBox(stat: Stat) {
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Text(
-            text = String.format("%.1f", stat.value),
+            text = stat.value.formatOneDecimal(),
             fontSize = 14.sp,
             fontWeight = FontWeight.ExtraBold,
             fontFamily = FontFamily.SansSerif,
@@ -309,3 +310,10 @@ private fun EmptyStatBox() {
 }
 
 data class Stat(val label: String, val value: Double, val revealed: Boolean)
+
+/** Équivalent multiplateforme de `android.graphics.Color.parseColor` pour une chaîne "#RRGGBB"
+ * (`android.graphics` n'existe pas sur iOS). */
+private fun parseHexColor(hex: String): Int {
+    val rgb = hex.removePrefix("#").toLong(16).toInt()
+    return (0xFF000000.toInt()) or rgb
+}

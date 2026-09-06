@@ -66,8 +66,6 @@ dependencies {
     // Hilt/Dagger (kapt), aucun risque d'incompatibilité avec la version de Kotlin exigée par le
     // SDK Supabase (voir historique du projet).
     implementation(libs.koin.android)
-    implementation(libs.koin.compose.viewmodel)
-    implementation(libs.androidx.navigation.compose)
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)

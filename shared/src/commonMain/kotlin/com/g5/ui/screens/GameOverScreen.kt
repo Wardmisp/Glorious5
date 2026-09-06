@@ -22,12 +22,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
+import org.jetbrains.compose.resources.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.g5.R
+import com.g5.shared.resources.*
 import com.g5.domain.model.TeamEntry
 import com.g5.domain.model.TeamAnalytics
 
@@ -45,7 +45,7 @@ fun GameOverScreen(
     val winnerName = when (luckyWinner) {
         1 -> p1Name
         2 -> p2Name
-        else -> stringResource(R.string.game_over_no_winner)
+        else -> stringResource(Res.string.game_over_no_winner)
     }
 
     Column(
@@ -76,7 +76,7 @@ fun GameOverScreen(
                 )
 
                 Text(
-                    text = stringResource(R.string.game_over_title),
+                    text = stringResource(Res.string.game_over_title),
                     fontSize = 32.sp,
                     fontWeight = FontWeight.ExtraBold,
                     fontFamily = FontFamily.SansSerif,
@@ -84,7 +84,7 @@ fun GameOverScreen(
                 )
 
                 Text(
-                    text = stringResource(R.string.game_over_winner_announcement, winnerName),
+                    text = stringResource(Res.string.game_over_winner_announcement, winnerName),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     fontFamily = FontFamily.SansSerif,
@@ -123,7 +123,7 @@ fun GameOverScreen(
                         )
 
                         Text(
-                            text = stringResource(if (isWinner) R.string.common_winner else R.string.common_loser),
+                            text = stringResource(if (isWinner) Res.string.common_winner else Res.string.common_loser),
                             fontSize = 24.sp,
                             fontWeight = FontWeight.ExtraBold,
                             fontFamily = FontFamily.SansSerif,
@@ -167,7 +167,7 @@ fun GameOverScreen(
                         }
 
                         Text(
-                            text = stringResource(R.string.game_over_budget_left, budget),
+                            text = stringResource(Res.string.game_over_budget_left, budget),
                             fontSize = 12.sp,
                             fontFamily = FontFamily.SansSerif,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
@@ -185,7 +185,7 @@ fun GameOverScreen(
                 .padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
             Text(
-                text = stringResource(R.string.common_back_to_menu),
+                text = stringResource(Res.string.common_back_to_menu),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.ExtraBold,
                 fontFamily = FontFamily.SansSerif,
