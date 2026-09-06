@@ -33,7 +33,6 @@ import com.g5.ui.navigation.NavCommand
 import com.g5.ui.navigation.Routes
 import com.g5.ui.screens.GameScreen
 import com.g5.ui.screens.HomeScreen
-import com.g5.ui.screens.HomeScreenStrings
 import com.g5.ui.screens.MultiplayerLobbyScreen
 import com.g5.ui.screens.MultiplayerMatchScreen
 import com.g5.ui.screens.MultiplayerResultScreen
@@ -130,21 +129,7 @@ fun BasketballDraftApp(viewModel: GameViewModel, modifier: Modifier = Modifier) 
                         }
                     }
                     HomeScreen(
-                        strings = HomeScreenStrings(
-                            title = stringResource(R.string.home_title),
-                            tagline = stringResource(R.string.home_tagline),
-                            vsComputerLabel = stringResource(R.string.home_vs_computer_label),
-                            vsComputerSublabel = stringResource(R.string.home_vs_computer_sublabel),
-                            splitScreenLabel = stringResource(R.string.home_split_screen_label),
-                            splitScreenSublabel = stringResource(R.string.home_split_screen_sublabel),
-                            onlineLabel = stringResource(R.string.home_online_label),
-                            onlineSublabel = stringResource(R.string.home_online_sublabel),
-                            tutorialLabel = stringResource(R.string.home_tutorial_label),
-                            tutorialSublabel = stringResource(R.string.home_tutorial_sublabel),
-                            optionsLabel = stringResource(R.string.common_options),
-                            optionsSublabel = stringResource(R.string.home_options_sublabel),
-                            versionFooter = stringResource(R.string.home_version_footer, versionName ?: "0.0.1")
-                        ),
+                        versionName = versionName ?: "0.0.1",
                         onNavigate = { route ->
                             when (route) {
                                 Routes.VsComputer -> viewModel.startGame(vsHuman = false)
