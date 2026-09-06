@@ -24,12 +24,8 @@ kotlin {
             implementation(libs.supabase.postgrest)
             implementation(libs.supabase.auth)
             implementation(libs.kotlinx.datetime)
-        }
-        androidMain.dependencies {
             api(libs.androidx.room.runtime)
             api(libs.androidx.room.ktx)
-            implementation(project.dependencies.platform(libs.androidx.compose.bom))
-            implementation(libs.androidx.compose.ui.graphics)
         }
     }
 }
