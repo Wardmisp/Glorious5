@@ -3,7 +3,6 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.cryptography.kotlin)
 }
 
 kotlin {
@@ -16,10 +15,29 @@ kotlin {
         }
     }
 
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach {
+    // Supabase Auth pulls in dev.whyoleg.cryptography's CryptoKit provider for iOS, whose Swift
+    // interop needs Apple's Swift standard libraries explicitly on the linker path -- otherwise
+    // "Undefined symbols ... swift_Builtin_float". The dev.whyoleg.cryptography Gradle plugin is
+    // supposed to add this automatically (configureSwiftLinkerOpts) but didn't in practice, so
+    // it's resolved by hand here via `xcode-select`, no hardcoded Xcode version/path.
+    val appleTargetPlatforms = mapOf(
+        iosArm64() to "iphoneos",
+        iosSimulatorArm64() to "iphonesimulator"
+    )
+
+    if (org.gradle.internal.os.OperatingSystem.current().isMacOsX) {
+        val developerDir = providers.exec {
+            commandLine("xcode-select", "-p")
+        }.standardOutput.asText.get().trim()
+
+        appleTargetPlatforms.forEach { (target, platformDir) ->
+            target.binaries.configureEach {
+                linkerOpts("-L$developerDir/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/$platformDir")
+            }
+        }
+    }
+
+    appleTargetPlatforms.keys.forEach {
         it.binaries.framework {
             baseName = "shared"
         }
@@ -41,13 +59,4 @@ kotlin {
 
 dependencies {
     add("kspAndroid", libs.androidx.room.compiler)
-}
-
-// Supabase Auth pulls in dev.whyoleg.cryptography's CryptoKit provider for iOS, which hardcodes
-// a path to /Applications/Xcode.app when linking against the platform's Swift standard libraries
-// -- missing on CI runners where Xcode is only installed as e.g. Xcode_15.4.app. This plugin
-// resolves the real path via `xcrun` instead. See:
-// https://whyoleg.github.io/cryptography-kotlin/getting-started/troubleshooting/xcode-compatibility/
-cryptography {
-    configureSwiftLinkerOpts = true
 }
