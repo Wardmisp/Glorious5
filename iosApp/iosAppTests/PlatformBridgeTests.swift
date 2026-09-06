@@ -6,6 +6,6 @@ import shared
 /// Kotlin code from Swift and getting a real value back works on a real iOS Simulator.
 final class PlatformBridgeTests: XCTestCase {
     func testPlatformNameComesFromKotlin() {
-        XCTAssertEqual(PlatformKt.platformName(), "iOS")
+        XCTAssertEqual(Platform_iosKt.platformName(), "iOS")
     }
 }
