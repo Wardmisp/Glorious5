@@ -5,6 +5,7 @@ import com.g5.domain.model.NBAPlayer
 import com.g5.domain.model.QuarterSimulation
 import com.g5.domain.provider.CommentaryKey
 import com.g5.domain.provider.StringProvider
+import kotlin.random.Random
 
 class GenerateMatchSimulationUseCase(private val stringProvider: StringProvider) {
 
@@ -26,7 +27,7 @@ class GenerateMatchSimulationUseCase(private val stringProvider: StringProvider)
         val times = (1 until 720).shuffled().take(actionCount).sortedDescending()
 
         repeat(actionCount) { i ->
-            val isTeamAActing = Math.random() < winProbA
+            val isTeamAActing = Random.nextDouble() < winProbA
             val actor = if (isTeamAActing) teamA.random() else teamB.random()
             val opponent = if (isTeamAActing) teamB.random() else teamA.random()
 

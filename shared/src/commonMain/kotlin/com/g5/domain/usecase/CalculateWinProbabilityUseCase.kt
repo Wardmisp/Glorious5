@@ -39,7 +39,7 @@ class CalculateWinProbabilityUseCase {
         val p3p = getPercentile(player.fg3Pct, distribution.map { it.fg3Pct })
         val pFt = getPercentile(player.ftPct, distribution.map { it.ftPct })
         val pPer = getPercentile(player.per, distribution.map { it.per })
-        
+
         // WS/Game calculation
         val wsPerGame = if (player.games > 0) player.winShares / player.games else 0.0
         val wsDistribution = distribution.map { if (it.games > 0) it.winShares / it.games else 0.0 }
@@ -67,7 +67,7 @@ class CalculateWinProbabilityUseCase {
 
     private fun calculateTeamScore(players: List<PlayerScore>): Double {
         if (players.isEmpty()) return 0.0
-        
+
         // Positional weights, keyed by code (voir normalizePositionCode côté data — cette
         // logique est indépendante de la langue d'affichage) : PG 0.22, SG 0.20, SF 0.20,
         // PF 0.20, C 0.18, GF 0.20, FC 0.19 ; tout le reste (poste inconnu) retombe sur 0.20.
@@ -91,7 +91,7 @@ class CalculateWinProbabilityUseCase {
         }
 
         // We normalize so the total weight corresponds to a 5-player team scale
-        // The formula 0.22*PG... sums to 1.0. 
+        // The formula 0.22*PG... sums to 1.0.
         // If we have 5 players, the sum of weights will be around 1.0.
         // We return the weighted sum directly as the "Team Score"
         return weightedSum
