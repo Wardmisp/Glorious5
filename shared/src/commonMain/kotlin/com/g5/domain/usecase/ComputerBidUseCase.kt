@@ -2,6 +2,7 @@ package com.g5.domain.usecase
 
 import com.g5.domain.model.BUDGET
 import com.g5.domain.model.NBAPlayer
+import kotlin.math.abs
 
 /**
  * Valorisation et décision de mise de l'IA en mode "vs ordinateur". Isolé de GameViewModel pour
@@ -20,7 +21,7 @@ class ComputerBidUseCase {
             player.blk * 1.5
 
         val seed = round + (aiBudget / 10)
-        val randomFactor = 0.8 + (Math.abs(seed.hashCode() % 40) / 100.0)
+        val randomFactor = 0.8 + (abs(seed.hashCode() % 40) / 100.0)
         val personalValuation = (baseValuation * randomFactor).toInt()
 
         val budgetLimit = if (personalValuation > 25) aiBudget else (aiBudget * 0.6).toInt()
