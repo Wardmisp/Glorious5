@@ -1,3 +1,7 @@
+@file:OptIn(ExperimentalWasmDsl::class)
+
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
+
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.kotlin.multiplatform.library)
@@ -8,6 +12,11 @@ plugins {
 }
 
 kotlin {
+    // Configurer manuellement le dependsOn de roomMain plus bas désactive sinon l'application
+    // automatique du modèle de hiérarchie par défaut (qui crée entre autres iosMain à partir de
+    // iosArm64()/iosSimulatorArm64()) -- il faut le réappliquer explicitement.
+    applyDefaultHierarchyTemplate()
+
     android {
         namespace = "com.g5.shared"
         compileSdk = 37
@@ -26,7 +35,21 @@ kotlin {
         }
     }
 
+    wasmJs {
+        browser()
+    }
+
     sourceSets {
+        // Room (androidx.room, 2.8.4) n'a pas de variante wasmJs -- ses annotations doivent
+        // rester hors de commonMain pour ne pas casser la compilation web (voir le plan de
+        // portage web : le web n'utilise pas Room du tout, juste un export JSON en mémoire).
+        // Android et iOS partagent donc ce sous-ensemble intermédiaire plutôt que commonMain.
+        val roomMain = create("roomMain") {
+            dependsOn(commonMain.get())
+        }
+        androidMain.get().dependsOn(roomMain)
+        iosMain.get().dependsOn(roomMain)
+
         commonMain.dependencies {
             implementation(libs.kotlinx.coroutines.core)
             implementation(libs.kotlinx.serialization.json)
@@ -35,7 +58,6 @@ kotlin {
             implementation(libs.supabase.postgrest)
             implementation(libs.supabase.auth)
             implementation(libs.kotlinx.datetime)
-            api(libs.androidx.room.runtime)
 
             api(compose.runtime)
             api(compose.foundation)
@@ -49,6 +71,9 @@ kotlin {
             api(libs.koin.compose.viewmodel)
             api(libs.androidx.lifecycle.viewmodel)
             api(libs.androidx.navigation.compose)
+        }
+        roomMain.dependencies {
+            api(libs.androidx.room.runtime)
             implementation(libs.androidx.sqlite.bundled)
         }
         androidMain.dependencies {
@@ -57,6 +82,10 @@ kotlin {
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+        }
+        wasmJsMain.dependencies {
+            implementation(libs.ktor.client.js)
+            implementation(libs.kotlinx.browser)
         }
     }
 }

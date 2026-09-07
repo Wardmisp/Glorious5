@@ -1,5 +1,22 @@
 package com.g5.data.repository
 
+/** Sépare un nom de joueur brut (Room ou JSON web) en prénom/nom, en retirant les diacritiques
+ * absents du clavier US utilisé par le reste de l'UI. Partagé par
+ * [com.g5.data.local.PlayerSeason.toNBAPlayer] (Room, Android/iOS) et `JsonPlayerRepository`
+ * (web) pour éviter de dupliquer cette logique dans les deux sources de données. */
+fun cleanPlayerName(rawName: String): Pair<String, String> {
+    val cleaned = rawName.trim()
+        .replace("ć", "c").replace("Ć", "C")
+        .replace("č", "c").replace("Č", "C")
+        .replace("š", "s").replace("Š", "S")
+        .replace("ž", "z").replace("Ž", "Z")
+        .replace("đ", "d").replace("Đ", "D")
+    val parts = cleaned.split(" ", limit = 2)
+    val firstName = parts.getOrNull(0) ?: cleaned
+    val lastName = parts.getOrNull(1) ?: ""
+    return firstName to lastName
+}
+
 /**
  * Normalise le poste brut (venant de Room ou de Supabase) vers un code stable indépendant de la
  * langue — PG/SG/SF/PF/C/GF/FC, ou la valeur d'origine si elle est déjà inconnue. Le libellé
